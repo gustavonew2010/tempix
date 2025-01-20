@@ -16,7 +16,7 @@ use Filament\Pages\Page;
 
 class EzzebankPaymentPage extends Page
 {
-    use EzzeBankTrait;
+    use EzzebankTrait;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 

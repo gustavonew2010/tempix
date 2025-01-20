@@ -14,7 +14,7 @@ use App\Traits\Missions\MissionTrait;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
-trait EvergameTrait
+trait EvergameTrait2
 {
     use MissionTrait;
 

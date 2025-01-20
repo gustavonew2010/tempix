@@ -1,0 +1,30 @@
+services:
+  # Serviço PHP/Laravel com Apache
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www/html/public_html
+    environment:
+      APP_ENV: production
+      APP_URL: http://localhost
+      DB_CONNECTION: mysql
+      DB_HOST: betx.chc00us2cv1d.sa-east-1.rds.amazonaws.com
+      DB_PORT: 3306
+      DB_DATABASE: tempix
+      DB_USERNAME: host_betx
+      DB_PASSWORD: Cap0199**
+    networks:
+      - laravel_net
+
+networks:
+  laravel_net:
+    driver: bridge
+
+volumes:
+  dbdata: 

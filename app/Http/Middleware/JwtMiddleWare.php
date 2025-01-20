@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use JWTAuth;
 
-class JWTMiddleWare
+class JWTMiddleware
 {
     /**
      * Handle an incoming request.

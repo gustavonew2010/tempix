@@ -4,7 +4,6 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
-use Illuminate\Support\Facades\Log;
 
 class Handler extends ExceptionHandler
 {
@@ -24,17 +23,31 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
-            Log::error('Error: ' . $e->getMessage());
-            Log::error('File: ' . $e->getFile());
-            Log::error('Line: ' . $e->getLine());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-        });
+        $this->renderable(function (Throwable $e, $request) {
+            if ($request->is('api/*')) {
+                // Desabilitar logging temporariamente
+                $debug = [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ];
 
-        if (config('app.debug')) {
-            $this->renderable(function (Throwable $e) {
-                return response()->view('errors.500', ['exception' => $e], 500);
-            });
-        }
+                // Se estiver em ambiente de desenvolvimento, incluir stack trace
+                if (config('app.debug')) {
+                    $debug['trace'] = collect($e->getTrace())
+                        ->map(function ($trace) {
+                            return \Illuminate\Support\Arr::except($trace, ['args']);
+                        })
+                        ->take(3) // Limitar a 3 níveis de stack trace
+                        ->toArray();
+                }
+
+                return response()->json([
+                    'error' => true,
+                    'message' => $e->getMessage(),
+                    'debug' => $debug
+                ], 500);
+            }
+        });
     }
 }
