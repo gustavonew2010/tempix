@@ -27,21 +27,23 @@ RUN a2ensite 000-default.conf
 WORKDIR /var/www/html/public_html
 
 # Copiar todo o projeto para public_html (simulando Hostinger)
-COPY . .
+COPY . . 
 
-# Criar diretórios necessários e ajustar permissões
-RUN mkdir -p storage/logs \
-    && mkdir -p storage/framework/cache \
-    && mkdir -p storage/framework/sessions \
-    && mkdir -p storage/framework/views \
-    && mkdir -p bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 775 storage \
-    && chmod -R 775 bootstrap/cache \
-    && echo "export APACHE_RUN_USER=www-data" >> /etc/apache2/envvars \
+# Criar diretórios necessários (se não existirem)
+RUN mkdir -p /var/www/html/public_html/storage /var/www/html/public_html/bootstrap/cache
+
+# Ajustar permissões para os diretórios
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 777 /var/www/html/storage \
+    && chmod -R 777 /var/www/html/bootstrap/cache \
+    && chmod -R 777 /var/www/html/public_html/storage/logs \
+    && chmod -R 777 /var/www/html/public_html/bootstrap/cache
+
+# Ajustar variáveis de ambiente do Apache
+RUN echo "export APACHE_RUN_USER=www-data" >> /etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=www-data" >> /etc/apache2/envvars
 
 EXPOSE 80
 
+# Iniciar o Apache em primeiro plano
 CMD ["apache2ctl", "-D", "FOREGROUND"]
