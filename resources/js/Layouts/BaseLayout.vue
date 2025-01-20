@@ -2,7 +2,9 @@
     <div>
         <LoadingScreen v-if="loading" />
         <template v-else>
-            <NavTopComponent :simple="false" />
+            <NavTopComponent 
+                :auth-status="isAuthenticated"
+            />
             <SideBarComponent v-once :categories="categories"/>
 
             <div :class="[
@@ -113,6 +115,7 @@ import { sidebarStore } from "@/Stores/SideBarStore.js";
 import { useAuthStore } from "@/Stores/Auth.js";
 import { missionStore } from "@/Stores/MissionStore.js";
 import HttpApi from "@/Services/HttpApi.js";
+import { storeToRefs } from 'pinia';
 
 export default {
     props: [],
@@ -136,21 +139,15 @@ export default {
             modalMission: null,
         }
     },
-    setup(props) {
-
-        onMounted(() => {
-            initFlowbite();
-        });
-
+    setup() {
+        const authStore = useAuthStore();
+        const { isAuth } = storeToRefs(authStore);
+        
         return {
-
-        };
+            isAuthenticated: isAuth
+        }
     },
     computed: {
-        isAuthenticated() {
-            const authStore = useAuthStore();
-            return authStore.isAuth;
-        },
         missionModal() {
             const mission = missionStore();
             return mission.getMissionStatus;
@@ -265,6 +262,11 @@ export default {
         },
         sidebarMenu(newVal, oldVal) {
             this.sidebar = newVal;
+        },
+        isAuthenticated(newValue) {
+            this.$nextTick(() => {
+                this.$forceUpdate()
+            })
         }
     },
 };

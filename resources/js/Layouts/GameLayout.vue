@@ -1,6 +1,6 @@
 <template>
 
-  <NavTopComponent :style="{ visibility: NavTopComponent ? 'visible' : 'hidden' }" />
+  <NavTopComponent :style="{ visibility: NavTopComponent ? 'visible' : 'hidden' }" /> 
 
   <div class="page-container " >
     <div class="content flex items-center justify-between navtop-color" style="width: 100%;margin-top: -5px;padding: 5px 2%;">

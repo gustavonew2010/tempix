@@ -1,0 +1,242 @@
+/* Estilos gerais de navegação */
+.stats-card {
+    @apply bg-gray-800 rounded-lg p-4 transform transition-all duration-300 hover:scale-105 hover:shadow-lg;
+}
+
+.stats-icon {
+    @apply text-2xl mb-2 flex justify-center;
+}
+
+.stats-label {
+    @apply text-xs text-gray-400 text-center;
+}
+
+.stats-value {
+    @apply text-xl font-bold text-center mt-1;
+}
+
+/* Animações */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Layout e espaçamento */
+.pad-modal-profile {
+    padding: 0px 4%;
+}
+
+/* Hover states */
+.hover-menu:hover {
+    background-color: #0F2B39;
+    border-radius: 10px;
+}
+
+.sair-menu:hover {
+    background-color: #27171A;
+    border-radius: 10px;
+    color: #D3345D;
+}
+
+.sairp-menu:hover {
+    color: #D3345D;
+}
+
+/* Elementos específicos */
+.notificacao-sino {
+    font-size: 20px;
+    color: gold;
+}
+
+.tirar-div {
+    display: none;
+}
+
+.padding-register {
+    padding: 0px 8%;
+}
+
+.nav-indexx {
+    z-index: 999;
+}
+
+.login-register-x {
+    margin-top: -20px;
+    margin-right: -55px;
+}
+
+.login-register-100vh {
+    background-color: var(--carousel-banners-dark);
+    border-radius: 20px;
+    max-width: 450px;
+    margin: 0 auto;
+    border-radius: 8px;
+}
+
+.x-mark-scale {
+    transition: .3s;
+}
+
+.x-mark-scale:hover {
+    transform: scale(.9);
+}
+
+.msg-alerta {
+    background-color: #0474CC;
+    height: 30px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.msg-alerta-text {
+    color: white;
+    font-weight: 400;
+    font-size: 14px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.texto-esportes {
+    opacity: .5;
+    transition: .3s;
+}
+
+.texto-esportes:hover {
+    opacity: 1;
+}
+
+/* Media Queries */
+@media (max-width: 1025px) {
+    #open-side-nav {
+        display: none;
+    }
+    .tirar-esporte {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .texto-indique {
+        font-size: 14px;
+        padding-top: 5px;
+    }
+    
+    .texto-indique-pad {
+        padding: 0 2%;
+        text-align: center;
+    }
+    
+    .pad-modal-profile {
+        padding: 0px 0px;
+    }
+    
+    .por-height-alto {
+        height: 100vh;
+        border-radius: 0px;
+    }
+    
+    .notificacao-sino {
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.25rem;
+        padding: 0px 8px;
+    }
+    
+    .search-menu {
+        top: 0;
+        min-height: 100vh;
+    }
+    
+    .imagem-logo {
+        max-width: 140px;
+    }
+    
+    .botao-entrar-mobile {
+        padding: 3px 10px;
+    }
+    
+    .nav-indexx {
+        z-index: 999;
+    }
+    
+    .botao-mobile-register-login {
+        padding: 2px 12px;
+        height: auto;
+    }
+    
+    .login-register-100vh {
+        height: 100vh;
+        border-radius: 0px;
+        max-width: 1000px;
+        width: 100%;
+    }
+    
+    .login-register-x {
+        margin-top: -10px;
+        margin-right: -25px;
+    }
+    
+    .padding-register {
+        padding: 0px 4%;
+    }
+}
+
+@media (max-width: 600px) {
+    .margin-teste {
+        margin-left: 8px;
+    }
+    
+    .tirar-div {
+        display: block;
+    }
+    
+    .pulse2 {
+        width: 2px;
+        height: 2px;
+        margin-left: 15px;
+        bottom: 0;
+    }
+}
+
+@media (max-width: 500px) {
+    .texto-indique {
+        font-size: 12px;
+        padding-top: 5px;
+    }
+}
+
+/* Indicadores online */
+.item-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.online-indicator {
+    margin-top: 5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.pulse2 {
+    position: absolute;
+    right: 0;
+    bottom: 8%;
+    margin-left: 12px;
+    width: 10px;
+    height: 10px;
+    background-color: #00ff00;
+    border-radius: 50%;
+    margin-right: 3px;
+    box-shadow: 0 0 5px #00ff00, 0 0 20px #00ff00;
+} 

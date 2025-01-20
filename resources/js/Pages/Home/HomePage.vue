@@ -901,22 +901,6 @@
 </style>
 <template>
     <BaseLayout>
-        <!-- Header fixo -->
-        <div class="header-container">
-            <button @click="toggleSidebar" class="menu-button">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            
-            <div class="logo-container">
-                <a href="/" v-if="setting">
-                    <img :src="`/storage/${setting.software_logo_black}`" alt="" class="block dark:hidden">
-                    <img :src="`/storage/${setting.software_logo_white}`" alt="" class="hidden dark:block">
-                </a>
-            </div>
-        </div>
-
-        <!-- Resto do conteúdo -->
-        <div class="background-overlay"></div>
         <div class="content-wrapper">
             <!-- Banners carousel com position relative -->
             <div class="carousel-banners" ref="bannerSection">
@@ -1216,6 +1200,7 @@ import {
 import CustomPagination from "@/Components/UI/CustomPagination.vue";
 import mitt from 'mitt'; // Adicione esta importação
 import { useRouter } from 'vue-router' 
+import NavTopComponent from '@/Components/Nav/NavTopComponent.vue'
 // Crie um emitter global
 export const emitter = mitt();
 
@@ -1238,7 +1223,8 @@ export default {
         LanguageSelector,
         MakeDeposit,
         BaseLayout,
-        RouterLink
+        RouterLink,
+        NavTopComponent
     },
     data() {
         return {

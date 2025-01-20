@@ -30,14 +30,14 @@ WORKDIR /var/www/html/public_html
 COPY . . 
 
 # Criar diretórios necessários (se não existirem)
-RUN mkdir -p /var/www/html/public_html/storage /var/www/html/public_html/bootstrap/cache /var/www/html/public_html/storage/logs
+RUN mkdir -p /var/www/html/public_html/storage /var/www/html/public_html/bootstrap/cache
 
 # Ajustar permissões para os diretórios
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 777 /var/www/html/public_html/storage \
     && chmod -R 777 /var/www/html/public_html/bootstrap/cache \
     && chmod -R 777 /var/www/html/public_html/storage/logs \
-    && chmod -R 777 /var/www/html/public_html
+    && chmod -R 777 /var/www/html/public_html/bootstrap/cache
 
 # Ajustar variáveis de ambiente do Apache
 RUN echo "export APACHE_RUN_USER=www-data" >> /etc/apache2/envvars \

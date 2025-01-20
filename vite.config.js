@@ -8,7 +8,6 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
-            publicDirectory: 'public',
         }),
         vue({
             template: {
@@ -18,6 +17,15 @@ export default defineConfig({
         }),
         i18n(),
     ],
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+    },
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        base: '/build/',
+    },
     resolve: {
         alias: {
             '@': '/resources/js'

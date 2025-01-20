@@ -2,7 +2,7 @@
     <NavTopComponent :simple="false" />
     <div class="" :class="''">
         <div class="relative">
-            <slot></slot>
+            <slot></slot> 
 
             <FooterComponent v-once />
             <BottomNavComponent v-once/>

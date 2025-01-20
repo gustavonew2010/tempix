@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Permitir acesso a todos
+    Order allow,deny
+    Allow from all
+    
+    # Redirecionar todas as requisições para o diretório public
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
