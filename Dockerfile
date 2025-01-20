@@ -29,9 +29,16 @@ WORKDIR /var/www/html/public_html
 # Copiar todo o projeto para public_html (simulando Hostinger)
 COPY . .
 
-# Ajustar permissões
-RUN chown -R www-data:www-data /var/www/html \
+# Criar diretórios necessários e ajustar permissões
+RUN mkdir -p storage/logs \
+    && mkdir -p storage/framework/cache \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/views \
+    && mkdir -p bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
+    && chmod -R 775 storage \
+    && chmod -R 775 bootstrap/cache \
     && echo "export APACHE_RUN_USER=www-data" >> /etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=www-data" >> /etc/apache2/envvars
 
