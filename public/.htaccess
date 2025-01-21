@@ -9,6 +9,16 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+    # Permitir acesso direto a arquivos existentes em storage
+    RewriteCond %{REQUEST_URI} ^/storage/
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Se tem parâmetros de imagem, redireciona para o processador
+    RewriteCond %{REQUEST_URI} ^/storage/
+    RewriteCond %{QUERY_STRING} format|quality|width
+    RewriteRule ^storage/(.+)\.(jpg|jpeg|png|gif|webp)$ image-processor.php?file=$1.$2 [L,QSA]
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
