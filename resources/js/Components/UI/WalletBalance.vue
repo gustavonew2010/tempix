@@ -88,8 +88,7 @@
         data() {
             return {
                 isLoadingWallet: true,
-                wallet: null,
-                processInterval: null,
+                wallet: null
             }
         },
         setup(props) {
@@ -105,7 +104,6 @@
             });
 
             function checkRoute() {
-                // Verifique se a rota atual é 'casinoPlayPage'
                 isCasinoPlayPage.value = route.name === 'casinoPlayPage';
             }
 
@@ -117,7 +115,7 @@
 
         },
         beforeUnmount() {
-            clearInterval(this.processInterval);
+            this.stopPolling();
         },
         mounted() {
             window.scrollTo(0, 0);
@@ -134,28 +132,50 @@
                     .catch(error => {
                         Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
                             if(value == 'unauthenticated') {
-                                localStorage. clear();
-                                clearInterval(this.processInterval);
+                                localStorage.clear();
                             }
                         });
-
                         _this.isLoadingWallet = false;
                     });
             },
+            scheduleNextCheck() {
+                if (this.processInterval) {
+                    clearTimeout(this.processInterval);
+                }
+
+                // Se estiver na página do casino, usa polling mais rápido
+                const delay = this.isCasinoPlayPage ? 3000 : this.pollingDelay;
+                
+                this.processInterval = setTimeout(() => {
+                    this.getWallet();
+                }, delay);
+            },
+            stopPolling() {
+                if (this.processInterval) {
+                    clearTimeout(this.processInterval);
+                    this.processInterval = null;
+                }
+            },
+            startPolling() {
+                this.pollingDelay = 3000; // Reset para intervalo inicial
+                this.getWallet(); // Primeira chamada imediata
+            }
         },
         async created() {
-
-            if(this.isCasinoPlayPage) {
-                this.processInterval = setInterval(async  () => {
-                    await this.getWallet(); // Substitua 'seuMetodo' pelo nome do seu método
-                }, 5000);
+            try {
+                await this.getWallet(); // Carrega o saldo inicial apenas uma vez
+            } catch (error) {
+                console.error('Erro no created:', error);
             }
-
-            await this.getWallet(); // Substitua 'seuMetodo' pelo nome do seu método
-
         },
         watch: {
-
+            // Se mudar para a página do casino, atualiza mais frequentemente
+            isCasinoPlayPage(newValue) {
+                if (newValue) {
+                    this.pollingDelay = 3000;
+                    this.getWallet();
+                }
+            }
         },
     };
 </script>

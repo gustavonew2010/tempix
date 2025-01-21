@@ -80,6 +80,7 @@
     import {onMounted, ref, watch, watchEffect} from "vue";
     import {initFlowbite} from "flowbite";
     import HttpApi from "@/Services/HttpApi.js";
+    import Echo from 'laravel-echo';
 
     import { useRouter } from 'vue-router';
 
@@ -151,9 +152,20 @@
                     
                 },
             });
+
+            // Listen for balance updates
+            if (this.isAuthenticated) {
+                window.Echo.private(`user.${this.$auth.user.id}`)
+                    .listen('.balance.updated', (e) => {
+                        this.wallet.total_balance = e.balance;
+                    });
+            }
         },
         beforeUnmount() {
-
+            // Clean up Echo listeners
+            if (this.isAuthenticated) {
+                window.Echo.leave(`user.${this.$auth.user.id}`);
+            }
         },
         methods: {
             getWallet: async function() {
