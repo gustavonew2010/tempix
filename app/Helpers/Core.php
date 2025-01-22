@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Helpers;
 
 use App\Helpers\Core as Helper;
@@ -1462,20 +1461,9 @@ class Core
      * @param $array
      * @return mixed
      */
-    public static function MakeToken($array){
-        if(is_array($array)){
-            $output =  '{"status": true';
-            $interacao = 0;
-            foreach ($array as $key => $value){
-                $output .=  ',"' .$key . '"' . ': "' . $value . '"';
-            }
-            $output .= "}";
-        }else{
-            $er_txt = self::Decode('QVakfW0DwcOie2aD9kog9oRx81VtX73oY1Vn91o7YVamZVa2eVaxYkwofGadZGadfGope2aB9zJgbVapYXJgX5R6YWJgeGgg9h');
-            $output = str_replace('_', '&nbsp;', $er_txt);
-            exit($output);
-        }
-        return self::Encode($output);
+    public static function MakeToken($data)
+    {
+        return base64_encode(json_encode($data));
     }
 
 
@@ -1484,16 +1472,9 @@ class Core
      * @param $token
      * @return mixed|string
      */
-    public static function DecToken($token){
-        $json = self::Decode($token);
-        if(is_numeric($json)){
-            return $token;
-        }else if(self::isJson($json)){
-            $json = str_replace("{\"email", "{\"status\":true ,\"email", $json);
-            return json_decode($json, true);
-        }else{
-            return array("status"=>false, "messase"=>"invalid token");
-        }
+    public static function DecToken($token)
+    {
+        return json_decode(base64_decode($token), true);
     }
 
     /**

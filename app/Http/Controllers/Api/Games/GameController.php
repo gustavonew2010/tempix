@@ -24,6 +24,7 @@ use App\Traits\Providers\ExpfyTrait;
 use App\Traits\Providers\WorldSlotTrait;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Helpers\Core as Helper;
 
 class GameController extends Controller
 {
@@ -77,10 +78,10 @@ class GameController extends Controller
      * @param $token
      * @param $action
      * @return \Illuminate\Http\JsonResponse|void
-     */
+     */ 
     public function sourceProvider(Request $request, $token, $action)
     {
-        $tokenOpen = \Helper::DecToken($token);
+        $tokenOpen = Helper::DecToken($token); 
         $validEndpoints = ['session', 'icons', 'spin', 'freenum'];
 
         if (in_array($action, $validEndpoints)) {
@@ -88,7 +89,7 @@ class GameController extends Controller
             {
                 $game = Game::whereStatus(1)->where('game_code', $tokenOpen['game'])->first();
                 if(!empty($game)) {
-                    $controller = \Helper::createController($game->game_code);
+                    $controller = Helper::createController($game->game_code);
 
                     switch ($action) {
                         case 'session':
@@ -170,7 +171,7 @@ class GameController extends Controller
                 if($wallet->total_balance > 0) {
                     $game->increment('views');
 
-                    $token = \Helper::MakeToken([
+                    $token = Helper::MakeToken([
                         'id' => auth('api')->user()->id,
                         'game' => $game->game_code
                     ]);
@@ -263,15 +264,26 @@ class GameController extends Controller
                             ]);
                         case 'fivers':
                             $fiversLaunch = self::GameLaunchFivers($game->provider->code, $game->game_id, 'pt', auth('api')->id());
-
-                            if(isset($fiversLaunch['launch_url'])) {
+                            
+                            if (!$fiversLaunch) {
                                 return response()->json([
-                                    'game' => $game,
-                                    'gameUrl' => $fiversLaunch['launch_url'],
-                                    'token' => $token
-                                ]);
+                                    'error' => 'Falha ao iniciar o jogo',
+                                    'status' => false
+                                ], 400);
                             }
-						return response()->json(['error' => $fiversLaunch, 'status' => false ], 400);
+
+                            if (!isset($fiversLaunch['launch_url'])) {
+                                return response()->json([
+                                    'error' => $fiversLaunch['message'] ?? 'URL de lançamento não encontrada',
+                                    'status' => false
+                                ], 400);
+                            }
+
+                            return response()->json([
+                                'game' => $game,
+                                'gameUrl' => $fiversLaunch['launch_url'],
+                                'token' => $token
+                            ]);
                         
                       case 'expfy':
                             $expfygameLaunch = self::GameLaunchExpfy($game->provider->code, $game->game_id, 'pt', auth('api')->id());

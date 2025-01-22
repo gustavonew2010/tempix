@@ -143,46 +143,55 @@ trait FiversTrait
             'userId' => $userId
         ]);
 
-        if(self::getCredentials()) {
+        if (!self::getCredentials()) {
+            return ['error' => 'Credenciais inválidas'];
+        }
+
+        try {
+            $wallet = Wallet::where('user_id', $userId)
+                ->where('active', 1)
+                ->first();
+
+            if (!$wallet) {
+                return ['error' => 'Carteira não encontrada'];
+            }
+
             $postArray = [
-                "agentToken"    => self::$agentToken,
-                "secretKey"     => self::$agentSecretKey,
-                "user_code"     => $userId.'',
-                "game_code"     => $game_code,
-                "user_balance"  => Wallet::where('user_id', $userId)->where('active', 1)->first()->total_balance ?? 0,
-                "lang"          => $lang
+                "agentToken" => self::$agentToken,
+                "secretKey" => self::$agentSecretKey,
+                "user_code" => $userId.'',
+                "game_code" => $game_code,
+                "user_balance" => $wallet->total_balance ?? 0,
+                "lang" => $lang
             ];
 
             $endpoint = rtrim(self::$apiEndpoint, '/') . '/game_launch';
             
-            \Log::info('Requisição para API Fivers', [
-                'endpoint' => $endpoint,
-                'payload' => $postArray
-            ]);
-
-            try {
-                $response = Http::post($endpoint, $postArray);
-                
-                \Log::info('Resposta da API Fivers', [
+            $response = Http::post($endpoint, $postArray);
+            
+            if (!$response->successful()) {
+                \Log::error('Erro na resposta da API Fivers', [
                     'status' => $response->status(),
                     'body' => $response->json()
                 ]);
-
-                if($response->successful()) {
-                    $data = $response->json();
-                    return $data;
-                }
-                
-                return false;
-            } catch (\Exception $e) {
-                \Log::error('Exceção ao executar GameLaunchFivers', [
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                return false;
+                return ['error' => 'Erro na comunicação com o servidor'];
             }
+
+            $data = $response->json();
+            
+            if (!isset($data['launch_url'])) {
+                return ['error' => 'URL de lançamento não encontrada na resposta'];
+            }
+
+            return $data;
+
+        } catch (\Exception $e) {
+            \Log::error('Exceção ao executar GameLaunchFivers', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return ['error' => 'Erro interno do servidor'];
         }
-        return false;
     }
 
     /**
