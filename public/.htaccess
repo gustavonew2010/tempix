@@ -17,7 +17,12 @@
     # Se tem parâmetros de imagem, redireciona para o processador
     RewriteCond %{REQUEST_URI} ^/storage/
     RewriteCond %{QUERY_STRING} format|quality|width
-    RewriteRule ^storage/(.+)\.(jpg|jpeg|png|gif|webp)$ image-processor.php?file=$1.$2 [L,QSA]
+    RewriteRule ^storage/(.+)\.(jpg|jpeg|png|gif|webp|avif)$ image-processor.php?file=$1.$2 [L,QSA]
+
+    # Permitir acesso direto a arquivos .avif
+    RewriteCond %{REQUEST_URI} ^/storage/
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^.*\.(avif)$ - [L]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -39,4 +44,17 @@
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+</IfModule>
+
+# Definir cabeçalho para arquivos .avif
+<IfModule mod_headers.c>
+    <FilesMatch "\.(avif)$">
+        Header set Content-Type "image/avif"
+    </FilesMatch>
+</IfModule>
+
+# Cache para arquivos .avif
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/avif "access plus 1 year"
 </IfModule>
