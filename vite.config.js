@@ -20,11 +20,12 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,
+        https: true, // Habilitar HTTPS
     },
     build: {
         manifest: true,
         outDir: 'public/build',
-        base: '/build/',
+        base: 'https://tempix.bet/build/', // URL completa com HTTPS
     },
     resolve: {
         alias: {

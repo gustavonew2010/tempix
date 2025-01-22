@@ -11,17 +11,29 @@ services:
     volumes:
       - .:/var/www/html/public_html
     environment:
-      APP_ENV: local
+      APP_ENV: production
+      APP_DEBUG: "false"
       APP_URL: https://tempix.bet
       ASSET_URL: https://tempix.bet
       VITE_APP_URL: https://tempix.bet
       MIX_ASSET_URL: https://tempix.bet
+      VITE_BASE_URL: /
       DB_CONNECTION: mysql
       DB_HOST: betx.chc00us2cv1d.sa-east-1.rds.amazonaws.com
       DB_PORT: 3306
       DB_DATABASE: tempix
       DB_USERNAME: host_betx
       DB_PASSWORD: Cap0199**
+      SESSION_DOMAIN: .tempix.bet
+      SESSION_SECURE_COOKIE: "true" 
+      SANCTUM_STATEFUL_DOMAINS: tempix.bet
+      SESSION_SAME_SITE: strict
+      VITE_PORT: 5173
+      VITE_HOST: 0.0.0.0
+      VITE_PUSHER_HOST: tempix.bet
+      DIGITOPAY_BASE_URL: https://api.digitopayoficial.com.br
+      DIGITOPAY_CLIENT_ID: 8252d842-147c-4dd0-8e3b-3061dc9d0c1b
+      DIGITOPAY_SECRET: 5216e502-8f51-4239-95c0-a1f8f0da7ca4
     networks:
       - laravel_net
 
