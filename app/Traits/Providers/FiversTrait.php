@@ -12,6 +12,7 @@ use App\Models\Wallet;
 use App\Traits\Missions\MissionTrait;
 use Illuminate\Support\Facades\Http;
 use App\Events\BalanceUpdated;
+use Illuminate\Support\Facades\Log;
 
 trait FiversTrait
 {
@@ -136,7 +137,7 @@ trait FiversTrait
      */
     public static function GameLaunchFivers($provider_code, $game_code, $lang, $userId)
     {
-        \Log::info('Iniciando GameLaunchFivers', [
+        Log::channel('fivers')->info('Iniciando GameLaunchFivers', [
             'provider_code' => $provider_code,
             'game_code' => $game_code,
             'lang' => $lang,
@@ -144,6 +145,7 @@ trait FiversTrait
         ]);
 
         if (!self::getCredentials()) {
+            Log::channel('fivers')->error('Falha ao obter credenciais');
             return ['error' => 'Credenciais inválidas'];
         }
 
@@ -152,7 +154,13 @@ trait FiversTrait
                 ->where('active', 1)
                 ->first();
 
+            Log::channel('fivers')->info('Dados da carteira', [
+                'wallet_id' => $wallet->id ?? null,
+                'balance' => $wallet->total_balance ?? 0
+            ]);
+
             if (!$wallet) {
+                Log::channel('fivers')->error('Carteira não encontrada', ['user_id' => $userId]);
                 return ['error' => 'Carteira não encontrada'];
             }
 
@@ -165,12 +173,21 @@ trait FiversTrait
                 "lang" => $lang
             ];
 
+            Log::channel('fivers')->info('Enviando requisição para Fivers', [
+                'endpoint' => rtrim(self::$apiEndpoint, '/') . '/game_launch',
+                'request' => array_merge($postArray, ['secretKey' => '****'])
+            ]);
+
             $endpoint = rtrim(self::$apiEndpoint, '/') . '/game_launch';
-            
             $response = Http::post($endpoint, $postArray);
             
+            Log::channel('fivers')->info('Resposta da API Fivers', [
+                'status' => $response->status(),
+                'body' => $response->json()
+            ]);
+
             if (!$response->successful()) {
-                \Log::error('Erro na resposta da API Fivers', [
+                Log::channel('fivers')->error('Erro na resposta da API Fivers', [
                     'status' => $response->status(),
                     'body' => $response->json()
                 ]);
@@ -180,13 +197,20 @@ trait FiversTrait
             $data = $response->json();
             
             if (!isset($data['launch_url'])) {
+                Log::channel('fivers')->error('URL de lançamento não encontrada', [
+                    'response' => $data
+                ]);
                 return ['error' => 'URL de lançamento não encontrada na resposta'];
             }
+
+            Log::channel('fivers')->info('Jogo iniciado com sucesso', [
+                'launch_url' => $data['launch_url']
+            ]);
 
             return $data;
 
         } catch (\Exception $e) {
-            \Log::error('Exceção ao executar GameLaunchFivers', [
+            Log::channel('fivers')->error('Exceção ao executar GameLaunchFivers', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -464,88 +488,102 @@ trait FiversTrait
      */
     public static function WebhooksFivers($request)
     {
-        $logFile = storage_path('logs/fivers-webhook.log');
-        
-        // Log inicial da requisição
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Nova requisição recebida\n", FILE_APPEND);
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Dados: " . json_encode($request->all()) . "\n", FILE_APPEND);
-
-        if($request->type === 'WinBet') {
-            $credentialsLoaded = self::getCredentials();
-            
-            file_put_contents($logFile, date('Y-m-d H:i:s') . " - getCredentials retornou: " . ($credentialsLoaded ? 'true' : 'false') . "\n", FILE_APPEND);
-
-            if(!$credentialsLoaded) {
-                file_put_contents($logFile, date('Y-m-d H:i:s') . " - Falha ao carregar credenciais\n", FILE_APPEND);
-                return response()->json(['msg' => 'INVALID_CREDENTIALS', 'balance' => 0]);
-            }
-
-            // Comparação das credenciais
-            $isValid = ($request->agent_code === self::$agentCode && 
-                       $request->agent_secret === self::$agentSecretKey);
-
-            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Validação de credenciais: " . json_encode([
-                'recebido' => [
-                    'agent_code' => $request->agent_code,
-                    'agent_secret' => $request->agent_secret
-                ],
-                'esperado' => [
-                    'agent_code' => self::$agentCode,
-                    'agent_secret' => self::$agentSecretKey
-                ],
-                'is_valid' => $isValid
-            ]) . "\n", FILE_APPEND);
-
-            if(!$isValid) {
-                return response()->json(['msg' => 'INVALID_CREDENTIALS', 'balance' => 0]);
-            }
-
-            // Processa a transação
-            $wallet = Wallet::where('user_id', $request->user_code)
-                          ->where('active', 1)
-                          ->first();
-
-            if(empty($wallet)) {
-                return response()->json([
-                    'msg' => 'INVALID_USER',
-                    'balance' => 0
-                ]);
-            }
-
-            // Verifica se tem saldo suficiente para a aposta
-            if(isset($request->slot) && $request->slot['bet'] > $wallet->total_balance) {
-                return response()->json([
-                    'msg' => 'INSUFFICIENT_USER_FUNDS',
-                    'balance' => $wallet->total_balance
-                ]);
-            }
-
-            // Processa a transação
-            if(isset($request->slot)) {
-                $transaction = self::PrepareTransactions(
-                    $wallet,
-                    $request->user_code,
-                    $request->slot['txn_id'],
-                    $request->slot['bet'],
-                    $request->slot['win'],
-                    $request->slot['game_code'],
-                    $request->slot['provider_code']
-                );
-
-                // Atualiza o saldo após a transação
-                $wallet->refresh();
-
-                return response()->json([
-                    'msg' => '',
-                    'balance' => $wallet->total_balance
-                ]);
-            }
-        }
-
-        return response()->json([
-            'msg' => 'INVALID_REQUEST',
-            'balance' => 0
+        Log::channel('fivers')->info('Recebendo webhook Fivers', [
+            'method' => $request->method(),
+            'params' => $request->all()
         ]);
+
+        try {
+            $logFile = storage_path('logs/fivers-webhook.log');
+            
+            // Log inicial da requisição
+            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Nova requisição recebida\n", FILE_APPEND);
+            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Dados: " . json_encode($request->all()) . "\n", FILE_APPEND);
+
+            if($request->type === 'WinBet') {
+                $credentialsLoaded = self::getCredentials();
+                
+                file_put_contents($logFile, date('Y-m-d H:i:s') . " - getCredentials retornou: " . ($credentialsLoaded ? 'true' : 'false') . "\n", FILE_APPEND);
+
+                if(!$credentialsLoaded) {
+                    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Falha ao carregar credenciais\n", FILE_APPEND);
+                    return response()->json(['msg' => 'INVALID_CREDENTIALS', 'balance' => 0]);
+                }
+
+                // Comparação das credenciais
+                $isValid = ($request->agent_code === self::$agentCode && 
+                           $request->agent_secret === self::$agentSecretKey);
+
+                file_put_contents($logFile, date('Y-m-d H:i:s') . " - Validação de credenciais: " . json_encode([
+                    'recebido' => [
+                        'agent_code' => $request->agent_code,
+                        'agent_secret' => $request->agent_secret
+                    ],
+                    'esperado' => [
+                        'agent_code' => self::$agentCode,
+                        'agent_secret' => self::$agentSecretKey
+                    ],
+                    'is_valid' => $isValid
+                ]) . "\n", FILE_APPEND);
+
+                if(!$isValid) {
+                    return response()->json(['msg' => 'INVALID_CREDENTIALS', 'balance' => 0]);
+                }
+
+                // Processa a transação
+                $wallet = Wallet::where('user_id', $request->user_code)
+                              ->where('active', 1)
+                              ->first();
+
+                if(empty($wallet)) {
+                    return response()->json([
+                        'msg' => 'INVALID_USER',
+                        'balance' => 0
+                    ]);
+                }
+
+                // Verifica se tem saldo suficiente para a aposta
+                if(isset($request->slot) && $request->slot['bet'] > $wallet->total_balance) {
+                    return response()->json([
+                        'msg' => 'INSUFFICIENT_USER_FUNDS',
+                        'balance' => $wallet->total_balance
+                    ]);
+                }
+
+                // Processa a transação
+                if(isset($request->slot)) {
+                    $transaction = self::PrepareTransactions(
+                        $wallet,
+                        $request->user_code,
+                        $request->slot['txn_id'],
+                        $request->slot['bet'],
+                        $request->slot['win'],
+                        $request->slot['game_code'],
+                        $request->slot['provider_code']
+                    );
+
+                    // Atualiza o saldo após a transação
+                    $wallet->refresh();
+
+                    return response()->json([
+                        'msg' => '',
+                        'balance' => $wallet->total_balance
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'msg' => 'INVALID_REQUEST',
+                'balance' => 0
+            ]);
+
+        } catch (\Exception $e) {
+            Log::channel('fivers')->error('Erro no webhook Fivers', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
 
