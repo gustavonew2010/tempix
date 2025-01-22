@@ -32,16 +32,14 @@ COPY . .
 # Criar diretórios necessários (se não existirem)
 RUN mkdir -p /var/www/html/public_html/storage /var/www/html/public_html/bootstrap/cache
 
-# Ajustar permissões para os diretórios
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 777 /var/www/html/public_html/storage \
-    && chmod -R 777 /var/www/html/public_html/bootstrap/cache \
-    && chmod -R 777 /var/www/html/public_html/storage/logs \
-    && chmod -R 777 /var/www/html/public_html/bootstrap/cache
+# Liberar TODAS as permissões para TODOS os usuários e grupos
+RUN chmod -R 777 /var/www/html && \
+    chown -R nobody:nogroup /var/www/html && \
+    chmod -R o+w /var/www/html
 
-# Ajustar variáveis de ambiente do Apache
-RUN echo "export APACHE_RUN_USER=www-data" >> /etc/apache2/envvars \
-    && echo "export APACHE_RUN_GROUP=www-data" >> /etc/apache2/envvars
+# Ajustar variáveis de ambiente do Apache para usar nobody
+RUN echo "export APACHE_RUN_USER=nobody" >> /etc/apache2/envvars \
+    && echo "export APACHE_RUN_GROUP=nogroup" >> /etc/apache2/envvars
 
 EXPOSE 80
 

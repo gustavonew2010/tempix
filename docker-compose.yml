@@ -12,8 +12,10 @@ services:
       - .:/var/www/html/public_html
     environment:
       APP_ENV: local
-      APP_URL: http://localhost
-      ASSET_URL: http://localhost
+      APP_URL: http://54.207.211.25
+      ASSET_URL: http://54.207.211.25
+      VITE_APP_URL: http://54.207.211.25
+      MIX_ASSET_URL: http://54.207.211.25
       DB_CONNECTION: mysql
       DB_HOST: betx.chc00us2cv1d.sa-east-1.rds.amazonaws.com
       DB_PORT: 3306
