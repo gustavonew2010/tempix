@@ -7,15 +7,15 @@ services:
     container_name: laravel_app
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8000:8000"
     volumes:
       - .:/var/www/html/public_html
     environment:
       APP_ENV: local
-      APP_URL: http://54.207.211.25
-      ASSET_URL: http://54.207.211.25
-      VITE_APP_URL: http://54.207.211.25
-      MIX_ASSET_URL: http://54.207.211.25
+      APP_URL: https://tempix.bet
+      ASSET_URL: https://tempix.bet
+      VITE_APP_URL: https://tempix.bet
+      MIX_ASSET_URL: https://tempix.bet
       DB_CONNECTION: mysql
       DB_HOST: betx.chc00us2cv1d.sa-east-1.rds.amazonaws.com
       DB_PORT: 3306

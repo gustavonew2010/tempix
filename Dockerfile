@@ -47,7 +47,12 @@ RUN chmod -R 777 /var/www/html && \
 RUN echo "export APACHE_RUN_USER=www-data" >> /etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=www-data" >> /etc/apache2/envvars
 
-EXPOSE 80
+# Mudar a porta exposta
+EXPOSE 8000
+
+# Configurar Apache para usar porta 8000
+RUN sed -i 's/Listen 80/Listen 8000/g' /etc/apache2/ports.conf && \
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8000>/g' /etc/apache2/sites-available/000-default.conf
 
 # Iniciar o Apache em primeiro plano
 CMD ["apache2ctl", "-D", "FOREGROUND"]
