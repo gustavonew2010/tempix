@@ -30,16 +30,22 @@ WORKDIR /var/www/html/public_html
 COPY . . 
 
 # Criar diretórios necessários (se não existirem)
-RUN mkdir -p /var/www/html/public_html/storage /var/www/html/public_html/bootstrap/cache
+RUN mkdir -p /var/www/html/public_html/storage/framework/sessions \
+    /var/www/html/public_html/storage/framework/views \
+    /var/www/html/public_html/storage/framework/cache \
+    /var/www/html/public_html/bootstrap/cache
 
-# Liberar TODAS as permissões para TODOS os usuários e grupos
+# Super permissões para garantir acesso total
 RUN chmod -R 777 /var/www/html && \
-    chown -R nobody:nogroup /var/www/html && \
-    chmod -R o+w /var/www/html
+    chown -R www-data:www-data /var/www/html && \
+    chmod -R o+w /var/www/html && \
+    chmod -R g+w /var/www/html && \
+    # Garantir que novos arquivos herdem as permissões
+    find /var/www/html -type d -exec chmod g+s {} \;
 
-# Ajustar variáveis de ambiente do Apache para usar nobody
-RUN echo "export APACHE_RUN_USER=nobody" >> /etc/apache2/envvars \
-    && echo "export APACHE_RUN_GROUP=nogroup" >> /etc/apache2/envvars
+# Ajustar variáveis de ambiente do Apache
+RUN echo "export APACHE_RUN_USER=www-data" >> /etc/apache2/envvars \
+    && echo "export APACHE_RUN_GROUP=www-data" >> /etc/apache2/envvars
 
 EXPOSE 80
 
