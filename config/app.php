@@ -175,6 +175,7 @@ return [
         App\Providers\Filament\AdminPanelProvider::class,
         App\Providers\Filament\AffiliatePanelProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\CloudflareServiceProvider::class,
     ])->toArray(),
 
     /*

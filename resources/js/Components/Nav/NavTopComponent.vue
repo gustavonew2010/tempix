@@ -2,115 +2,123 @@
     <nav :class="['fixed top-10 navtop-color nav-indexx', sidebar ? 'w-full' : 'w-full']">
         <PromoBar />
         
-        <div class="px-3 lg:px-5 lg:pl-3 nav-menu relative" style="background-color: var(--navtop-color-dark);">
-            <NavCategories />
-            
-            <div class="absolute top-0 left-5 hidden lg:block">
-                <div class="flex items-center justify-center h-full" style="align-items: center;">
-                    <div class="flex-row w-[100%] cursor-pointer items-center px-2 py-3 border-primary flex justify-center tirar-esporte" 
-                         style="border-bottom: 3px solid;margin-left: 10px;margin-top:10px;padding-left: 10px;padding-right: 10px;padding-bottom: 1em;">
-                        <svg height="1em" viewBox="0 0 640 512" width="1em" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M220.7 7.468C247.3-7.906 281.4 1.218 296.8 27.85L463.8 317.1C479.1 343.8 470 377.8 443.4 393.2L250.5 504.5C223.9 519.9 189.9 510.8 174.5 484.2L7.468 194.9C-7.906 168.2 1.218 134.2 27.85 118.8L220.7 7.468zM143.8 277.3C136.9 303.2 152.3 329.1 178.3 336.9C204.3 343.9 230.1 328.5 237.9 302.5L240.3 293.6C240.4 293.3 240.5 292.9 240.6 292.5L258.4 323.2L246.3 330.2C239.6 334 237.4 342.5 241.2 349.2C245.1 355.9 253.6 358.1 260.2 354.3L308.4 326.5C315.1 322.6 317.4 314.1 313.5 307.4C309.7 300.8 301.2 298.5 294.5 302.3L282.5 309.3L264.7 278.6C265.1 278.7 265.5 278.8 265.9 278.9L274.7 281.2C300.7 288.2 327.4 272.8 334.4 246.8C341.3 220.8 325.9 194.1 299.9 187.1L196.1 159.6C185.8 156.6 174.4 163.2 171.4 174.3L143.8 277.3z" fill="currentColor"/>
-                        </svg>
-                        <p class="text-[16px] font-bold" style="font-size: .875rem;font-weight: 700;padding-left: 8px;color: white">CASSINO</p>
-                    </div>
-
-                    <div class="flex-row w-[100%] items-center px-2 py-3 gap-2 flex justify-center texto-esportes tirar-esporte cursor-not-allowed">
-                        <div style="display: flex;align-items: center;opacity: 0.5;">
-                            <svg style="margin-top: -3px;" height="1em" viewBox="0 0 512 512" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M355.5 45.53L342.4 14.98c-27.95-9.983-57.18-14.98-86.42-14.98c-29.25 0-58.51 4.992-86.46 14.97L156.5 45.53l99.5 55.13L355.5 45.53zM86.78 96.15L53.67 99.09c-34.79 44.75-53.67 99.8-53.67 156.5L.0001 256c0 2.694 .0519 5.379 .1352 8.063l24.95 21.76l83.2-77.67L86.78 96.15zM318.8 336L357.3 217.4L255.1 144L154.7 217.4l38.82 118.6L318.8 336zM512 255.6c0-56.7-18.9-111.8-53.72-156.5L425.6 96.16L403.7 208.2l83.21 77.67l24.92-21.79C511.1 260.1 512 258.1 512 255.6zM51.77 367.7l-7.39 32.46c33.48 49.11 82.96 85.07 140 101.7l28.6-16.99l-48.19-103.3L51.77 367.7zM347.2 381.5l-48.19 103.3l28.57 17c57.05-16.66 106.5-52.62 140-101.7l-7.38-32.46L347.2 381.5z" fill="currentColor"/>
+        <div class="nav-gradient-container">
+            <div class="px-3 lg:px-5 lg:pl-3 nav-menu relative">
+                <NavCategories />
+                
+                <div class="absolute top-0 left-5 hidden lg:block">
+                    <div class="flex items-center justify-center h-full" style="align-items: center;">
+                        <div class="flex-row w-[100%] cursor-pointer items-center px-2 py-3 border-primary flex justify-center tirar-esporte" 
+                             style="border-bottom: 3px solid;margin-left: 10px;margin-top:10px;padding-left: 10px;padding-right: 10px;padding-bottom: 1em;">
+                            <svg height="1em" viewBox="0 0 640 512" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M220.7 7.468C247.3-7.906 281.4 1.218 296.8 27.85L463.8 317.1C479.1 343.8 470 377.8 443.4 393.2L250.5 504.5C223.9 519.9 189.9 510.8 174.5 484.2L7.468 194.9C-7.906 168.2 1.218 134.2 27.85 118.8L220.7 7.468zM143.8 277.3C136.9 303.2 152.3 329.1 178.3 336.9C204.3 343.9 230.1 328.5 237.9 302.5L240.3 293.6C240.4 293.3 240.5 292.9 240.6 292.5L258.4 323.2L246.3 330.2C239.6 334 237.4 342.5 241.2 349.2C245.1 355.9 253.6 358.1 260.2 354.3L308.4 326.5C315.1 322.6 317.4 314.1 313.5 307.4C309.7 300.8 301.2 298.5 294.5 302.3L282.5 309.3L264.7 278.6C265.1 278.7 265.5 278.8 265.9 278.9L274.7 281.2C300.7 288.2 327.4 272.8 334.4 246.8C341.3 220.8 325.9 194.1 299.9 187.1L196.1 159.6C185.8 156.6 174.4 163.2 171.4 174.3L143.8 277.3z" fill="currentColor"/>
                             </svg>
-                            <p class="text-[16px] font-bold" style="font-size: .875rem;font-weight: 700;padding-left: 8px;">ESPORTES</p>
+                            <p class="text-[16px] font-bold" style="font-size: .875rem;font-weight: 700;padding-left: 8px;color: white">CASSINO</p>
+                        </div>
+ 
+                        <div class="flex-row w-[100%] items-center px-2 py-3 gap-2 flex justify-center texto-esportes tirar-esporte cursor-not-allowed">
+                            <div style="display: flex;align-items: center;opacity: 0.5;">
+                                <svg style="margin-top: -3px;" height="1em" viewBox="0 0 512 512" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M355.5 45.53L342.4 14.98c-27.95-9.983-57.18-14.98-86.42-14.98c-29.25 0-58.51 4.992-86.46 14.97L156.5 45.53l99.5 55.13L355.5 45.53zM86.78 96.15L53.67 99.09c-34.79 44.75-53.67 99.8-53.67 156.5L.0001 256c0 2.694 .0519 5.379 .1352 8.063l24.95 21.76l83.2-77.67L86.78 96.15zM318.8 336L357.3 217.4L255.1 144L154.7 217.4l38.82 118.6L318.8 336zM512 255.6c0-56.7-18.9-111.8-53.72-156.5L425.6 96.16L403.7 208.2l83.21 77.67l24.92-21.79C511.1 260.1 512 258.1 512 255.6zM51.77 367.7l-7.39 32.46c33.48 49.11 82.96 85.07 140 101.7l28.6-16.99l-48.19-103.3L51.77 367.7zM347.2 381.5l-48.19 103.3l28.57 17c57.05-16.66 106.5-52.62 140-101.7l-7.38-32.46L347.2 381.5z" fill="currentColor"/>
+                                </svg>
+                                <p class="text-[16px] font-bold" style="font-size: .875rem;font-weight: 700;padding-left: 8px;">ESPORTES</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div :class="[sidebar ? 'lg:ml-[65px]' : 'lg:ml-[280px]']">
-                <div class="mx-auto w-full" style="max-width: 1110px">
-                    <div class="flex items-center justify-between">
-                        <NavBrand :setting="setting" @toggle-menu="toggleMenu" />
-                        
-                        <div class="flex items-center py-3">
-                            <AuthButtons v-if="!authStatus"
-                                       @login="loginToggle"
-                                       @register="registerToggle" />
+                <div :class="[sidebar ? 'lg:ml-[65px]' : 'lg:ml-[280px]']">
+                    <div class="mx-auto w-full" style="max-width: 1110px">
+                        <div class="flex items-center justify-between">
+                            <NavBrand :setting="setting" @toggle-menu="toggleMenu" @navigate-home="navigateHome" />
                             
-                            <div v-if="authStatus" class="flex items-center">
-                                <MakeDeposit 
-                                    :showMobile="false" 
-                                    :title="$t('Depositar')"
-                                    ref="makeDepositRef"
-                                />
+                            <div class="flex items-center py-3">
+                                <!-- Botões de Auth apenas quando não autenticado -->
+                                <template v-if="!authStatus">
+                                    <AuthButtons 
+                                        @login="openAuthModal('login')" 
+                                        @register="openAuthModal('register')" 
+                                    />
+                                </template>
 
-                                <WalletBalance />
-                                
-                                <div class="flex items-center ml-3 margin-teste">
-                                    <div>
-                                        <button type="button" 
-                                                @click="toggleUserDropdown"
-                                                class="flex text-sm bg-[white] rounded-full ui-button-blue3" 
-                                                aria-expanded="false">
-                                            <span class="sr-only">Open user menu</span>
-                                            <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
-                                                 alt="avatar" 
-                                                 class="w-5 h-5 rounded-full">
-                                        </button>
+                                <!-- Menu do usuário apenas quando autenticado -->
+                                <div v-else class="flex items-center">
+                                    <button @click="openDepositModal" 
+                                            class="ui-button-blue2 mr-3 hover:scale-105 transition-transform">
+                                        {{ $t('Deposit') }}
+                                    </button>
+                                    
+                                    <!-- Wallet Balance com novo design -->
+                                    <div class="wallet-container">
+                                        <WalletBalance />
                                     </div>
                                     
-                                    <!-- Dropdown Menu -->
-                                    <div class="z-50 text-left list-none absolute right-0 mt-2 w-48 rounded-md shadow-lg" 
-                                         id="dropdown-user2" 
-                                         :class="{ 'hidden': !showUserDropdown }"
-                                         style="background-color: white; top: 100%;">
-                                        <ul class="py-1" role="none">
-                                            <li class="hover-menu">
-                                                <RouterLink :to="{ name: 'profileWallet' }" 
-                                                          class="flex items-center block px-4 py-2 text-sm"
-                                                          style="color: var(--title-color);">
-                                                    <i class="fa-duotone fa-wallet pr-3"></i>
-                                                    <p style="font-weight: bold">Carteira</p>
-                                                </RouterLink>
-                                            </li>
+                                    <!-- User Menu com novo design -->
+                                    <div class="flex items-center ml-3 margin-teste">
+                                        <div>
+                                            <button type="button" 
+                                                    @click="toggleUserDropdown"
+                                                    class="profile-button" 
+                                                    aria-expanded="false">
+                                                <span class="sr-only">Open user menu</span>
+                                                <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
+                                                     alt="avatar" 
+                                                     class="w-8 h-8 rounded-full border-2 border-primary">
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Dropdown Menu Redesenhado -->
+                                        <div class="user-dropdown" 
+                                             id="dropdown-user2" 
+                                             :class="{ 'hidden': !showUserDropdown }">
+                                            <div class="p-3 border-b border-gray-700">
+                                                <div class="flex items-center space-x-3">
+                                                    <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
+                                                         alt="avatar" 
+                                                         class="w-12 h-12 rounded-full border-2 border-primary">
+                                                    <div>
+                                                        <p class="text-sm font-bold text-white">{{ userData?.name }}</p>
+                                                        <p class="text-xs text-gray-400">{{ userData?.email }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             
-                                            <li class="hover-menu">
-                                                <RouterLink :to="{ name: 'profileAffiliate' }"
-                                                          class="flex items-center block px-4 py-2 text-sm"
-                                                          style="color: var(--title-color);">
-                                                    <span class="pr-3">
-                                                        <svg height="1em" viewBox="0 0 576 512" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                                            <!-- ... SVG path ... -->
-                                                        </svg>
-                                                    </span>
-                                                    <p style="font-weight: bold">{{ $t('Painel Afiliado') }}</p>
-                                                </RouterLink>
-                                            </li>
-                                            
-                                            <li class="hover-menu">
-                                                <a style="color: var(--title-color);" 
-                                                   href="#" 
-                                                   @click.prevent="openProfileModal" 
-                                                   class="flex items-center block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" 
-                                                   role="menuitem">
-                                                    <span class="pr-3">
-                                                        <svg height="1em" viewBox="0 0 640 512" width="1em" xmlns="http://www.w3.org/2000/svg" active="true" aria-hidden="true" class="I9SFw"><path d="M610.5 373.3c2.625-14 2.625-28.5 0-42.5l25.75-15c3-1.625 4.375-5.125 3.375-8.5c-6.75-21.5-18.25-41.13-33.25-57.38c-2.25-2.5-6-3.125-9-1.375l-25.75 14.88c-10.88-9.25-23.38-16.5-36.88-21.25V212.3c0-3.375-2.5-6.375-5.75-7c-22.25-5-45-4.875-66.25 0c-3.25 .625-5.625 3.625-5.625 7v29.88c-13.5 4.75-26 12-36.88 21.25L394.4 248.5c-2.875-1.75-6.625-1.125-9 1.375c-15 16.25-26.5 35.88-33.13 57.38c-1 3.375 .3751 6.875 3.25 8.5l25.75 15c-2.5 14-2.5 28.5 0 42.5l-25.75 15c-3 1.625-4.25 5.125-3.25 8.5c6.625 21.5 18.13 41 33.13 57.38c2.375 2.5 6 3.125 9 1.375l25.88-14.88c10.88 9.25 23.38 16.5 36.88 21.25v29.88c0 3.375 2.375 6.375 5.625 7c22.38 5 45 4.875 66.25 0c3.25-.625 5.75-3.625 5.75-7v-29.88c13.5-4.75 26-12 36.88-21.25l25.75 14.88c2.875 1.75 6.75 1.125 9-1.375c15-16.25 26.5-35.88 33.25-57.38c1-3.375-.3751-6.875-3.375-8.5L610.5 373.3zM496 400.5c-26.75 0-48.5-21.75-48.5-48.5s21.75-48.5 48.5-48.5c26.75 0 48.5 21.75 48.5 48.5S522.8 400.5 496 400.5z" fill="currentColor"></path><path d="M224 256c70.7 0 128-57.31 128-128S294.7 0 224 0C153.3 0 96 57.31 96 128S153.3 256 224 256zM425.1 491.8v-9.172c-2.303-1.25-4.572-2.559-6.809-3.93l-7.818 4.493c-6.002 3.504-12.83 5.352-19.75 5.352c-10.71 0-21.13-4.492-28.97-12.75c-18.41-20.09-32.29-44.15-40.22-69.9c-5.352-18.06 2.343-36.87 17.83-45.24l8.018-4.669c-.0664-2.621-.0664-5.242 0-7.859l-7.655-4.461c-12.3-6.953-19.4-19.66-19.64-33.38C305.6 306.3 290.4 304 274.7 304H173.3C77.61 304 0 381.7 0 477.4C0 496.5 15.52 512 34.66 512H413.3c5.727 0 10.9-1.727 15.66-4.188C426.7 502.8 425.1 497.5 425.1 491.8z" fill="currentColor" opacity="0.4"></path></svg>
-                                                    </span>
-                                                    <p style="font-weight: bold"> {{ $t('Dados da conta') }}</p> 
-                                                </a>
-                                            </li>
+                                            <ul class="py-2" role="none">
+                                                <li>
+                                                    <RouterLink :to="{ name: 'profileWallet' }" 
+                                                              class="dropdown-item">
+                                                        <i class="fa-duotone fa-wallet text-primary"></i>
+                                                        <span>Carteira</span>
+                                                    </RouterLink>
+                                                </li>
+                                                
+                                                <li>
+                                                    <RouterLink :to="{ name: 'profileAffiliate' }"
+                                                              class="dropdown-item">
+                                                        <i class="fa-duotone fa-users text-primary"></i>
+                                                        <span>{{ $t('Painel Afiliado') }}</span>
+                                                    </RouterLink>
+                                                </li>
+                                                
+                                                <li>
+                                                    <a @click.prevent="openProfileModal" 
+                                                       href="#" 
+                                                       class="dropdown-item">
+                                                        <i class="fa-duotone fa-user text-primary"></i>
+                                                        <span>{{ $t('Dados da conta') }}</span>
+                                                    </a>
+                                                </li>
 
-                                            <div style="height: 1px;background-color: #27292A;width: 100%;margin-top: 10px;margin-bottom: 10px"></div>
-                                            
-                                            <li class="sair-menu mb-3">
-                                                <a @click.prevent="logoutAccount" 
-                                                   href="#"
-                                                   class="flex items-center block px-4 py-2 text-sm"
-                                                   style="color: var(--title-color);">
-                                                    <i class="fa-duotone fa-right-from-bracket pr-3"></i>
-                                                    <p>Sair</p>
-                                                </a>
-                                            </li>
-                                        </ul>
+                                                <li>
+                                                    <a @click.prevent="logoutAccount" 
+                                                       href="#"
+                                                       class="dropdown-item text-red-500 hover:bg-red-500/10">
+                                                        <i class="fa-duotone fa-right-from-bracket"></i>
+                                                        <span>Sair</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -126,9 +134,11 @@
                     :games="games"
                     :is-loading="isLoadingSearch" />
         
-        <AuthModal v-model="showAuthModal"
-                  @close="loginToggle"
-                  @show-register="hideLoginShowRegisterToggle" />
+        <AuthModal 
+            v-model="showAuthModal"
+            @close="closeAuthModal"
+            ref="authModal"
+        />
         
         <RegisterModal v-model="showRegisterModal"
                       @close="registerToggle"
@@ -161,10 +171,12 @@ import DropdownDarkLight from "@/Components/UI/DropdownDarkLight.vue";
 import LanguageSelector from "@/Components/UI/LanguageSelector.vue";
 import WalletBalance from "@/Components/UI/WalletBalance.vue";
 import HttpApi from "@/Services/HttpApi.js";
-import MakeDeposit from "@/Components/UI/MakeDeposit.vue";
 import {searchGameStore} from "@/Stores/SearchGameStore.js";
 import CassinoGameCard from "@/Pages/Cassino/Components/CassinoGameCard.vue";
 import ProfileModal from '@/Components/UI/ProfileModal.vue'
+import { useCacheStore } from '@/Stores/CacheStore.js'
+import { useModalStore } from '@/Stores/ModalStore'
+import DepositWidget from '@/Components/Widgets/DepositWidget.vue'
 
 // Componentes
 import PromoBar from './PromoBar.vue'
@@ -173,7 +185,7 @@ import NavBrand from './NavBrand.vue'
 import AuthButtons from './AuthButtons.vue'
 import UserMenu from './UserMenu.vue'
 import SearchModal from './SearchModal.vue'
-import AuthModal from './AuthModal.vue'
+import AuthModal from '@/Components/Nav/AuthModal.vue'
 import RegisterModal from './RegisterModal.vue'
 
 export default {
@@ -187,13 +199,13 @@ export default {
         SearchModal,
         AuthModal,
         RegisterModal,
-        MakeDeposit,
         CassinoGameCard,
         WalletBalance,
         LanguageSelector,
         DropdownDarkLight,
         RouterLink,
-        ProfileModal
+        ProfileModal,
+        DepositWidget
     },
     
     props: {
@@ -210,6 +222,8 @@ export default {
         const toast = useToast()
         const { user: userData } = storeToRefs(authStore)
         const sidebarMenuStore = sidebarStore()
+        const cacheStore = useCacheStore()
+        const modalStore = useModalStore()
 
         return { 
             authStore, 
@@ -217,7 +231,9 @@ export default {
             router,
             toast,
             sidebarMenuStore,
-            setting: settingStore.setting
+            setting: settingStore.setting,
+            cacheStore,
+            modalStore
         }
     },
 
@@ -244,6 +260,7 @@ export default {
             profileUser: null,
             profileName: '',
             avatarUrl: null,
+            showDepositModal: false,
         }
     },
 
@@ -262,9 +279,17 @@ export default {
             this.showSearchMenu = !this.showSearchMenu
         },
         
-        loginToggle() {
-            console.log('Toggle login modal', this.showAuthModal)
-            this.showAuthModal = !this.showAuthModal
+        openAuthModal(tab = 'login') {
+            this.showAuthModal = true
+            this.$nextTick(() => {
+                if (this.$refs.authModal) {
+                    this.$refs.authModal.activeTab = tab
+                }
+            })
+        },
+        
+        closeAuthModal() {
+            this.showAuthModal = false
         },
         
         registerToggle() {
@@ -285,6 +310,8 @@ export default {
         async logoutAccount() {
             try {
                 await this.authStore.logout()
+                // Limpa o cache ao fazer logout
+                this.cacheStore.clearCache()
                 this.router.push({ name: 'home' })
                 this.toast.success(this.$t('You have been successfully disconnected'))
             } catch (error) {
@@ -302,16 +329,9 @@ export default {
             }
         },
         
-        openDeposit() {
-            if (this.$refs.makeDepositRef) {
-                this.$refs.makeDepositRef.toggleModalDeposit();
-            }
-        },
-        
-        closeDepositModal() {
-            if (this.depositModal) {
-                this.depositModal.hide();
-            }
+        openDepositModal() {
+            console.log('Abrindo modal de depósito')
+            this.modalStore.openDepositModal()
         },
         
         profileToggle() {
@@ -395,6 +415,21 @@ export default {
                 throw error;
             }
         },
+        
+        navigateHome(event) {
+            event.preventDefault()
+            
+            if (this.$route.name === 'home') {
+                return
+            }
+
+            this.modalStore.closeDepositModal()
+            this.$router.replace({ name: 'home' })
+        },
+
+        handleLogoClick(event) {
+            this.navigateHome(event);
+        }
     },
 
     watch: {
@@ -413,7 +448,6 @@ export default {
         // Inicializar modais
         const modalAuthEl = document.getElementById('modalElAuth')
         const modalRegisterEl = document.getElementById('modalElRegister')
-        const modalDepositEl = document.getElementById('modalElDeposit')
 
         if (modalAuthEl) {
             this.modalAuth = new Modal(modalAuthEl, {
@@ -445,34 +479,13 @@ export default {
             })
         }
 
-        if (modalDepositEl) {
-            this.modalDeposit = new Modal(modalDepositEl, {
-                placement: 'center',
-                backdrop: 'dynamic',
-                backdropClasses: 'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40 backmodaldeposit',
-                closable: true,
-                onHide: () => {
-                    const divsToDelete = document.querySelectorAll('.backmodaldeposit');
-                    divsToDelete.forEach(div => div.remove());
-                }
-            })
-        }
-
-        // Inicializar modal de depósito
-        this.depositModal = new Modal(document.getElementById('depositModal'), {
-            placement: 'center',
-            backdrop: 'dynamic',
-            backdropClasses: 'bg-black/80 fixed inset-0 z-40 backdrop-blur-md',
-            closable: false,
-        });
-
         // Fechar menu ao clicar fora
         document.addEventListener('click', this.handleClickOutside);
 
         // Adiciona listener para fechar o dropdown quando clicar fora
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('dropdown-user2');
-            const profileButton = e.target.closest('.ui-button-blue3');
+            const profileButton = e.target.closest('.profile-button');
             
             if (!dropdown?.contains(e.target) && !profileButton) {
                 this.showUserDropdown = false;
@@ -500,15 +513,6 @@ export default {
 
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutside);
-        // Limpar modais ao desmontar
-        if (this.modalDeposit) {
-            this.modalDeposit.hide();
-            this.modalDeposit = null;
-        }
-        if (this.depositModal) {
-            this.depositModal.hide();
-            this.depositModal = null;
-        }
     }
 }
 </script>
@@ -557,5 +561,41 @@ export default {
     .tirar-esporte {
         display: none;
     }
+}
+
+/* Novo container com gradiente */
+.nav-gradient-container {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 162, 212, 0.15) 0%,
+    rgba(30, 35, 40, 1) 35%
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  z-index: 1;
+}
+
+/* Efeito de brilho sutil */
+.nav-gradient-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 162, 212, 0.05) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Ajuste do fundo do menu para transparente */
+.nav-menu {
+  background: transparent !important;
 }
 </style>

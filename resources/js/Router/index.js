@@ -34,12 +34,23 @@ import CasinoPlayPage from "@/Pages/Cassino/CasinoPlayPage.vue";
 import ForgotPassword from "@/Pages/Auth/ForgotPassword.vue";
 import ResetPassword from "@/Pages/Auth/ResetPassword.vue";
 import GameLoader from '@/Pages/Games/GameLoader.vue'
+import { useCacheStore } from '@/Stores/CacheStore'
 
 export const routes = [
     {
         name: 'home',
         path: '/:action?',
-        component: HomePage
+        component: HomePage,
+        beforeEnter: async (to, from, next) => {
+            const cacheStore = useCacheStore();
+            
+            // Se não tiver cache válido, limpa o cache existente
+            if (!cacheStore.isValidCache('home') || !cacheStore.isValidCache('featured_games')) {
+                cacheStore.clearCache();
+            }
+            
+            next();
+        }
     },
     {
         name: 'login',
@@ -145,7 +156,16 @@ export const routes = [
         path: '/profile/wallet',
         component: WalletPage,
         meta: {
-            auth: true
+            auth: true,
+            hideModals: true
+        },
+        beforeEnter: (to, from, next) => {
+            const modals = document.querySelectorAll('.modal-deposit, .modal-auth');
+            modals.forEach(modal => {
+                modal.classList.remove('show');
+            });
+            document.body.style.overflow = 'auto';
+            next();
         }
     },
     {
@@ -251,24 +271,59 @@ export const routes = [
 const router = createRouter({
     history: createWebHistory(import.meta.env.VITE_BASE_URL || '/'),
     routes: routes,
-});
-
-router.beforeEach(async (to, from, next) => {
-    if(to.meta?.auth) {
-        const auth = useAuthStore();
-        auth.isAuth ? next() : next({ name: 'home' });
-    }else{
-        next();
+    scrollBehavior(to, from, savedPosition) {
+        if (savedPosition) {
+            return savedPosition
+        }
+        return { top: 0 }
     }
 });
 
-router.afterEach(() => {
-    setTimeout(() => {
-        const app = document.getElementById('viperpro').__vue_app__;
-        if (app && app._instance) {
-            app._instance.data.isLoading = false;
+router.beforeEach(async (to, from, next) => {
+    const cacheStore = useCacheStore()
+
+    // Se estiver navegando para a home
+    if (to.name === 'home' || to.name === 'landingPage') {
+        // Verifica cache imediatamente
+        const hasValidCache = cacheStore.homeData && 
+                            cacheStore.getFeaturedGames && 
+                            cacheStore.isValidCache('home') && 
+                            cacheStore.isValidCache('featured_games');
+
+        if (hasValidCache) {
+            console.log('Cache válido encontrado no router');
+            to.meta = {
+                ...to.meta,
+                skipLoading: true,
+                useCache: true // Flag para usar cache
+            };
         }
-    }, 1000);
+    }
+
+    if (to.meta?.auth) {
+        const auth = useAuthStore()
+        auth.isAuth ? next() : next({ name: 'home' })
+    } else {
+        next()
+    }
+
+    // Middleware global para limpar cache quando sair da home
+    if (from.name === 'home' && to.name !== 'home') {
+        // Opcional: limpar cache ao sair da home
+        // cacheStore.clearCache();
+    }
+});
+
+router.afterEach((to) => {
+    // Remove o setTimeout desnecessário
+    const app = document.getElementById('viperpro')?.__vue_app__;
+    if (app?._instance) {
+        app._instance.data.isLoading = false;
+    }
+
+    if (to.meta?.hideModals) {
+        document.body.style.overflow = 'auto';
+    }
 });
 
 export default router;

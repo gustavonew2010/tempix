@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Categories;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -13,8 +15,73 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::get();
-        return response()->json(['categories' => $categories]);
+        try {
+            $cacheKey = 'categories_list_v1';
+            $cacheDuration = 86400; // 24 horas
+
+            return Cache::remember($cacheKey, $cacheDuration, function() {
+                $categories = Category::select([
+                        'id',
+                        'name',
+                        'slug',
+                        'image',
+                        'icon',
+                        'order',
+                        'is_menu_item',
+                        'is_dropdown',
+                        'parent_id'
+                    ])
+                    ->orderBy('order')
+                    ->where('is_menu_item', true)
+                    ->get();
+
+                $result = [];
+                foreach ($categories as $category) {
+                    $result[] = [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug,
+                        'image' => $category->image,
+                        'icon' => $category->icon,
+                        'order' => $category->order,
+                        'is_menu_item' => $category->is_menu_item,
+                        'is_dropdown' => $category->is_dropdown,
+                        'parent_id' => $category->parent_id
+                    ];
+                }
+
+                return response()->json([
+                    'status' => true,
+                    'categories' => $result
+                ]);
+            });
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar categorias:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro ao buscar categorias',
+                'debug_message' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Método para invalidar o cache manualmente se necessário
+     */
+    public function refreshCache()
+    {
+        try {
+            Cache::forget('categories_list_v1');
+            return response()->json(['message' => 'Cache invalidado com sucesso']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao invalidar cache'], 500);
+        }
     }
 
     /**

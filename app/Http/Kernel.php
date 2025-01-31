@@ -14,8 +14,8 @@ class Kernel extends HttpKernel
      * @var array<int, class-string|string>
      */
     protected $middleware = [
-        // Adicionar o middleware HTTPS no topo
-        \App\Http\Middleware\HttpsProtocol::class,
+        // Removi o middleware HTTPS
+        // \App\Http\Middleware\HttpsProtocol::class,
         
         // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
@@ -49,7 +49,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             // Adicionar HTTPS para API também
-            \App\Http\Middleware\HttpsProtocol::class,
+           // \App\Http\Middleware\HttpsProtocol::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];

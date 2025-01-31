@@ -12,7 +12,7 @@
                     <template #header></template>
                 </HeaderComponent>
 
-                <form class="sm:max-w-[1110px] lg:max-w-[1110px] mx-auto w-full mb-[15px] mt-[30px]">
+                <form class="sm:max-w-[1010px] lg:max-w-[1010px] mx-auto w-full mb-[15px] mt-[30px]">
                     <div class="flex start mx-auto items-center">
                         <a style="margin-right: 10px;margin-bottom: 35px;" href="../">
                             <svg height="1em" viewBox="0 0 448 512" width="1em" xmlns="http://www.w3.org/2000/svg">

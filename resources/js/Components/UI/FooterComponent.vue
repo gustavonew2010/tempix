@@ -1,158 +1,144 @@
 <template>
-  <footer class="footer-component relative z-10 bg-[#0F0F11] mt-16 w-full">
-        <div class="footer-container container mx-auto px-4 pt-12 pb-6">
-            <!-- Seção Superior -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <!-- Logo e Descrição -->
-                <div class="col-span-1 md:col-span-2 lg:col-span-1">
-                    <!-- Logo -->
-                    <div class="mb-6">
-                        <i class="fas fa-dice text-[#00A6FF] text-4xl"></i>
-                    </div>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        Sua plataforma confiável para apostas esportivas e jogos online. Oferecemos uma experiência segura e emocionante.
-                    </p>
-                </div>
-
-                <!-- Links Rápidos -->
-                <div>
-                    <h3 class="text-white font-semibold mb-4 text-lg">Links Rápidos</h3>
-                    <div class="flex flex-col space-y-3">
-                        <a href="#" class="text-gray-400 hover:text-[#00A6FF] transition-colors duration-200 text-sm">Betting terms</a>
-                        <a href="#" class="text-gray-400 hover:text-[#00A6FF] transition-colors duration-200 text-sm">Terms and conditions</a>
-                        <a href="#" class="text-gray-400 hover:text-[#00A6FF] transition-colors duration-200 text-sm">Privacy policy</a>
-                        <a href="#" class="text-gray-400 hover:text-[#00A6FF] transition-colors duration-200 text-sm">Responsible gaming</a>
-                        <a href="#" class="text-gray-400 hover:text-[#00A6FF] transition-colors duration-200 text-sm">AML Policy</a>
-                    </div>
-                </div>
-
-                <!-- Pagamento -->
-                <div>
-                    <h3 class="text-white font-semibold mb-4 text-lg">Pagamento</h3>
-                    <div class="bg-[#252528] rounded-lg p-4 inline-block">
-                        <i class="fas fa-qrcode text-3xl text-green-500"></i>
-                    </div>
-                </div>
-
-                <!-- Redes Sociais -->
-                <div>
-                    <h3 class="text-white font-semibold mb-4 text-lg">Siga-nos</h3>
-                    <div class="flex gap-4">
-                        <a href="#" class="bg-[#252528] p-3 rounded-lg hover:bg-[#2F2F33] transition-colors duration-200">
-                            <i class="fab fa-instagram text-gray-400 hover:text-[#00A6FF]"></i>
-                        </a>
-                        <a href="#" class="bg-[#252528] p-3 rounded-lg hover:bg-[#2F2F33] transition-colors duration-200">
-                            <i class="fab fa-telegram text-gray-400 hover:text-[#00A6FF]"></i>
-                        </a>
-                        <a href="#" class="bg-[#252528] p-3 rounded-lg hover:bg-[#2F2F33] transition-colors duration-200">
-                            <i class="fab fa-facebook text-gray-400 hover:text-[#00A6FF]"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Texto Descritivo -->
-            <div class="border-t border-b border-[#2F2F33] py-8 mb-8">
-                <h2 class="text-white text-xl font-semibold mb-4">Apostas Online: Uma Experiência Emocionante e Segura</h2>
-                <p class="text-gray-400 leading-relaxed mb-4">
-                    Descubra a emoção das apostas online no Onepix! Oferecemos uma plataforma confiável e segura para entusiastas de jogos de aposta explorarem suas habilidades. Com uma ampla variedade de opções de apostas, desde esportes a jogos de cassino, você encontrará tudo o que precisa em um só lugar. Nossa equipe dedicada está pronta para auxiliá-lo em todas as etapas, desde o registro até o saque dos seus ganhos. Aproveite a facilidade de apostar online e mergulhe na emoção dos jogos.
-                </p>
-            </div>
-
-            <!-- Informações Legais -->
-            <div class="text-gray-500 text-sm leading-relaxed mb-12 bg-[#252528] p-6 rounded-lg">
-                TemPix is an online entertainment website that offers its users a unique sports betting experience. This website is operated by NovaWave Technology N.V., a company registered in Curaçao, under number 1737149321, with registered office in Schottegatweg Oost 10, Unit 1-9, Bon Bini Business Center, Willemstad, Curaçao, Dutch Caribbean, an entity duly authorized and licensed by the Government of Curaçao.
-            </div>
-
-            <!-- Certificações -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
-                <div v-for="(icon, i) in ['shield-check', 'certificate', 'award', 'badge-check', 'shield-alt', 'star']" :key="i" 
-                     class="bg-[#252528] p-4 rounded-lg flex items-center justify-center hover:bg-[#2F2F33] transition-colors duration-200">
-                    <i :class="`fas fa-${icon} text-2xl text-gray-400`"></i>
-                </div>
-            </div>
-
-            <!-- Contatos -->
-            <div class="flex flex-col md:flex-row justify-center gap-6 text-gray-400 text-sm border-t border-[#2F2F33] pt-6">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-headset"></i>
-                    <span>Suporte: support@tempix.co</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-gavel"></i>
-                    <span>Jurídico: legal@tempix.co</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-handshake"></i>
-                    <span>Parcerias: partners@tempix.co</span>
-                </div>
-            </div>
+  <footer class="footer-component bg-gray-800 py-8 md:py-12">
+    <div class="container mx-auto px-4">
+      <!-- Selo Ministério da Fazenda -->
+      <div class="flex justify-center mb-8 md:mb-16">
+        <div class="relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-yellow-400/20 to-green-500/20 rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-700"></div>
+          <img
+            src="https://static.vera.bet.br/deploy-ed77068f46e6aace75a271a79321ce4f1a768c05-fae42819febff8c9a50a/assets/seals/autorizado.png"
+            alt="Aprovado pelo Ministério da Fazenda"
+            class="relative h-16 md:h-20 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
-    </footer>
+      </div>
+
+      <!-- Grid de Links -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-8 md:mb-12">
+        <!-- Coluna Aposte -->
+        <div class="p-4 md:p-6 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors duration-300">
+          <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Aposte</h3>
+          <ul class="space-y-1.5 md:space-y-2">
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Apostas Esportivas</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Esportes ao Vivo</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Jogos Slots</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Jogos ao Vivo</a></li>
+          </ul>
+        </div>
+
+        <!-- Coluna Comunidade -->
+        <div class="p-4 md:p-6 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors duration-300">
+          <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Comunidade</h3>
+          <ul class="space-y-1.5 md:space-y-2">
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Promoções</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Blog</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Central de Ajuda</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Canais de Atendimento</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Aplicativo móvel</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Acesse Nosso Telegram</a></li>
+          </ul>
+        </div>
+
+        <!-- Coluna Regras -->
+        <div class="p-4 md:p-6 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors duration-300">
+          <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Regras</h3>
+          <ul class="space-y-1.5 md:space-y-2">
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Termos de apostas</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Termos e Condições</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Política de Privacidade</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Política KYC</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Política PLD-FTP</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">LGPD</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Jogo responsável</a></li>
+          </ul>
+        </div>
+
+        <!-- Coluna Links Úteis com Certificações -->
+        <div class="p-4 md:p-6 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors duration-300">
+          <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Links Úteis</h3>
+          <ul class="space-y-1.5 md:space-y-2 mb-4 md:mb-6">
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Contate-nos</a></li>
+            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Acessar site antigo</a></li>
+          </ul>
+
+          <!-- Certificações -->
+          <div class="grid grid-cols-2 sm:grid-cols-1 gap-2 mt-4">
+            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
+              <img
+                src="https://ebacbrasil.com.br/wp-content/uploads/2023/01/logo-EBAC.png"
+                alt="EBAC Logo"
+                class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
+              <img
+                src="https://www.treacle.me/wp-content/uploads/2023/09/Be-Gamble-Aware-01-800x227.png"
+                alt="BeGambleAware"
+                class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
+              <img
+                src="https://www.pikpng.com/pngl/m/366-3664695_the-gt-app-gambling-therapy-logo-clipart.png"
+                alt="Gambling Therapy"
+                class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTorQdzlkt2XgXIKsg8Jn00xFA2F7Tzst3ENw&s"
+                alt="Certification"
+                class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Texto Descritivo -->
+      <div class="p-4 md:p-8 rounded-xl bg-gray-900/30 mb-8 md:mb-12">
+        <p class="text-sm md:text-base text-gray-300 leading-relaxed mb-4">
+          A TemPix é mais do que uma plataforma de apostas, é um símbolo de confiança e pioneirismo no mercado brasileiro. Como uma das primeiras bets a ser regulamentada no país, a TemPix orgulha-se de ter sido desenvolvida especialmente para você, brasileiro. Aqui, o apostador encontra um ambiente seguro, transparente e totalmente em conformidade com as normas legais, proporcionando não apenas entretenimento, mas também a garantia de que cada aposta é realizada com responsabilidade e ética.
+        </p>
+        <button class="text-sm md:text-base text-white hover:text-gray-300 transition-colors duration-200 flex items-center gap-2">
+          Ver mais
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="flex items-center justify-center gap-2 md:gap-3 text-white">
+        <img
+          src="https://static.vecteezy.com/system/resources/previews/018/923/995/original/brazil-flag-icons-png.png"
+          alt="Bandeira do Brasil"
+          class="h-4 md:h-5 w-auto object-contain"
+        />
+        <span class="text-sm md:text-lg">Feito com <span class="text-red-500">❤️</span> para brasileiros!</span>
+      </div>
+    </div>
+  </footer>
 </template>
 
 <script>
 export default {
-    name: 'Footer'
+  name: 'FooterComponent'
 }
 </script>
 
-<style>
+<style scoped>
 .footer-component {
-    background-color: #0F0F11 !important;
-    position: relative;
-    z-index: 10;
+  position: relative;
 }
 
-.footer-container {
-    max-width: 1210px;
-    position: relative;
-    z-index: 11;
-}
-
-/* Remover transições dos links */
-a {
-    transition: none !important;
-}
-
-/* Remover hover effects */
-a:hover {
-    transform: none !important;
-}
-
-/* Remover transições dos ícones sociais */
-.fab {
-    transition: none !important;
-}
-
-
-/* Remover animações de certificações */
-.grid-cols-2 > div {
-    transition: none !important;
-}
-
-.grid-cols-2 > div:hover {
-    transform: none !important;
-}
-
-/* Remover transições de cores */
-.hover\:text-\[\#00A6FF\]:hover {
-    transition: none !important;
-}
-
-.hover\:bg-\[\#2F2F33\]:hover {
-    transition: none !important;
-}
-
-/* Remover efeito de fundo */
 .footer-component::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #0F0F11;
-    z-index: -1;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
 }
 </style>

@@ -1,312 +1,615 @@
 <style>
-
-.teste-margin {
-    background-color: var(--footer-color-dark);
-    border-radius: 12px;
-    margin-top: 70px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+.wallet-page {
+    @apply min-h-screen py-8 px-4 md:px-6;
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
 }
 
-.teste-margin:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.15);
+.wallet-container {
+    @apply max-w-6xl mx-auto space-y-8;
 }
 
-.wallet-card {
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
+/* Card Principal */
+.main-balance-card {
+    @apply rounded-2xl p-8;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
 
-.wallet-balance {
-    font-size: 2.8em;
-    font-weight: bold;
-    background: linear-gradient(45deg, var(--ci-primary-color), #4a90e2);
+.balance-header {
+    @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-6;
+}
+
+.balance-info h2 {
+    @apply text-gray-400 text-sm font-medium mb-2;
+}
+
+.balance-amount {
+    @apply text-4xl md:text-5xl font-bold mb-2;
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin: 0.5rem 0;
 }
 
-.wallet-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
+.bonus-amount {
+    @apply flex items-center gap-2 text-gray-400 text-sm;
 }
 
-.wallet-actions a, 
-.wallet-actions button {
-    flex: 1;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+.balance-actions {
+    @apply flex flex-col sm:flex-row gap-4 w-full md:w-auto;
 }
 
-.transactions-section {
-    background-color: var(--footer-color-dark);
-    border-radius: 12px;
-    margin-top: 2rem;
-    padding: 1.5rem;
+.action-button {
+    @apply flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300
+           min-w-[160px] relative overflow-hidden;
+}
+
+.action-button::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+}
+
+.action-button:hover::before {
+    @apply opacity-100;
+}
+
+.action-button.deposit {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    @apply text-white shadow-lg shadow-blue-500/25;
+}
+
+.action-button.withdraw {
+    @apply bg-white/10 text-white backdrop-blur-sm;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Transactions Card */
+.transactions-card {
+    @apply rounded-2xl bg-white/5 backdrop-blur-sm overflow-hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .transactions-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
+    @apply p-6 border-b border-white/10;
 }
 
-.transactions-table {
-    border-radius: 8px;
-    overflow: hidden;
+.tab-buttons {
+    @apply flex gap-6;
 }
 
-.transactions-table th {
-    background-color: rgba(0, 0, 0, 0.2);
-    font-weight: 600;
+.tab-button {
+    @apply flex items-center gap-2 px-4 py-2 text-gray-400 relative transition-all duration-300;
 }
 
-.transactions-table td, 
-.transactions-table th {
-    padding: 1rem;
+.tab-button.active {
+    @apply text-blue-500;
 }
 
-@media (min-width:1025px) and (max-width:1410px) {
-    .padding-wallet {
-        padding: 0px 4%;
+.tab-indicator {
+    @apply absolute bottom-0 left-0 w-full h-0.5 scale-x-0 transition-transform duration-300;
+    background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.tab-button.active .tab-indicator {
+    @apply scale-x-100;
+}
+
+.transactions-content {
+    @apply p-6;
+}
+
+.transactions-list {
+    @apply space-y-4;
+}
+
+.transaction-item {
+    @apply flex items-center justify-between p-4 rounded-xl transition-all duration-300
+           hover:bg-white/5 border border-transparent hover:border-white/10;
+}
+
+.transaction-info {
+    @apply flex items-center gap-4;
+}
+
+.transaction-icon {
+    @apply w-10 h-10 rounded-full flex items-center justify-center;
+}
+
+.transaction-icon.success {
+    @apply bg-green-500/10 text-green-500;
+}
+
+.transaction-icon.pending {
+    @apply bg-yellow-500/10 text-yellow-500;
+}
+
+.transaction-details {
+    @apply flex flex-col;
+}
+
+.transaction-date {
+    @apply text-sm text-gray-300;
+}
+
+.transaction-status {
+    @apply text-xs text-gray-400;
+}
+
+.transaction-amount {
+    @apply text-lg font-medium;
+}
+
+.transaction-amount.success {
+    @apply text-green-500;
+}
+
+.transaction-amount.pending {
+    @apply text-yellow-500;
+}
+
+.empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-center;
+}
+
+.empty-state i {
+    @apply text-4xl mb-4 text-gray-400;
+}
+
+.empty-state p {
+    @apply text-lg text-gray-300 mb-1;
+}
+
+.empty-state span {
+    @apply text-sm text-gray-400;
+}
+
+/* Animations */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+@media (max-width: 768px) {
+    .wallet-page {
+        @apply py-4 px-3;
+    }
+
+    .main-balance-card {
+        @apply p-4;
+    }
+
+    .balance-header {
+        @apply flex-col gap-4;
+    }
+
+    .balance-info {
+        @apply w-full text-center;
+    }
+
+    .balance-amount {
+        @apply text-3xl;
+    }
+
+    .quick-stats {
+        @apply grid-cols-1 gap-3;
+    }
+
+    .stat-item {
+        @apply p-3;
+    }
+
+    .info-cards-grid {
+        @apply grid-cols-1 gap-4;
+    }
+
+    .info-card {
+        @apply p-4 flex-col text-center;
+    }
+
+    .info-card-icon {
+        @apply mx-auto mb-3;
+    }
+
+    .transactions-card {
+        @apply p-4;
+    }
+
+    .tab-buttons {
+        @apply overflow-x-auto pb-2;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-button {
+        @apply whitespace-nowrap px-3 py-2 text-sm;
+    }
+
+    .transaction-item {
+        @apply flex-col gap-3 p-3;
+    }
+
+    .transaction-info {
+        @apply w-full justify-between;
+    }
+
+    .transaction-amount {
+        @apply text-base;
+    }
+
+    /* Ajustes para telas muito pequenas */
+    @media (max-width: 360px) {
+        .balance-amount {
+            @apply text-2xl;
+        }
+
+        .stat-value {
+            @apply text-sm;
+        }
+
+        .info-card h3 {
+            @apply text-base;
+        }
     }
 }
-@media (min-width:640px) and (max-width:1024px) {
-    .teste-margin {
-        margin-top: 70px;
+
+/* Ajustes para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .wallet-page {
+        @apply py-6 px-4;
     }
-}
-@media (max-width:600px) {
-    .wallet-card {
-        padding: 1rem;
+
+    .info-cards-grid {
+        @apply grid-cols-2;
     }
-    
-    .wallet-balance {
-        font-size: 2em;
-    }
-    
-    .wallet-actions {
-        flex-direction: column;
-    }
-}
-@media (max-width:768px) {
-    .padding-wallet {
-      padding: 0px 4%;
+
+    .quick-stats {
+        @apply grid-cols-2;
     }
 }
 
-/* Adicionando margem superior para evitar sobreposição com navtopbar */
-.wallet-container {
-    padding-top: 2rem;
-}
-
-/* Status badges estilizados */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 0.875rem;
-}
-
-.status-badge i {
-    font-size: 1rem;
-}
-
-.status-badge.success {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-}
-
-.status-badge.pending {
-    background-color: rgba(234, 179, 8, 0.1);
-    color: #eab308;
-}
-
-/* Animação do spinner */
-.status-badge.pending i {
-    animation: spin 1.5s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
+/* Fix para notch e barras de navegação mobile */
+@supports(padding: max(0px)) {
+    .wallet-page {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
-    to {
-        transform: rotate(360deg);
+}
+
+/* Melhorias de usabilidade para touch */
+@media (hover: none) and (pointer: coarse) {
+    .tab-button,
+    .action-button {
+        @apply min-h-[44px];
     }
+
+    .transaction-item {
+        @apply py-3;
+    }
+}
+
+/* Otimizações de performance */
+.transaction-item,
+.info-card,
+.stat-item {
+    will-change: transform;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrolling suave em iOS */
+.transactions-content {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ajustes de fonte para melhor legibilidade em mobile */
+@media screen and (max-width: 768px) {
+    .balance-details,
+    .transaction-date,
+    .transaction-status {
+        @apply text-xs;
+    }
+
+    .stat-label,
+    .info-card p {
+        @apply text-xs;
+    }
+}
+
+/* Melhorias de acessibilidade para touch */
+@media (hover: none) {
+    .action-button,
+    .tab-button {
+        @apply active:opacity-70;
+    }
+}
+
+/* Loading States */
+.is-loading {
+    position: relative;
+}
+
+.is-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    border-radius: inherit;
+}
+
+.skeleton-text {
+    height: 2.5rem;
+    width: 200px;
+    background: linear-gradient(90deg, #1E293B 25%, #2D3748 50%, #1E293B 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Quick Stats */
+.quick-stats {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto mt-6 md:mt-0;
+}
+
+.stat-item {
+    @apply flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10;
+}
+
+.stat-icon {
+    @apply w-12 h-12 rounded-full flex items-center justify-center text-xl;
+}
+
+.stat-icon.deposits {
+    @apply bg-green-500/10 text-green-500;
+}
+
+.stat-icon.withdraws {
+    @apply bg-blue-500/10 text-blue-500;
+}
+
+.stat-info {
+    @apply flex flex-col;
+}
+
+.stat-label {
+    @apply text-sm text-gray-400;
+}
+
+.stat-value {
+    @apply text-lg font-medium text-white;
+}
+
+/* Info Cards */
+.info-cards-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6 mt-6;
+}
+
+.info-card {
+    @apply flex gap-4 p-6 rounded-2xl bg-white/5 border border-white/10;
+}
+
+.info-card-icon {
+    @apply w-12 h-12 rounded-full flex items-center justify-center text-xl;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+}
+
+.info-card-content {
+    @apply flex-1;
+}
+
+.info-card-content h3 {
+    @apply text-lg font-medium mb-2;
+}
+
+.verification-progress {
+    @apply mt-4;
+}
+
+.progress-bar {
+    @apply h-2 bg-white/10 rounded-full overflow-hidden mb-2;
+}
+
+.progress {
+    @apply h-full bg-green-500;
+}
+
+.limits-info {
+    @apply space-y-2 mt-2;
+}
+
+.limit-item {
+    @apply flex justify-between items-center text-sm;
+}
+
+.limit-item span {
+    @apply text-gray-400;
+}
+
+.limit-item strong {
+    @apply text-white;
+}
+
+/* Balance Details */
+.balance-details {
+    @apply flex flex-col gap-2 mt-4;
+}
+
+.detail-item {
+    @apply flex items-center gap-2 text-sm text-gray-400;
 }
 </style>
 <template>
     <BaseLayout>
-        <div v-if="setting != null" class="wallet-container grid grid-cols-1 mx-auto w-full sm:max-w-[690px] lg:max-w-[1110px] padding-wallet">
-            <!-- Carteira Principal -->
-            <div v-if="!isLoadingWallet" class="wallet-card teste-margin">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold mb-2">Saldo disponível</h2>
-                        <div class="wallet-balance">
-                            {{ state.currencyFormat(wallet?.total_balance, wallet?.currency) }}
+        <div class="wallet-page">
+            <div class="wallet-container">
+                <!-- Card Principal -->
+                <div class="main-balance-card" :class="{ 'is-loading': isPageLoading }">
+                    <div class="balance-header">
+                        <div class="balance-info">
+                            <h2>Saldo Total</h2>
+                            <div class="balance-amount" v-if="!isPageLoading">
+                                {{ state.currencyFormat(wallet?.total_balance || 0, wallet?.currency || 'BRL') }}
+                            </div>
+                            <div class="skeleton-text" v-else></div>
+                            
+                            <div class="balance-details">
+                                <div class="detail-item">
+                                    <i class="fa-solid fa-gift"></i>
+                                    <span>Bônus: B$ {{ state.currencyFormat((wallet?.balance_bonus || 0), wallet?.currency || 'BRL') }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Última atualização: {{ lastUpdate }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-gray-400">
-                            Bônus: B$ {{ state.currencyFormat((wallet.balance_bonus), wallet.currency) }}
+
+                        <div class="quick-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon deposits">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Depositado</span>
+                                    <span class="stat-value">{{ state.currencyFormat(totalDeposits || 0, wallet?.currency || 'BRL') }}</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon withdraws">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Retirado</span>
+                                    <span class="stat-value">{{ state.currencyFormat(totalWithdraws || 0, wallet?.currency || 'BRL') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="balance-actions">
+                            <button @click="openDeposit" class="action-button deposit">
+                                <i class="fas fa-wallet"></i>
+                                <span>Depositar</span>
+                            </button>
+                            <RouterLink :to="{ name: 'profileWithdraw' }" class="action-button withdraw">
+                                <i class="fas fa-money-bill-transfer"></i>
+                                <span>Sacar</span>
+                            </RouterLink>
                         </div>
                     </div>
-                    <i class="fa-duotone fa-wallet text-5xl opacity-50" style="color: #5B5E5F;"></i>
                 </div>
-                
-                <div class="wallet-actions">
-                    <MakeDeposit :showMobile="false" :title="$t('Depositar')" />
-                    <RouterLink 
-                        :to="{ name: 'profileWithdraw' }" 
-                        class="bg-[#5B5E5F] hover:bg-[#4a4d4e] text-white"
-                    >
-                        <i class="fas fa-money-bill-transfer"></i>
-                        {{ $t('Sacar') }}
-                    </RouterLink>
-                </div>
-            </div>
 
-            <!-- Seção de Transações -->
-            <div class="transactions-section">
-                <div v-if="!isLoading && wallet">
-                    <!-- Saques -->
-                    <div class="mb-8">
-                        <div class="transactions-header">
-                            <h3 class="text-2xl font-bold" style="color: var(--ci-primary-color);">
-                                Histórico de Saques
-                            </h3>
+                <!-- Cards de Informação -->
+                <div class="info-cards-grid">
+                    <div class="info-card verification-status">
+                        <div class="info-card-icon">
+                            <i class="fa-solid fa-shield-check"></i>
                         </div>
-                        
-                        <div class="transactions-table">
-                            <div class="relative overflow-x-auto">
-                                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3">
-                                                {{ $t('Date') }}
-                                            </th>
-                                            <th scope="col" class="px-6 py-3">
-                                                {{ $t('Value') }}
-                                            </th>
-                                            <th scope="col" class="px-6 py-3">
-                                                {{ $t('Status') }}
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="(withdraw, index) in withdraws.data" 
-                                            :key="index" 
-                                            class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                            <td class="px-6 py-4">
-                                                {{ withdraw.dateHumanReadable }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ state.currencyFormat(parseFloat(withdraw.amount), withdraw.currency) }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <span v-if="withdraw.status === 1" 
-                                                      class="status-badge success">
-                                                    <i class="fa-sharp fa-solid fa-badge-check"></i>
-                                                    Confirmado
-                                                </span>
-                                                <span v-if="withdraw.status === 0" 
-                                                      class="status-badge pending">
-                                                    <i class="fa-solid fa-spinner"></i>
-                                                    Processando
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="info-card-content">
+                            <h3>Status da Conta</h3>
+                            <p>Conta Verificada</p>
+                            <div class="verification-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 100%"></div>
+                                </div>
+                                <span>100% Completo</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Depósitos -->
-                    <div>
-                        <div class="transactions-header">
-                            <h3 class="text-2xl font-bold" style="color: var(--ci-primary-color);">
-                                Histórico de Depósitos
-                            </h3>
+                    <div class="info-card limits">
+                        <div class="info-card-icon">
+                            <i class="fa-solid fa-chart-line"></i>
                         </div>
-                        
-                        <div class="transactions-table">
-                            <div class="relative overflow-x-auto">
-                                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400 ">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3">
-                                                {{ $t('Date') }}
-                                            </th>
-                                            <th scope="col" class="px-6 py-3">
-                                                {{ $t('Value') }}
-                                            </th>
-                                            <th scope="col" class="px-6 py-3">
-                                                {{ $t('Status') }}
-                                            </th>
-                                            
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="(deposit, index) in deposits.data" 
-                                            :key="index" 
-                                            class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                            <td class="px-6 py-4">
-                                                {{ deposit.dateHumanReadable }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ state.currencyFormat(parseFloat(deposit.amount), deposit.currency) }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <span v-if="deposit.status === 1" 
-                                                      class="status-badge success">
-                                                    <i class="fa-sharp fa-solid fa-badge-check"></i>
-                                                    Confirmado
-                                                </span>
-                                                <span v-if="deposit.status === 0" 
-                                                      class="status-badge pending">
-                                                    <i class="fa-solid fa-spinner"></i>
-                                                    Processando
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="info-card-content">
+                            <h3>Limites da Conta</h3>
+                            <div class="limits-info">
+                                <div class="limit-item">
+                                    <span>Depósito Mínimo:</span>
+                                    <strong>R$ 20,00</strong>
+                                </div>
+                                <div class="limit-item">
+                                    <span>Saque Mínimo:</span>
+                                    <strong>R$ 50,00</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Loading State -->
-                <div v-if="isLoading" class="flex justify-center items-center py-20">
-                    <div class="status-badge pending">
-                        <i class="fa-solid fa-spinner text-4xl"></i>
-                        Carregando...
+                <!-- Histórico de Transações -->
+                <div class="transactions-card" :class="{ 'is-loading': isPageLoading }">
+                    <div class="transactions-header">
+                        <div class="tab-buttons">
+                            <button 
+                                v-for="tab in ['withdraws', 'deposits']"
+                                :key="tab"
+                                @click="activeTab = tab"
+                                :class="['tab-button', { active: activeTab === tab }]"
+                            >
+                                <i :class="tab === 'withdraws' ? 'fa-solid fa-money-bill-transfer' : 'fa-solid fa-wallet'"></i>
+                                {{ tab === 'withdraws' ? 'Saques' : 'Depósitos' }}
+                                <div class="tab-indicator"></div>
+                            </button>
+                        </div>
                     </div>
+
+                    <Transition name="fade" mode="out-in">
+                        <div class="transactions-content" :key="activeTab">
+                            <!-- Lista de Transações -->
+                            <div v-if="getActiveTransactions.length" class="transactions-list">
+                                <div v-for="transaction in getActiveTransactions" 
+                                     :key="transaction.id" 
+                                     class="transaction-item">
+                                    <div class="transaction-info">
+                                        <div class="transaction-icon" :class="transaction.status === 1 ? 'success' : 'pending'">
+                                            <i :class="transaction.status === 1 ? 'fa-solid fa-check' : 'fa-solid fa-clock'"></i>
+                                        </div>
+                                        <div class="transaction-details">
+                                            <span class="transaction-date">{{ transaction.dateHumanReadable }}</span>
+                                            <span class="transaction-status">
+                                                {{ transaction.status === 1 ? 'Confirmado' : 'Processando' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="transaction-amount" :class="transaction.status === 1 ? 'success' : 'pending'">
+                                        {{ state.currencyFormat(parseFloat(transaction.amount), transaction.currency) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Estado Vazio -->
+                            <div v-else class="empty-state">
+                                <i :class="activeTab === 'withdraws' ? 'fa-duotone fa-money-bill-transfer' : 'fa-duotone fa-wallet'"></i>
+                                <p>Nenhum {{ activeTab === 'withdraws' ? 'saque' : 'depósito' }} realizado</p>
+                                <span>Suas transações aparecerão aqui</span>
+                            </div>
+                        </div>
+                    </Transition>
                 </div>
             </div>
         </div>
     </BaseLayout>
 </template>
 
-
 <script>
-
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import { RouterLink } from "vue-router";
-import MakeDeposit from "@/Components/UI/MakeDeposit.vue";
 import BaseLayout from "@/Layouts/BaseLayout.vue";
 import {useToast} from "vue-toastification";
 import {useAuthStore} from "@/Stores/Auth.js";
@@ -314,160 +617,123 @@ import HttpApi from "@/Services/HttpApi.js";
 import {useSettingStore} from "@/Stores/SettingStore.js";
 import WalletSideMenu from "@/Pages/Profile/Components/WalletSideMenu.vue";
 import CustomPagination from "@/Components/UI/CustomPagination.vue";
+import { useModalStore } from '@/Stores/ModalStore'
 
 export default {
-    props: [],
-    components: {MakeDeposit, CustomPagination, WalletSideMenu, BaseLayout, RouterLink },
-    data() {
+    components: { CustomPagination, WalletSideMenu, BaseLayout, RouterLink },
+    
+    setup() {
+        const modalStore = useModalStore()
+        const isPageLoading = ref(true)
+        const wallet = ref({})
+        const withdraws = ref(null)
+        const deposits = ref(null)
+        const setting = ref(null)
+        const mywallets = ref(null)
+        const activeTab = ref('withdraws')
+
+        const hasTransactionData = computed(() => {
+            return withdraws.value?.data && deposits.value?.data
+        })
+
+        // Função unificada para carregar dados
+        const loadPageData = async () => {
+            try {
+                isPageLoading.value = true
+                
+                // Carregar dados em paralelo
+                const [
+                    walletResponse,
+                    withdrawsResponse,
+                    depositsResponse,
+                    myWalletsResponse
+                ] = await Promise.all([
+                    HttpApi.get('profile/wallet'),
+                    HttpApi.get('wallet/withdraw'),
+                    HttpApi.get('wallet/deposit'),
+                    HttpApi.get('profile/mywallet')
+                ])
+
+                // Atualizar dados
+                wallet.value = walletResponse.data.wallet
+                withdraws.value = withdrawsResponse.data.withdraws
+                deposits.value = depositsResponse.data.deposits
+                mywallets.value = myWalletsResponse.data.wallets
+
+                // Carregar configurações
+                const settingStore = useSettingStore()
+                setting.value = settingStore.setting
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error)
+                const toast = useToast()
+                toast.error('Erro ao carregar dados da carteira')
+            } finally {
+                isPageLoading.value = false
+            }
+        }
+
+        // Carregar dados quando o componente for montado
+        onMounted(async () => {
+            await loadPageData()
+            window.scrollTo(0, 0)
+            // Adicionar efeito de brilho ao hover
+            const buttons = document.querySelectorAll('.tab-button')
+            buttons.forEach(button => {
+                button.addEventListener('mousemove', (e) => {
+                    const rect = button.getBoundingClientRect()
+                    const x = ((e.clientX - rect.left) / rect.width) * 100
+                    const y = ((e.clientY - rect.top) / rect.height) * 100
+                    button.style.setProperty('--x', `${x}%`)
+                    button.style.setProperty('--y', `${y}%`)
+                })
+            })
+        })
+
+        const openDeposit = () => {
+            modalStore.openDepositModal()
+        }
+
         return {
-            isLoading: false,
-            isLoadingWallet: true,
-            wallet: {},
-            mywallets: null,
-            setting: null,
-            withdraws: null,
-            deposits: null,
+            isPageLoading,
+            wallet,
+            withdraws,
+            deposits,
+            setting,
+            mywallets,
+            hasTransactionData,
+            openDeposit,
+            activeTab,
+            modalStore
         }
     },
-    setup(props) {
 
-
-        return {};
-    },
-    computed: {
-        userData() {
-            const authStore = useAuthStore();
-            return authStore.user;
-        },
-    },
-    mounted() {
-        window.scrollTo(0, 0);
-    },
     methods: {
-        getWallet: function() {
-            const _this = this;
-            const _toast = useToast();
-
-            HttpApi.get('profile/wallet')
-                .then(response => {
-                    _this.wallet = response.data.wallet;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                });
-        },
-        getWithdraws: function() {
-            const _this = this;
-            _this.isLoading = true;
-
-            HttpApi.get('wallet/withdraw')
-                .then(response => {
-                    _this.withdraws = response.data.withdraws;
-                    _this.isLoading = false;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        console.log(`${value}`);
-                    });
-                    _this.isLoading = false;
-                });
-        },
-        getDeposits: function() {
-            const _this = this;
-            _this.isLoading = true;
-
-            HttpApi.get('wallet/deposit')
-                .then(response => {
-                    _this.deposits = response.data.deposits;
-                    _this.isLoading = false;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        console.log(`${value}`);
-                    });
-                    _this.isLoading = false;
-                });
-        },
-        setWallet: function(id) {
-            const _this = this;
-            const _toast = useToast();
-            _this.isLoadingWallet = true;
-
-            HttpApi.post('profile/mywallet/'+ id, {})
-                .then(response => {
-                   _this.getMyWallet();
-                    _this.isLoadingWallet = false;
-                    window.location.reload();
-
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                    _this.isLoadingWallet = false;
-                });
-        },
-        getWallet: function() {
-            const _this = this;
-            const _toast = useToast();
-            _this.isLoadingWallet = true;
-
-            HttpApi.get('profile/wallet')
-                .then(response => {
-                    _this.wallet = response.data.wallet;
-                    _this.isLoadingWallet = false;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                    _this.isLoadingWallet = false;
-                });
-        },
-        getMyWallet: function() {
-            const _this = this;
-            const _toast = useToast();
-
-            HttpApi.get('profile/mywallet')
-                .then(response => {
-                    _this.mywallets = response.data.wallets;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                });
-        },
-        getSetting: function() {
-            const _this = this;
-            const settingStore = useSettingStore();
-            const settingData = settingStore.setting;
-
-            if(settingData) {
-                _this.setting = settingData;
-            }
-
-            _this.isLoading = false;
-        },
         rolloverPercentage(balance) {
-            return Math.max(0, ((balance / 100) * 100).toFixed(2));
-        },
+            return Math.max(0, ((balance / 100) * 100).toFixed(2))
+        }
     },
-    created() {
-        this.getWallet();
-        this.getMyWallet();
-        this.getSetting();
-        this.getWithdraws();
-        this.getDeposits();
-    },
-    watch: {
 
+    computed: {
+        getActiveTransactions() {
+            return this.activeTab === 'withdraws' ? this.withdraws?.data || [] : this.deposits?.data || []
+        },
+        lastUpdate() {
+            return new Date().toLocaleString()
+        },
+        totalDeposits() {
+            return this.deposits?.data?.reduce((acc, dep) => acc + parseFloat(dep.amount), 0) || 0
+        },
+        totalWithdraws() {
+            return this.withdraws?.data?.reduce((acc, wit) => acc + parseFloat(wit.amount), 0) || 0
+        }
     },
-};
+
+    beforeUnmount() {
+        this.modalStore.closeDepositModal()
+    }
+}
 </script>
 
 <style scoped>
-
+/* ... estilos existentes ... */
 </style>

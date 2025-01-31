@@ -82,7 +82,7 @@ Route::prefix('profile')
 Route::prefix('providers')
     ->group(function ()
     {
-
+        Route::get('/', [GameController::class, 'getProviders']);
     });
 
 
@@ -102,11 +102,16 @@ Route::prefix('spin')
     })
     ->name('landing.spin.');
 
-Route::get('games/category/{id}', [GameController::class, 'getGamesByCategory']);
-
 Route::group(['prefix' => 'games'], function () {
+    Route::get('/', [GameController::class, 'index']);
+    Route::get('/featured', [GameController::class, 'featured']);
     Route::get('/search', [SearchGameController::class, 'index'])
         ->middleware('api')
         ->name('api.games.search');
+    Route::get('/single/{id}', [GameController::class, 'show']);
+    Route::post('/toggle-favorite/{id}', [GameController::class, 'toggleFavorite']);
+    Route::post('/toggle-like/{id}', [GameController::class, 'toggleLike']);
 });
+
+Route::get('/providers-with-games', [GameController::class, 'getProvidersWithGames']);
 

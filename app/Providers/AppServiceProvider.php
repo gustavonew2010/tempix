@@ -28,10 +28,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Forçar HTTPS em produção
-        if($this->app->environment('production')) {
+        if (config('app.env') === 'production') {
+            // Força HTTPS em produção
             URL::forceScheme('https');
-            $this->app['request']->server->set('HTTPS', true);
+            
+            // Configurações de segurança
+            config([
+                'session.secure' => true,
+                'session.same_site' => 'strict',
+            ]);
         }
 
 //        FilamentAsset::register([

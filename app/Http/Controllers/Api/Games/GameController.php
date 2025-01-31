@@ -25,6 +25,8 @@ use App\Traits\Providers\WorldSlotTrait;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Helpers\Core as Helper;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class GameController extends Controller
 {
@@ -45,15 +47,68 @@ class GameController extends Controller
      * @dev victormsalatiel
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $providers = Provider::with(['games', 'games.provider'])
-            ->whereHas('games')
-            ->orderBy('name', 'desc')
+        $query = Game::with(['provider', 'categories'])
             ->where('status', 1)
-            ->get();
+            ->whereHas('provider', function($q) {
+                $q->where('distribution', 'fivers');
+            });
 
-        return response()->json(['providers' =>$providers]);
+        // Filtro por categoria
+        if ($request->has('category') && $request->category) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->category);
+            });
+        }
+
+        // Filtro por provedor usando code
+        if ($request->has('provider') && $request->provider) {
+            $query->whereHas('provider', function($q) use ($request) {
+                $q->where('code', $request->provider);
+            });
+        }
+
+        // Busca por nome
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('game_name', 'like', "%{$search}%")
+                  ->orWhere('game_id', 'like', "%{$search}%");
+            });
+        }
+
+        // Log da query antes da execução
+        \Log::info('SQL Query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+            'provider_id' => $request->provider,
+            'category' => $request->category,
+            'search' => $request->search
+        ]);
+
+        // Ordenação por visualizações
+        $query->orderBy('views', 'desc');
+
+        // Paginação
+        $perPage = $request->get('per_page', 12);
+        $games = $query->paginate($perPage);
+
+        // Log dos resultados
+        \Log::info('Query Results:', [
+            'total_games' => $games->total(),
+            'current_page' => $games->currentPage(),
+            'per_page' => $games->perPage()
+        ]);
+
+        return response()->json([
+            'data' => $games->items(),
+            'total' => $games->total(),
+            'current_page' => $games->currentPage(),
+            'per_page' => $games->perPage(),
+            'last_page' => $games->lastPage(),
+            'has_more_pages' => $games->hasMorePages()
+        ]);
     }
 
     /**
@@ -265,6 +320,13 @@ class GameController extends Controller
                         case 'fivers':
                             $fiversLaunch = self::GameLaunchFivers($game->provider->code, $game->game_id, 'pt', auth('api')->id());
                             
+                            // Log para debug
+                            \Log::info('Fivers Launch Response:', [
+                                'response' => $fiversLaunch,
+                                'game_id' => $game->game_id,
+                                'provider_code' => $game->provider->code
+                            ]);
+                            
                             if (!$fiversLaunch) {
                                 return response()->json([
                                     'error' => 'Falha ao iniciar o jogo',
@@ -272,9 +334,13 @@ class GameController extends Controller
                                 ], 400);
                             }
 
-                            if (!isset($fiversLaunch['launch_url'])) {
+                            // Verifica se é um array e se contém a chave launch_url
+                            if (!is_array($fiversLaunch) || !isset($fiversLaunch['launch_url'])) {
+                                // Se for string, usa como mensagem de erro
+                                $errorMessage = is_string($fiversLaunch) ? $fiversLaunch : 'URL de lançamento não encontrada';
+                                
                                 return response()->json([
-                                    'error' => $fiversLaunch['message'] ?? 'URL de lançamento não encontrada',
+                                    'error' => $errorMessage,
                                     'status' => false
                                 ], 400);
                             }
@@ -336,33 +402,7 @@ class GameController extends Controller
      * @dev victormsalatiel
      * Show the form for editing the specified resource.
      */
-    public function allGames(Request $request)
-    {
-        $query = Game::query();
-        $query->with(['provider', 'categories']);
 
-        if (!empty($request->provider) && $request->provider != 'all') {
-            $query->where('provider_id', $request->provider);
-        }
-
-        if (!empty($request->category) && $request->category != 'all') {
-            $query->whereHas('categories', function ($categoryQuery) use ($request) {
-                $categoryQuery->where('slug', $request->category);
-            });
-        }
-
-        if (isset($request->searchTerm) && !empty($request->searchTerm) && strlen($request->searchTerm) > 2) {
-            $query->whereLike(['game_code', 'game_name', 'description', 'distribution', 'provider.name'], $request->searchTerm);
-        }else{
-            $query->orderBy('views', 'desc');
-        }
-
-        $games = $query
-            ->where('status', 1)
-            ->paginate(12)->appends(request()->query());
-
-        return response()->json(['games' => $games]);
-    }
 
     /**
      * @dev victormsalatiel
@@ -467,20 +507,234 @@ class GameController extends Controller
     return self::WebhooksPlayConnect($request);
     }
 
-    public function getGamesByCategory($categoryId)
+    public function getGamesByCategory($categoryId, Request $request)
     {
-        $category = Category::with(['games' => function($query) {
-            $query->where('status', 1)
-                  ->with('provider');
-        }])->find($categoryId);
+        try {
+            $perPage = $request->get('per_page', 12);
+            $page = $request->get('page', 1);
 
-        if (!$category) {
-            return response()->json(['error' => 'Categoria não encontrada'], 404);
+            $category = Category::findOrFail($categoryId);
+            
+            $games = Game::with(['provider'])
+                ->whereHas('categories', function($query) use ($categoryId) {
+                    $query->where('categories.id', $categoryId);
+                })
+                ->where('status', 1)
+                ->paginate($perPage);
+
+            return response()->json([
+                'category' => $category->name,
+                'games' => $games->items(),
+                'pagination' => [
+                    'current_page' => $games->currentPage(),
+                    'last_page' => $games->lastPage(),
+                    'per_page' => $games->perPage(),
+                    'total' => $games->total()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Categoria não encontrada ou erro ao buscar jogos',
+                'message' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    /**
+     * Get all active providers with fivers distribution
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProviders()
+    {
+        try {
+            $providers = Provider::where('status', 1)
+                ->where('distribution', 'fivers')
+                ->select([
+                    'id',
+                    'cover',
+                    'code',
+                    'name',
+                    'status',
+                    'rtp',
+                    'views',
+                    'distribution',
+                    'created_at',
+                    'updated_at'
+                ])
+                ->groupBy('code')
+                ->orderBy('code')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'providers' => $providers
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro ao buscar provedores'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get games with filters
+     */
+    public function allGames(Request $request)
+    {
+        $query = Game::query();
+        $query->with(['provider', 'categories']);
+
+        // Filtro por provedor
+        if ($request->has('provider_id') && !empty($request->provider_id)) {
+            $query->where('provider_id', $request->provider_id);
         }
 
+        // Filtro por categoria
+        if ($request->has('category_id') && !empty($request->category_id)) {
+            $query->whereHas('categories', function ($categoryQuery) use ($request) {
+                $categoryQuery->where('categories.id', $request->category_id);
+            });
+        }
+
+        // Busca por termo (case insensitive)
+        if ($request->has('search') && !empty($request->search) && strlen($request->search) >= 3) {
+            $searchTerm = strtolower($request->search);
+            $query->where(function($q) use ($searchTerm) {
+                $q->whereRaw('LOWER(game_name) LIKE ?', ['%' . $searchTerm . '%'])
+                  ->orWhereRaw('LOWER(game_code) LIKE ?', ['%' . $searchTerm . '%'])
+                  ->orWhereHas('provider', function($providerQuery) use ($searchTerm) {
+                      $providerQuery->whereRaw('LOWER(name) LIKE ?', ['%' . $searchTerm . '%']);
+                  });
+            });
+            
+            // Ordenar por relevância
+            $query->orderByRaw("
+                CASE 
+                    WHEN LOWER(game_name) LIKE ? THEN 1
+                    WHEN LOWER(game_name) LIKE ? THEN 2
+                    ELSE 3 
+                END", 
+                [$searchTerm . '%', '%' . $searchTerm . '%']
+            );
+        } else {
+            // Ordenação padrão por views quando não há busca
+            $query->orderBy('views', 'desc');
+        }
+
+        // Status ativo
+        $query->where('status', 1);
+
+        // Paginação
+        $perPage = $request->get('per_page', 12);
+        $games = $query->paginate($perPage);
+
         return response()->json([
-            'category' => $category->name,
-            'games' => $category->games
+            'data' => $games->items(),
+            'total' => $games->total(),
+            'current_page' => $games->currentPage(),
+            'per_page' => $games->perPage(),
+            'last_page' => $games->lastPage()
         ]);
+    }
+
+    public function getProvidersWithGames(Request $request)
+    {
+        try {
+            $cacheKey = 'providers_with_games_fivers_v1';
+            $cacheDuration = 3600; // 1 hora
+
+            return Cache::remember($cacheKey, $cacheDuration, function() {
+                $startTime = microtime(true);
+
+                $providers = Provider::select([
+                        'id',
+                        'name',
+                        'code',
+                        'cover',
+                        'status',
+                        'distribution',
+                        'created_at',
+                        'updated_at'
+                    ])
+                    ->where('status', 1)
+                    ->where('distribution', 'fivers')
+                    ->whereExists(function($query) {
+                        $query->select(DB::raw(1))
+                            ->from('games')
+                            ->whereColumn('games.provider_id', 'providers.id')
+                            ->where('games.status', 1)
+                            ->where('games.show_home', 1);
+                    })
+                    ->with(['games' => function($query) {
+                        $query->select(
+                            'id',
+                            'provider_id',
+                            'game_name',
+                            'game_code',
+                            'cover',
+                            'status',
+                            'show_home',
+                            'views',
+                            'created_at',
+                            'updated_at'
+                        )
+                        ->where('status', 1)
+                        ->where('show_home', 1)
+                        ->orderBy('views', 'desc');
+                    }])
+                    ->get();
+
+                $result = $providers->map(function($provider) {
+                    return [
+                        'id' => $provider->id,
+                        'name' => $provider->name,
+                        'code' => $provider->code,
+                        'cover' => $provider->cover,
+                        'games' => $provider->games->map(function($game) {
+                            return [
+                                'id' => $game->id,
+                                'game_name' => $game->game_name,
+                                'game_code' => $game->game_code,
+                                'cover' => $game->cover,
+                                'views' => $game->views,
+                                'created_at' => $game->created_at
+                            ];
+                        })->values()->all()
+                    ];
+                })->values()->all();
+
+                $endTime = microtime(true);
+                $executionTime = ($endTime - $startTime);
+
+                \Log::info('Providers with games query executed', [
+                    'providers_count' => count($result),
+                    'total_games' => collect($result)->sum(function($provider) {
+                        return count($provider['games']);
+                    }),
+                    'execution_time' => $executionTime
+                ]);
+
+                return [
+                    'status' => true,
+                    'providers' => $result,
+                    'execution_time' => $executionTime,
+                    'from_cache' => false
+                ];
+            });
+
+        } catch (\Exception $e) {
+            \Log::error('Erro ao buscar provedores e jogos:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro ao buscar provedores e jogos',
+                'debug_message' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 }

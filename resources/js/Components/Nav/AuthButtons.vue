@@ -1,26 +1,137 @@
 <template>
-    <div class="flex ml-5">
-        <button @click.prevent="$emit('register')" 
-                class="text-[#ACAFA7] hover:text-white transition-colors duration-200">
-            Registre-se
-        </button>
-        <button @click.prevent="$emit('login')" 
-                class="ui-button-blue ml-4 rounded flex flex-row items-center botao-entrar-mobile">
-            <svg class="mr-2" height="1em" viewBox="0 0 512 512" width="1em" xmlns="http://www.w3.org/2000/svg">
-                <path d="M352 96h64c17.7 0 32 14.3 32 32V384c0 17.7-14.3 32-32 32H352c-17.7 0-32 14.3-32 32s14.3 32 32 32h64c53 0 96-43 96-96V128c0-53-43-96-96-96H352c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-7.5 177.4c4.8-4.5 7.5-10.8 7.5-17.4s-2.7-12.9-7.5-17.4l-144-136c-7-6.6-17.2-8.4-26-4.6s-14.5 12.5-14.5 22v72H32c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32H160v72c0 9.6 5.7 18.2 14.5 22s19 2 26-4.6l144-136z" fill="currentColor"/>
-            </svg>
-            Entrar
-        </button>
-    </div>
+  <div class="flex items-center">
+    <!-- Botão de Login -->
+    <button 
+      @click="$emit('login')"
+      class="text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+    >
+      {{ $t('Login') }}
+    </button>
+
+    <!-- Botão de Registro Animado -->
+    <button 
+      @click="handleRegister"
+      class="register-button-animated ml-3 px-4 py-2 rounded-md font-medium text-white relative overflow-hidden"
+    >
+      {{ $t('Registre-se') }}
+      <div class="button-glow"></div>
+    </button>
+  </div>
 </template>
+
+<style scoped>
+/* Estilo base do botão de registro */
+.register-button-animated {
+  background: linear-gradient(45deg, #00A2D4, #0077FF);
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+  border: none;
+  transform-style: preserve-3d;
+}
+
+/* Efeito de pulsar */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 162, 212, 0.7);
+  }
+  
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(0, 162, 212, 0);
+  }
+  
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 162, 212, 0);
+  }
+}
+
+/* Efeito de brilho deslizante */
+.button-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: glow 3s linear infinite;
+}
+
+@keyframes glow {
+  0% {
+    transform: rotate(45deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(45deg) translateX(100%);
+  }
+}
+
+/* Hover effect */
+.register-button-animated:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(0, 162, 212, 0.3);
+  background: linear-gradient(45deg, #0077FF, #00A2D4);
+}
+
+/* Active effect */
+.register-button-animated:active {
+  transform: translateY(1px);
+  box-shadow: 0 5px 10px rgba(0, 162, 212, 0.2);
+}
+
+/* Efeito de texto brilhante */
+.register-button-animated {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .register-button-animated {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Efeito de destaque em telas maiores */
+@media (min-width: 1024px) {
+  .register-button-animated::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #00A2D4, #0077FF);
+    z-index: -1;
+    filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .register-button-animated:hover::after {
+    opacity: 1;
+  }
+}
+</style>
 
 <script>
 export default {
-    name: 'AuthButtons',
-    emits: ['login', 'register']
+  name: 'AuthButtons',
+  emits: ['login', 'register'],
+  methods: {
+    handleRegister() {
+      // Emite o evento register com um parâmetro indicando para abrir na aba de registro
+      this.$emit('register', { openTab: 'register' })
+    }
+  }
 }
 </script>
-
-<style scoped>
-@import './styles/nav.css';
-</style> 

@@ -40,11 +40,16 @@ class Provider extends Model
      */
     public function games(): HasMany
     {
+        return $this->hasMany(Game::class, 'provider_id', 'id');
+    }
+
+    // Se precisar do relacionamento específico para home
+    public function homeGames(): HasMany
+    {
         return $this->hasMany(Game::class, 'provider_id', 'id')
             ->orderBy('views', 'desc')
             ->where('show_home', 1)
-            ->where('status', 1)
-            ;
+            ->where('status', 1);
     }
 
 }

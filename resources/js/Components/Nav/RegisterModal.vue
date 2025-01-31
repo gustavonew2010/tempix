@@ -1,122 +1,159 @@
 <template>
-    <div style="z-index: 999; background-color:rgba(0, 0, 0, 0.47); backdrop-filter: none;" 
+    <div style="z-index: 999;" 
          id="modalElRegister" 
          tabindex="-1" 
          aria-hidden="true" 
-         :class="['fixed inset-0 flex items-center justify-center overflow-x-hidden overflow-y-auto',
+         :class="['fixed inset-0 w-full overflow-x-hidden overflow-y-auto flex items-center justify-center',
                  { 'hidden': !modelValue }]">
-        <div class="relative w-full max-w-3xl px-4">
-            <div v-if="isLoadingRegister" class="absolute inset-0 z-[999] flex items-center justify-center">
-                <div role="status">
-                    <i class="fa-duotone fa-spinner-third fa-spin" style="font-size: 45px;--fa-primary-color: var(--ci-primary-color); --fa-secondary-color: #000000;"></i>
-                    <span class="sr-only">Loading...</span>
-                </div>
-            </div>
+        <!-- Usar a mesma estrutura do AuthModal, apenas mudando o conteúdo interno -->
+        <div class="fixed inset-0 bg-black/90"></div>
 
-            <div class="flex md:justify-between">
-                <div class="w-full relative p-5 login-register-100vh">
-                    <form @submit.prevent="registerSubmit" method="post" action="" class="padding-register">
-                        <div style="display: flex;align-items: center;justify-content: space-between;padding-bottom: 20px;">
-                            <div style="display: flex;align-items: center;margin: 0 auto;text-align:center;gap:20px;">
-                                <p class="text-sm text-gray-500 dark:text-gray-300 tirar-div" style="margin-left: 35px;">
-                                    <a style="color: white" href="" @click.prevent="$emit('show-login')">
-                                        <strong style="font-weight: 500;">Entrar</strong>
-                                    </a>
-                                </p>
-                                
-                                <p class="text-sm text-gray-500 dark:text-gray-300 tirar-div">
-                                    <a style="color: var(--ci-primary-color)">
-                                        <strong style="color: white;font-weight: 500;color: var(--ci-primary-color)">Registrar</strong>
-                                    </a>
-                                </p>
+        <div class="relative w-full max-w-[520px] max-h-full mx-auto px-4 z-10">
+            <div class="flex items-center justify-center min-h-screen">
+                <div class="w-full relative login-register-100vh">
+                    <!-- Header com tabs -->
+                    <div class="auth-header">
+                        <!-- Botão X estilizado -->
+                        <button @click="$emit('close')" class="close-button absolute right-6 top-6">
+                            <div class="close-icon-wrapper">
+                                <span>✕</span>
                             </div>
-                            
-                            <a class="login-register-x" @click.prevent="$emit('close')" href="">
-                                <div class="x-mark-scale" style="box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.50);background-color: var(--carousel-banners-dark);padding: 7px 13px;border-radius: 5px">
-                                    <i style="color: var(--ci-primary-color);font-weight: bold" class="fa-light fa-x"></i>
+                        </button>
+
+                        <!-- Tabs centralizados -->
+                        <div class="flex justify-center pt-6 pb-4">
+                            <div class="tabs-wrapper">
+                                <button 
+                                    class="tab-button"
+                                    @click="$emit('show-login')"
+                                >
+                                    <span class="tab-text">Conecte-se</span>
+                                </button>
+                                <button 
+                                    class="tab-button active"
+                                >
+                                    <span class="tab-text">Inscrever-se</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Divisória com gradiente -->
+                        <div class="header-divider"></div>
+                    </div>
+
+                    <div v-if="isLoadingRegister" class="absolute inset-0 z-[999] flex items-center justify-center">
+                        <div role="status">
+                            <i class="fa-duotone fa-spinner-third fa-spin" style="font-size: 45px;--fa-primary-color: var(--ci-primary-color); --fa-secondary-color: #000000;"></i>
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div class="flex md:justify-between">
+                        <div class="w-full relative p-5 login-register-100vh">
+                            <form @submit.prevent="registerSubmit" method="post" action="" class="padding-register">
+                                <div style="display: flex;align-items: center;justify-content: space-between;padding-bottom: 20px;">
+                                    <div style="display: flex;align-items: center;margin: 0 auto;text-align:center;gap:20px;">
+                                        <p class="text-sm text-gray-500 dark:text-gray-300 tirar-div" style="margin-left: 35px;">
+                                            <a style="color: white" href="" @click.prevent="$emit('show-login')">
+                                                <strong style="font-weight: 500;">Entrar</strong>
+                                            </a>
+                                        </p>
+                                        
+                                        <p class="text-sm text-gray-500 dark:text-gray-300 tirar-div">
+                                            <a style="color: var(--ci-primary-color)">
+                                                <strong style="color: white;font-weight: 500;color: var(--ci-primary-color)">Registrar</strong>
+                                            </a>
+                                        </p>
+                                    </div>
+                                    
+                                    <a class="login-register-x" @click.prevent="$emit('close')" href="">
+                                        <div class="x-mark-scale" style="box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.50);background-color: var(--carousel-banners-dark);padding: 7px 13px;border-radius: 5px">
+                                            <i style="color: var(--ci-primary-color);font-weight: bold" class="fa-light fa-x"></i>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
+
+                                <div class="tirar-div" style="width: 100%;height: 1px;background-color: #383A3B;margin-bottom: 20px;"></div>
+
+                                <div style="display: flex;justify-content: center;margin: 0 auto;margin-bottom: 20px">
+                                    <a v-if="setting" class="flex md:ml-2 ml:1 md:mr-24 items-center" style="display: flex;justify-content: center;margin: 0 auto;">
+                                        <img :src="`/storage/`+setting.software_logo_black" alt="" class="h-8 block dark:hidden" />
+                                        <img :src="`/storage/`+setting.software_logo_white" alt="" class="md:max-h-[35px] max-h-[30px] hidden dark:block" />
+                                    </a>
+                                </div>
+
+                                <div class="relative mb-3">
+                                    <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
+                                           type="text"
+                                           name="name"
+                                           v-model="form.name"
+                                           class="input-group"
+                                           :placeholder="$t('Nome')"
+                                           required>
+                                </div>
+
+                                <div class="relative mb-3">
+                                    <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
+                                           type="email"
+                                           name="email"
+                                           v-model="form.email"
+                                           class="input-group"
+                                           :placeholder="$t('E-mail')"
+                                           required>
+                                </div>
+
+                                <div class="relative mb-3">
+                                    <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
+                                           :type="typeInputPassword"
+                                           name="password"
+                                           v-model="form.password"
+                                           class="input-group pr-[40px]"
+                                           :placeholder="$t('Senha')"
+                                           required>
+                                    <button type="button" @click="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-3.5">
+                                        <i :class="typeInputPassword === 'text' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash'"></i>
+                                    </button>
+                                </div>
+
+                                <div class="mb-3 mt-5">
+                                    <button @click.prevent="isReferral = !isReferral" type="button" class="flex justify-center w-full">
+                                        <p style="color:white;font-size: 12px">{{ $t('Código de referência') }}</p>
+                                    </button>
+
+                                    <div v-if="isReferral" class="relative mb-3 mt-1">
+                                        <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
+                                               type="text" 
+                                               name="reference_code"
+                                               v-model="form.reference_code" 
+                                               class="input-group" 
+                                               :placeholder="$t('Code')">
+                                    </div>
+                                </div>
+
+                                <p style="text-align: center;font-size: 10px;color: white;font-weight: lighter;margin-bottom: -14px" 
+                                   class="text-sm text-gray-500 dark:text-gray-300 mb-6">
+                                    <a @click="$router.push('/terms/service')" href="">
+                                        Ao se registrar <strong style="color:var(--ci-primary-color);font-weight: lighter;">você concorda com nossos termos e condições</strong>
+                                    </a>
+                                </p>
+
+                                <div class="mt-5 w-full flex flex-col items-center">
+                                    <button style="color: var(--title-color);font-size: 17px;font-weight: 600;padding: 12px;width: 100%;margin: 0 auto;color: var(--title-color);" 
+                                            type="submit" 
+                                            class="ui-button-blue w-full mb-3">
+                                        Criar conta <i class="fa-solid fa-arrow-right"></i>
+                                    </button>
+                                    
+                                    <p style="text-align: center;padding-top: 20px;font-size: 12px;color: white;font-weight: 500;" 
+                                       class="text-sm text-gray-500 dark:text-gray-300 mb-6">
+                                        <a href="" @click.prevent="$emit('show-login')">
+                                            Já tem uma conta? <strong style="color:var(--ci-primary-color);font-weight: 500;">Entrar</strong>
+                                        </a>
+                                    </p>
+                                </div>
+                            </form>
                         </div>
-
-                        <div class="tirar-div" style="width: 100%;height: 1px;background-color: #383A3B;margin-bottom: 20px;"></div>
-
-                        <div style="display: flex;justify-content: center;margin: 0 auto;margin-bottom: 20px">
-                            <a v-if="setting" class="flex md:ml-2 ml:1 md:mr-24 items-center" style="display: flex;justify-content: center;margin: 0 auto;">
-                                <img :src="`/storage/`+setting.software_logo_black" alt="" class="h-8 block dark:hidden" />
-                                <img :src="`/storage/`+setting.software_logo_white" alt="" class="md:max-h-[35px] max-h-[30px] hidden dark:block" />
-                            </a>
-                        </div>
-
-                        <div class="relative mb-3">
-                            <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
-                                   type="text"
-                                   name="name"
-                                   v-model="form.name"
-                                   class="input-group"
-                                   :placeholder="$t('Nome')"
-                                   required>
-                        </div>
-
-                        <div class="relative mb-3">
-                            <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
-                                   type="email"
-                                   name="email"
-                                   v-model="form.email"
-                                   class="input-group"
-                                   :placeholder="$t('E-mail')"
-                                   required>
-                        </div>
-
-                        <div class="relative mb-3">
-                            <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
-                                   :type="typeInputPassword"
-                                   name="password"
-                                   v-model="form.password"
-                                   class="input-group pr-[40px]"
-                                   :placeholder="$t('Senha')"
-                                   required>
-                            <button type="button" @click="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-3.5">
-                                <i :class="typeInputPassword === 'text' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash'"></i>
-                            </button>
-                        </div>
-
-                        <div class="mb-3 mt-5">
-                            <button @click.prevent="isReferral = !isReferral" type="button" class="flex justify-center w-full">
-                                <p style="color:white;font-size: 12px">{{ $t('Código de referência') }}</p>
-                            </button>
-
-                            <div v-if="isReferral" class="relative mb-3 mt-1">
-                                <input style="padding: 17px 0px;padding-left: 20px;background-color: var(--input-primary);" 
-                                       type="text" 
-                                       name="reference_code"
-                                       v-model="form.reference_code" 
-                                       class="input-group" 
-                                       :placeholder="$t('Code')">
-                            </div>
-                        </div>
-
-                        <p style="text-align: center;font-size: 10px;color: white;font-weight: lighter;margin-bottom: -14px" 
-                           class="text-sm text-gray-500 dark:text-gray-300 mb-6">
-                            <a @click="$router.push('/terms/service')" href="">
-                                Ao se registrar <strong style="color:var(--ci-primary-color);font-weight: lighter;">você concorda com nossos termos e condições</strong>
-                            </a>
-                        </p>
-
-                        <div class="mt-5 w-full flex flex-col items-center">
-                            <button style="color: var(--title-color);font-size: 17px;font-weight: 600;padding: 12px;width: 100%;margin: 0 auto;color: var(--title-color);" 
-                                    type="submit" 
-                                    class="ui-button-blue w-full mb-3">
-                                Criar conta <i class="fa-solid fa-arrow-right"></i>
-                            </button>
-                            
-                            <p style="text-align: center;padding-top: 20px;font-size: 12px;color: white;font-weight: 500;" 
-                               class="text-sm text-gray-500 dark:text-gray-300 mb-6">
-                                <a href="" @click.prevent="$emit('show-login')">
-                                    Já tem uma conta? <strong style="color:var(--ci-primary-color);font-weight: 500;">Entrar</strong>
-                                </a>
-                            </p>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

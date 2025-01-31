@@ -36,6 +36,8 @@ class VerifyCsrfToken extends Middleware
         'playigaming_api',
         'playigaming_api/*',
         'mercadopago/*',
-        'mercadopago'
+        'mercadopago',
+        'verify',
+        'verify/*'
     ];
 }
