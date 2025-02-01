@@ -13,7 +13,7 @@
     gap: 0.5em;
     padding: 6px 12px;
     border-radius: 20px;
-    margin-top: -30px;
+    margin-top: -30px; 
     left: 48.5%;
     transform: translateX(-50%);
 }
@@ -2493,57 +2493,141 @@
 .auth-button i {
     font-size: 18px;
 }
+
+.game-modal {
+    backdrop-filter: blur(5px);
+}
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: #98EC2D;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.game-container {
+    height: 80vh;
+    width: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.game-header {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .game-container {
+        height: 100vh;
+    }
+}
 </style>
 <template>
     <BaseLayout>
         <div class="home-container">
-            <!-- Banner Section -->
-            <section class="banner-section" ref="bannerSection">
-                <template v-if="showLoginMessage">
-                    <div class="auth-overlay">
-                        <div class="auth-content">
-                            <div class="auth-icon">
-                                <i class="fa-solid fa-shield-exclamation"></i>
-                            </div>
-                            <h2 class="auth-title">Você precisa entrar para jogar.</h2>
-                            <button @click="openAuthModal" class="auth-button">
-                                <i class="fa-solid fa-right-to-bracket"></i>
-                                Entrar
-                            </button>
-                        </div>
+            <!-- Apenas a seção do banner/jogo alterna -->
+            <template v-if="activeGame">
+                <!-- Container do Jogo -->
+                <div class="game-section w-full bg-gray-900 relative">
+                    <div class="game-header flex items-center justify-between p-4 bg-gray-800">
+                        <h3 class="text-white text-lg font-medium">
+                            {{ activeGame.game_name }}
+                        </h3>
+                        <button @click="closeGameModal" class="text-white hover:text-primary-500">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                </template>
-                <template v-else>
-                    <div class="carousel">
-                        <!-- Seu carousel existente -->
-                        <div class="carousel-container" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-                            <div class="carousel-slide" @click="handleBannerClick(banner)">
-                                <img src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVX1ANJXPCQFGYHRCTY33R.png" 
-                                     alt="Banner 1"
-                                     class="banner-image">
-                            </div>
-                            <div class="carousel-slide" @click="handleBannerClick(banner)">
-                                <img src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVYPK805BB7Q482965KTY8.png" 
-                                     alt="Banner 2"
-                                     class="banner-image">
-                            </div>
-                            <div class="carousel-slide" @click="handleBannerClick(banner)">
-                                <img src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVVC1MYKKJJG6M5CPEZKWC.png" 
-                                     alt="Banner 3"
-                                     class="banner-image">
-                            </div>
+                    
+                    <div class="game-container relative">
+                        <!-- Loading State -->
+                        <div v-if="isLoadingGame" class="absolute inset-0 flex items-center justify-center bg-gray-900">
+                            <div class="loading-spinner"></div>
                         </div>
                         
-                        <div class="custom-pagination">
-                            <button v-for="(_, index) in banners" 
-                                    :key="index"
-                                    @click="goToSlide(index)"
-                                    :class="['pagination-dot', { active: currentSlide === index }]">
-                            </button>
+                        <!-- Game Iframe -->
+                        <iframe
+                            v-if="gameUrl"
+                            :src="gameUrl"
+                            class="w-full h-full border-0"
+                            allow="fullscreen"
+                        ></iframe>
+                        
+                        <!-- Error State -->
+                        <div v-if="!isLoadingGame && !gameUrl" class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center p-8">
+                                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                                <p class="text-white text-lg mb-4">{{ errorMessage || 'Não foi possível carregar o jogo' }}</p>
+                                <button 
+                                    @click="retryLoadGame" 
+                                    class="px-6 py-2 bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
+                                >
+                                    Tentar Novamente
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </template>
-            </section>
+                </div>
+            </template>
+            <template v-else>
+                <!-- Banner Section -->
+                <section class="banner-section" ref="bannerSection">
+                    <template v-if="showLoginMessage">
+                        <div class="auth-overlay">
+                            <div class="auth-content">
+                                <div class="auth-icon">
+                                    <i class="fa-solid fa-shield-exclamation"></i>
+                                </div>
+                                <h2 class="auth-title">Você precisa entrar para jogar.</h2>
+                                <button @click="openAuthModal" class="auth-button">
+                                    <i class="fa-solid fa-right-to-bracket"></i>
+                                    Entrar
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <div class="carousel">
+                            <!-- Seu carousel existente -->
+                            <div class="carousel-container" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+                                <div class="carousel-slide" @click="handleBannerClick(banner)">
+                                    <img src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVX1ANJXPCQFGYHRCTY33R.png" 
+                                         alt="Banner 1"
+                                         class="banner-image">
+                                </div>
+                                <div class="carousel-slide" @click="handleBannerClick(banner)">
+                                    <img src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVYPK805BB7Q482965KTY8.png" 
+                                         alt="Banner 2"
+                                         class="banner-image">
+                                </div>
+                                <div class="carousel-slide" @click="handleBannerClick(banner)">
+                                    <img src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVVC1MYKKJJG6M5CPEZKWC.png" 
+                                         alt="Banner 3"
+                                         class="banner-image">
+                                </div>
+                            </div>
+                            
+                            <div class="custom-pagination">
+                                <button v-for="(_, index) in banners" 
+                                        :key="index"
+                                        @click="goToSlide(index)"
+                                        :class="['pagination-dot', { active: currentSlide === index }]">
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </section>
+            </template>
 
             <!-- Search Section -->
             <section class="search-section">
@@ -2710,14 +2794,14 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Auth Modal -->
-        <AuthModal 
-            v-model="showAuthModal"
-            @close="showAuthModal = false"
-            @login-success="handleLoginSuccess"
-        />
+            <!-- Auth Modal -->
+            <AuthModal 
+                v-model="showAuthModal"
+                @close="showAuthModal = false"
+                @login-success="handleLoginSuccess"
+            />
+        </div>
     </BaseLayout>
 </template>
 
@@ -2896,6 +2980,8 @@ export default {
             showLoginMessage: false,
             showAuthModal: false,
             pendingGame: null, // Para armazenar o jogo que estava tentando abrir
+            showModal: false, // Novo estado para controlar a visibilidade do modal
+            errorMessage: null, // Novo estado para mensagem de erro
         }
     },
     setup(props) {
@@ -3349,8 +3435,12 @@ export default {
                 return;
             }
 
+            // Mostra o modal e inicia o loading
+            this.showModal = true;
             this.activeGame = game;
             this.isLoadingGame = true;
+            this.gameUrl = null;
+            this.errorMessage = null;
 
             try {
                 const endpoint = game.slug 
@@ -3359,40 +3449,37 @@ export default {
 
                 const response = await HttpApi.get(endpoint);
                 
-                // Verifica se a resposta contém erro
-                if (response.data.error) {
-                    throw new Error(response.data.error);
-                }
-
-                // Verifica se a URL do jogo existe
-                if (!response.data.gameUrl) {
+                if (response?.data?.gameUrl) {
+                    this.gameUrl = response.data.gameUrl;
+                } else {
                     throw new Error('URL do jogo não encontrada');
                 }
-
-                this.gameUrl = response.data.gameUrl;
-                await this.$nextTick();
                 
             } catch (error) {
-                console.error('Erro ao carregar o jogo:', error);
-                this.gameUrl = null;
+                console.error('Erro completo:', error);
                 
-                // Exibe mensagem de erro para o usuário
-                this.$toast.error(error.message || 'Erro ao carregar o jogo. Tente novamente.');
-                
-                // Se for erro de saldo, você pode adicionar uma lógica específica aqui
-                if (error.message?.includes('saldo')) {
-                    // Redirecionar para página de depósito ou mostrar modal de depósito
-                    // this.$router.push('/deposit');
+                // Define a mensagem de erro apropriada
+                if (error.response?.data?.error) {
+                    this.errorMessage = error.response.data.error;
+                } else if (error.response?.data?.message) {
+                    this.errorMessage = error.response.data.message;
+                } else {
+                    this.errorMessage = error.message || 'Erro ao carregar o jogo';
                 }
                 
+                this.$toast.error(this.errorMessage);
             } finally {
                 this.isLoadingGame = false;
             }
         },
+
         closeGameModal() {
+            this.showModal = false;
             this.activeGame = null;
             this.gameUrl = null;
+            this.errorMessage = null;
         },
+
         toggleFullscreen() {
             if (!document.fullscreenElement) {
                 this.$refs.gameSection.requestFullscreen();
@@ -3727,6 +3814,11 @@ export default {
             if (this.pendingGame) {
                 this.openGameModal(this.pendingGame);
                 this.pendingGame = null;
+            }
+        },
+        retryLoadGame() {
+            if (this.activeGame) {
+                this.openGameModal(this.activeGame);
             }
         },
     },

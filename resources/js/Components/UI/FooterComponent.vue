@@ -6,9 +6,10 @@
         <div class="relative group">
           <div class="absolute -inset-1 bg-gradient-to-r from-yellow-400/20 to-green-500/20 rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-700"></div>
           <img
-            src="https://static.vera.bet.br/deploy-ed77068f46e6aace75a271a79321ce4f1a768c05-fae42819febff8c9a50a/assets/seals/autorizado.png"
+            :src="sealImage"
             alt="Aprovado pelo Ministério da Fazenda"
             class="relative h-16 md:h-20 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
           />
         </div>
       </div>
@@ -63,32 +64,13 @@
 
           <!-- Certificações -->
           <div class="grid grid-cols-2 sm:grid-cols-1 gap-2 mt-4">
-            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
+            <div v-for="(cert, index) in certifications" :key="index" 
+                 class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
               <img
-                src="https://ebacbrasil.com.br/wp-content/uploads/2023/01/logo-EBAC.png"
-                alt="EBAC Logo"
+                :src="cert.src"
+                :alt="cert.alt"
                 class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
-              <img
-                src="https://www.treacle.me/wp-content/uploads/2023/09/Be-Gamble-Aware-01-800x227.png"
-                alt="BeGambleAware"
-                class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
-              <img
-                src="https://www.pikpng.com/pngl/m/366-3664695_the-gt-app-gambling-therapy-logo-clipart.png"
-                alt="Gambling Therapy"
-                class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div class="bg-white p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center">
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTorQdzlkt2XgXIKsg8Jn00xFA2F7Tzst3ENw&s"
-                alt="Certification"
-                class="h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                loading="lazy"
               />
             </div>
           </div>
@@ -123,13 +105,37 @@
 
 <script>
 export default {
-  name: 'FooterComponent'
+  name: 'FooterComponent',
+  data() {
+    return {
+      sealImage: 'https://static.vera.bet.br/deploy-ed77068f46e6aace75a271a79321ce4f1a768c05-fae42819febff8c9a50a/assets/seals/autorizado.png',
+      certifications: [
+        {
+          src: 'https://ebacbrasil.com.br/wp-content/uploads/2023/01/logo-EBAC.png',
+          alt: 'EBAC Logo'
+        },
+        {
+          src: 'https://www.treacle.me/wp-content/uploads/2023/09/Be-Gamble-Aware-01-800x227.png',
+          alt: 'BeGambleAware'
+        },
+        {
+          src: 'https://www.pikpng.com/pngl/m/366-3664695_the-gt-app-gambling-therapy-logo-clipart.png',
+          alt: 'Gambling Therapy'
+        },
+        {
+          src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTorQdzlkt2XgXIKsg8Jn00xFA2F7Tzst3ENw&s',
+          alt: 'Certification'
+        }
+      ]
+    }
+  }
 }
 </script>
 
 <style scoped>
 .footer-component {
   position: relative;
+  contain: content; /* Otimização de performance */
 }
 
 .footer-component::before {

@@ -75,13 +75,7 @@ const hasMoreGames = computed(() => {
     return props.gameState.total > props.gameState.games.length;
 });
 
-const openGameModal = (game) => {
-    emit('open-game', game);
-};
 
-const loadMore = () => {
-    emit('load-more');
-};
 </script>
 
 <style scoped>

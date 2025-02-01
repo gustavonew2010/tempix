@@ -17,7 +17,15 @@
                 <div class="layout-content">
                     <slot></slot>
                 </div>
-                <FooterComponent v-once class="layout-footer" />
+                <!-- Lazy load do Footer -->
+                <Suspense>
+                    <template #default>
+                        <FooterComponent v-once class="layout-footer" />
+                    </template>
+                    <template #fallback>
+                        <div class="layout-footer bg-gray-800 h-20"></div>
+                    </template>
+                </Suspense>
                 <BottomNavComponent v-once class="layout-bottom-nav"/>
             </main>
         </div>
@@ -30,7 +38,7 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, defineAsyncComponent } from 'vue'
 import { useAuthStore } from '@/Stores/Auth.js'
 import { storeToRefs } from 'pinia'
 import { initFlowbite } from 'flowbite'
@@ -47,7 +55,9 @@ export default defineComponent({
     name: 'BaseLayout',
     components: {
         BottomNavComponent,
-        FooterComponent,
+        FooterComponent: defineAsyncComponent(() => 
+            import('@/Components/UI/FooterComponent.vue')
+        ),
         SideBarComponent,
         NavTopComponent,
         DepositWidget

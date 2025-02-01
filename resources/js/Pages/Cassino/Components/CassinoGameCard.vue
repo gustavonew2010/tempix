@@ -1,5 +1,5 @@
 <template>
-  <div class="game-card" @click="$emit('click')">
+  <div class="game-card" @click="handleGameClick">
     <div class="game-thumbnail">
       <img 
         :src="gameImage" 
@@ -31,13 +31,9 @@ console.log('Game data:', props.game);
 const gameImage = computed(() => {
   if (!props.game.cover) return '/images/default-game.jpg';
   
-  // Verifica se já é uma URL completa
-  if (props.game.cover.startsWith('http')) {
-    return props.game.cover;
-  }
-  
-  // Constrói a URL completa para a imagem
-  return `/storage/${props.game.cover}`;
+  return props.game.cover.startsWith('http') 
+    ? props.game.cover 
+    : `/storage/${props.game.cover}`;
 });
 
 const gameName = computed(() => {
@@ -47,6 +43,13 @@ const gameName = computed(() => {
 const providerName = computed(() => {
   return props.game.provider_name || props.game.provider || 'Provedor';
 });
+
+const handleGameClick = () => {
+  // Dispara um evento global que o HomePage vai escutar
+  window.dispatchEvent(new CustomEvent('openGame', { 
+    detail: props.game 
+  }));
+};
 
 const handleImageError = (event) => {
   console.error('Erro ao carregar imagem:', props.game);
