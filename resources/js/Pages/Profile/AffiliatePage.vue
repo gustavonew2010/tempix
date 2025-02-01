@@ -2,10 +2,20 @@
     .teste-place {
         color: #999B9B;
     }
+
+    .container {
+        margin-top: 80px; /* ou ajuste conforme necessário */
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            margin-top: 60px; /* menor margem para mobile */
+        }
+    }
 </style>
 <template>
     <BaseLayout>
-        <div class="container mx-auto p-4 mt-40 relative  min-h-[calc(100vh-565px)]" style="padding: 0 2%;">
+        <div class="container mx-auto p-4 relative min-h-[calc(100vh-565px)]" style="padding: 0 2%; margin-top: 20px;">
             <div v-if="wallet && !isLoading" class="grid grid-cols-1 mx-auto w-full sm:max-w-[690px] lg:max-w-[710px] w-full">
                 <div v-if="isShowForm" class="col-span-1 shadow-lg mb-3 p-4" style="background-color: var(--footer-color-dark);border-radius: 5px;">
                     
@@ -366,19 +376,13 @@ export default {
     components: { BaseLayout, Modal },
     data() {
         return {
-            isLoading: false,
-            referenceRewards: null,
-            commissionRewards: null,
-            isShowForm: false,
+            isLoading: true,
             isLoadingGenerate: false,
-            code: '',
-            urlCode: '',
-            referencecode: '',
-            referencelink: '',
+            isShowForm: false,
             wallet: null,
             indications: 0,
-            histories: null,
-            withdrawalModal: null,
+            referencecode: '',
+            referencelink: '',
             withdrawalForm: {
                 amount: 0,
                 pix_key: '',
@@ -389,6 +393,15 @@ export default {
                 pix_key: null,
                 pix_type: null
             },
+            state: {
+                currencyFormat: (amount, currency = 'BRL') => {
+                    if (!amount) return 'R$ 0,00';
+                    return new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: currency
+                    }).format(amount);
+                }
+            }
         }
     },
     setup(props) {
@@ -470,52 +483,37 @@ export default {
             document.execCommand("copy");
             _toast.success(this.$t('Link copied successfully'));
         },
-        getCode: function() {
-            const _this = this;
-            const _toast = useToast();
-            _this.isLoadingGenerate = true;
-
-            HttpApi.get('profile/affiliates/')
-                .then(response => {
-                    if( response.data.code !== '' && response.data.code !== undefined && response.data.code !== null) {
-                        _this.isShowForm = true;
-                        _this.code          = response.data.code;
-                        _this.referencecode = response.data.code;
-                        _this.urlCode       = response.data.url;
-                    }
-
-                    _this.indications   = response.data.indications;
-                    _this.referencelink = response.data.url;
-                    _this.wallet        = response.data.wallet;
-                    _this.withdrawalForm.amount = response.data.wallet.refer_rewards;
-
-                    _this.isLoadingGenerate = false;
-                })
-                .catch(error => {
-                    _this.isShowForm = false;
-                    _this.isLoadingGenerate = false;
-                });
+        getCode: async function() {
+            try {
+                const response = await HttpApi.get('profile/affiliates');
+                if (response.data.status) {
+                    this.isShowForm = true;
+                    this.wallet = response.data.wallet;
+                    this.indications = response.data.indications;
+                    this.referencecode = response.data.code;
+                    this.referencelink = response.data.url;
+                }
+            } catch (error) {
+                console.error('Erro ao buscar código:', error);
+                throw error; // Propaga o erro para ser tratado no created()
+            }
         },
-        generateCode: function(event) {
-            const _this = this;
-            const _toast = useToast();
-            _this.isLoadingGenerate = true;
-
-            HttpApi.get('profile/affiliates/generate')
-                .then(response => {
-                    if(response.data.status) {
-                        _this.getCode();
-                        _toast.success(_this.$t('Your code was generated successfully'));
-                    }
-
-                    _this.isLoadingGenerate = false;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                    _this.isLoadingGenerate = false;
-                });
+        generateCode: async function() {
+            this.isLoadingGenerate = true;
+            try {
+                const response = await HttpApi.get('profile/affiliates/generate');
+                if (response.data.status) {
+                    await this.getCode();
+                    const toast = useToast();
+                    toast.success('Código gerado com sucesso!');
+                }
+            } catch (error) {
+                console.error('Erro ao gerar código:', error);
+                const toast = useToast();
+                toast.error('Erro ao gerar código. Por favor, tente novamente.');
+            } finally {
+                this.isLoadingGenerate = false;
+            }
         },
         toggleCommissionRewards: function(event) {
             this.commissionRewards.toggle();
@@ -551,7 +549,7 @@ export default {
             };
 
             // Validations
-            if (_this.withdrawalForm.amount < 50) {
+            if (!_this.withdrawalForm.amount || _this.withdrawalForm.amount < 50) {
                 _this.errors.amount = 'O valor mínimo para saque é R$ 50,00';
                 return;
             }
@@ -561,19 +559,36 @@ export default {
                 return;
             }
 
+            if (!_this.withdrawalForm.pix_key) {
+                _this.errors.pix_key = 'A chave PIX é obrigatória';
+                return;
+            }
+
+            if (!_this.withdrawalForm.pix_type) {
+                _this.errors.pix_type = 'O tipo de chave PIX é obrigatório';
+                return;
+            }
+
             _this.isLoading = true;
 
             try {
-                const response = await HttpApi.post('profile/affiliates/request', _this.withdrawalForm);
+                const response = await HttpApi.post('profile/affiliates/request', {
+                    amount: _this.withdrawalForm.amount,
+                    pix_key: _this.withdrawalForm.pix_key,
+                    pix_type: _this.withdrawalForm.pix_type
+                });
+                
                 _this.opemModalWithdrawal();
                 _toast.success('Solicitação de saque realizada com sucesso!');
-                _this.router.push({ name: 'profileWallet' });
+                _this.getCode(); // Atualiza os dados após o saque
             } catch (error) {
                 if (error.response?.data?.errors) {
                     const errors = error.response.data.errors;
                     Object.keys(errors).forEach(key => {
                         _this.errors[key] = errors[key][0];
                     });
+                } else if (error.response?.data?.message) {
+                    _toast.error(error.response.data.message);
                 } else {
                     _toast.error('Ocorreu um erro ao processar sua solicitação. Tente novamente.');
                 }
@@ -582,8 +597,16 @@ export default {
             }
         }
     },
-    created() {
-      this.getCode();
+    async created() {
+        try {
+            await this.getCode();
+        } catch (error) {
+            console.error('Erro ao carregar dados:', error);
+            const toast = useToast();
+            toast.error('Erro ao carregar dados. Por favor, tente novamente.');
+        } finally {
+            this.isLoading = false;
+        }
     },
     watch: {
 

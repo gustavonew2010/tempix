@@ -10,6 +10,7 @@ const http_axios = axios.create({
         'X-CSRF-TOKEN': csrfToken.content,
         "Content-type": "application/json",
         "Access-Control-Allow-Origin": "*",
+        'Accept': 'application/json'
     },
 });
 

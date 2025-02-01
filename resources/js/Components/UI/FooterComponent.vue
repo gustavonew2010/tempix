@@ -20,8 +20,6 @@
         <div class="p-4 md:p-6 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors duration-300">
           <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Aposte</h3>
           <ul class="space-y-1.5 md:space-y-2">
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Apostas Esportivas</a></li>
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Esportes ao Vivo</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Jogos Slots</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Jogos ao Vivo</a></li>
           </ul>
@@ -31,10 +29,7 @@
         <div class="p-4 md:p-6 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors duration-300">
           <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Comunidade</h3>
           <ul class="space-y-1.5 md:space-y-2">
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Promoções</a></li>
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Blog</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Central de Ajuda</a></li>
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Canais de Atendimento</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Aplicativo móvel</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Acesse Nosso Telegram</a></li>
           </ul>
@@ -44,11 +39,8 @@
         <div class="p-4 md:p-6 rounded-lg bg-gray-900/30 hover:bg-gray-900/50 transition-colors duration-300">
           <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Regras</h3>
           <ul class="space-y-1.5 md:space-y-2">
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Termos de apostas</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Termos e Condições</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Política de Privacidade</a></li>
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Política KYC</a></li>
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Política PLD-FTP</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">LGPD</a></li>
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Jogo responsável</a></li>
           </ul>
@@ -59,7 +51,6 @@
           <h3 class="text-white font-bold mb-3 md:mb-4 border-b border-gray-700 pb-2">Links Úteis</h3>
           <ul class="space-y-1.5 md:space-y-2 mb-4 md:mb-6">
             <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Contate-nos</a></li>
-            <li><a href="#" class="text-sm md:text-base text-gray-300 hover:text-white transition-colors duration-200">Acessar site antigo</a></li>
           </ul>
 
           <!-- Certificações -->

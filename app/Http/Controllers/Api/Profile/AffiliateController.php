@@ -78,7 +78,7 @@ class AffiliateController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function makeRequest(Request $request)
+    public function request(Request $request)
     {
         // Obtendo as configurações de saque do usuário
         $settings = Setting::where('id', 1)->first();

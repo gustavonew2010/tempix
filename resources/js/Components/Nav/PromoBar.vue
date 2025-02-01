@@ -5,9 +5,12 @@
                 <span class="emoji">💥</span>
                 <span class="text">Indique um amigo e ganhe R$ 5,00 de saldo REAL para cada amigo que convidar!</span>
             </p>
-            <a href="../profile/affiliate" class="promo-button">
+            <router-link 
+                to="/profile/affiliate" 
+                class="promo-button"
+            >
                 Resgatar
-            </a>
+            </router-link>
         </div>
     </div>
 </template>

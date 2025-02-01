@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Deposit;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -98,5 +99,39 @@ class ProfileController extends Controller
         }
 
         return response()->json(['language' => $preferredLanguage]);
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        try {
+            $user = auth('api')->user();
+
+            // Remove avatar antigo se existir
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Salva novo avatar
+            $path = $request->file('avatar')->store('avatars', 'public');
+            
+            // Atualiza o usuário
+            $user->avatar = $path;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Avatar atualizado com sucesso',
+                'avatar' => $path
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Erro ao atualizar avatar: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

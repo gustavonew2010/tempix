@@ -45,7 +45,10 @@ const providerName = computed(() => {
 });
 
 const handleGameClick = () => {
-  // Dispara um evento global que o HomePage vai escutar
+  // Rola a página para o topo suavemente
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Dispara o evento de abrir o jogo
   window.dispatchEvent(new CustomEvent('openGame', { 
     detail: props.game 
   }));
@@ -59,7 +62,7 @@ const handleImageError = (event) => {
 
 <style scoped>
 .game-card {
-  width: 160px;
+  width: 100%; /* Ocupa todo o espaço disponível do container pai */
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -67,7 +70,7 @@ const handleImageError = (event) => {
 .game-thumbnail {
   position: relative;
   width: 100%;
-  height: 200px;
+  aspect-ratio: 3/4; /* Mantém proporção consistente */
   border-radius: 8px;
   overflow: hidden;
   background: #1a1a1a;
@@ -84,16 +87,16 @@ const handleImageError = (event) => {
   transform: scale(1.05);
 }
 
-
 .hover-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(2px);
 }
 
 .game-card:hover .hover-overlay {
@@ -101,18 +104,25 @@ const handleImageError = (event) => {
 }
 
 .play-btn {
-  background: #0066FF;
+  background: linear-gradient(135deg, #0066FF 0%, #0052cc 100%);
   color: #fff;
   border: none;
   padding: 8px 24px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+  box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+  backdrop-filter: blur(4px);
 }
 
 .play-btn:hover {
-  background: #0052cc;
+  background: linear-gradient(135deg, #0052cc 0%, #0066FF 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
 }
 
 .game-title {
@@ -127,17 +137,48 @@ const handleImageError = (event) => {
   text-overflow: ellipsis;
 }
 
-@media (max-width: 768px) {
-  .game-card {
-    width: 120px;
+/* Ajustes responsivos para diferentes tamanhos de tela */
+@media (min-width: 1920px) {
+  .play-btn {
+    padding: 10px 28px;
+    font-size: 14px;
   }
   
-  .game-thumbnail {
-    height: 150px;
+  .game-title {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1366px) and (max-width: 1919px) {
+  .play-btn {
+    padding: 9px 26px;
+    font-size: 13px;
+  }
+  
+  .game-title {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1365px) {
+  .play-btn {
+    padding: 8px 24px;
+    font-size: 12px;
   }
   
   .game-title {
     font-size: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .play-btn {
+    padding: 6px 20px;
+    font-size: 11px;
+  }
+  
+  .game-title {
+    font-size: 11px;
   }
 }
 </style>

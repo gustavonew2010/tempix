@@ -65,7 +65,7 @@
                             Esqueceu sua senha?
                         </a>
 
-                        <div class="mobile-turnstile-wrapper">
+                        <div class="cf-turnstile-wrapper flex justify-center my-4">
                             <div class="cf-turnstile" 
                                  :data-sitekey="turnstileSiteKey"
                                  data-theme="dark"></div>
@@ -130,7 +130,7 @@
                             </a>
                         </div>
 
-                        <div class="mobile-turnstile-wrapper">
+                        <div class="cf-turnstile-wrapper flex justify-center my-4">
                             <div class="cf-turnstile" 
                                  :data-sitekey="turnstileSiteKey"
                                  data-theme="dark"></div>
@@ -229,20 +229,22 @@
                                 </a>
                             </div>
 
+                            <div class="cf-turnstile-wrapper flex justify-center my-4">
                                 <div class="cf-turnstile" 
                                      :data-sitekey="turnstileSiteKey"
                                      data-theme="dark"></div>
+                            </div>
 
                             <button type="submit"
                                     :disabled="!turnstileToken || isLoadingLogin"
-                                    class="auth-button">
+                                    class="w-full bg-[#00A2D4] hover:bg-[#0077FF] text-white py-3.5 rounded-lg font-medium transition-all flex items-center justify-center">
                                 <span v-if="!isLoadingLogin">Entrar</span>
                                 <i v-else class="fa-duotone fa-spinner-third fa-spin"></i>
                             </button>
                         </form>
 
                         <!-- Register Form -->
-                        <form v-else @submit.prevent="registerSubmit" class="space-y-6">
+                        <form v-else @submit.prevent="registerSubmit" class="space-y-4">
                             <div class="space-y-4">
                                 <input 
                                     type="text"
@@ -293,13 +295,15 @@
                                 </a>
                             </div>
 
+                            <div class="cf-turnstile-wrapper flex justify-center my-4">
                                 <div class="cf-turnstile" 
                                      :data-sitekey="turnstileSiteKey"
                                      data-theme="dark"></div>
+                            </div>
 
                             <button type="submit"
                                     :disabled="!turnstileToken || isLoadingRegister"
-                                    class="auth-button">
+                                    class="w-full bg-[#00A2D4] hover:bg-[#0077FF] text-white py-3.5 rounded-lg font-medium transition-all flex items-center justify-center">
                                 <span v-if="!isLoadingRegister">Criar conta</span>
                                 <i v-else class="fa-duotone fa-spinner-third fa-spin"></i>
                             </button>
@@ -344,6 +348,15 @@
             </div>
         </div>
         </Transition>
+
+        <!-- Footer -->
+        <div class="border-t border-[#363A3F] py-4 px-6 flex items-center justify-center gap-2">
+            <span class="text-gray-400">Não tem uma conta?</span>
+            <a @click="switchTab('register')" 
+               class="text-[#92C83E] hover:text-[#83B437] cursor-pointer">
+                Crie uma conta aqui
+            </a>
+        </div>
     </div>
 </template>
 
@@ -665,28 +678,15 @@ export default {
             }
         },
 
-        initTurnstile() {
-            if (!this.turnstileSiteKey) {
-                console.error('Turnstile sitekey não está definida')
-                return
-            }
-
-            try {
-                const container = document.querySelector('.cf-turnstile')
-                if (container && !container.hasChildNodes() && window.turnstile) {
-                    window.turnstile.render(container, {
-                        sitekey: this.turnstileSiteKey,
-                        theme: 'dark',
-                        callback: (token) => {
-                            console.log('Token gerado:', token)
-                            this.turnstileToken = token
-                        },
-                        'refresh-expired': 'auto'
-                    })
-                }
-            } catch (error) {
-                console.error('Erro ao inicializar Turnstile:', error)
-            }
+        switchTab(tab) {
+            this.activeTab = tab
+            // Limpa o token atual
+            this.turnstileToken = null
+            // Limpa os widgets existentes e reinicializa
+            this.$nextTick(() => {
+                this.clearTurnstileWidgets()
+                this.initTurnstile()
+            })
         },
 
         clearTurnstileWidgets() {
@@ -698,13 +698,37 @@ export default {
                     }
                 })
                 
-                this.turnstileToken = null
-                
                 if (window.turnstile) {
                     window.turnstile.reset()
                 }
             } catch (error) {
                 console.error('Erro ao limpar widgets:', error)
+            }
+        },
+
+        initTurnstile() {
+            if (!this.turnstileSiteKey) {
+                console.error('Turnstile sitekey não está definida')
+                return
+            }
+
+            try {
+                const containers = document.querySelectorAll('.cf-turnstile')
+                containers.forEach(container => {
+                    if (!container.hasChildNodes() && window.turnstile) {
+                        window.turnstile.render(container, {
+                            sitekey: this.turnstileSiteKey,
+                            theme: 'dark',
+                            callback: (token) => {
+                                console.log('Token gerado:', token)
+                                this.turnstileToken = token
+                            },
+                            'refresh-expired': 'auto'
+                        })
+                    }
+                })
+            } catch (error) {
+                console.error('Erro ao inicializar Turnstile:', error)
             }
         },
 
@@ -732,11 +756,6 @@ export default {
             this.showConfirmClose = false
             this.activeTab = 'login' // Reset para a aba de login
             this.$emit('close')
-        },
-
-        // Método para trocar de aba sem mostrar confirmação
-        switchTab(tab) {
-            this.activeTab = tab
         },
 
         checkScreenSize() {
@@ -834,7 +853,7 @@ export default {
 }
 
 .mobile-input {
-    @apply w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white text-sm
+    @apply bg-gray-800 border border-gray-700 
            transition-all focus:border-[#00A2D4] focus:ring-1 focus:ring-[#00A2D4]/20;
 }
 
@@ -869,7 +888,7 @@ export default {
 }
 
 .mobile-terms-link {
-    @apply text-[#00A2D4];
+    @apply text-[#00A2D4] hover:text-[#0077FF] transition-colors;
 }
 
 /* Small Screen Optimizations */
@@ -935,8 +954,7 @@ export default {
 }
 
 .tab-button.active::after {
-    content: '';
-    @apply absolute bottom-[-16px] left-0 w-full h-0.5 bg-[#00A2D4] shadow-[0_0_10px_#00A2D4];
+    @apply bg-[#00A2D4] shadow-[0_0_10px_#00A2D4];
 }
 
 .close-button {
@@ -948,7 +966,7 @@ export default {
 }
 
 .close-button:hover .close-icon-wrapper {
-    @apply bg-white/20;
+    @apply bg-[#00A2D4]/20;
 }
 
 .close-icon-wrapper span {
@@ -961,20 +979,35 @@ export default {
 
 /* Form Styles */
 .auth-input {
-    @apply w-full bg-[#23272C] border border-[#2A2F35] text-white px-4 py-3.5 rounded-lg text-[15px]
+    @apply w-full bg-[#23272C] border border-[#2A2F35] text-white 
            transition-all focus:border-[#00A2D4] focus:ring-2 focus:ring-[#00A2D4]/20;
 }
 
 .auth-button {
     @apply w-full bg-gradient-to-r from-[#00A2D4] to-[#0077FF] text-white py-3.5 rounded-lg 
-           font-semibold transition-all relative overflow-hidden hover:shadow-lg 
-           hover:shadow-[#00A2D4]/30 hover:-translate-y-0.5;
+           font-semibold relative overflow-hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-button:hover {
+    @apply shadow-lg shadow-[#00A2D4]/30 -translate-y-0.5;
+    background: linear-gradient(to right, #0077FF, #00A2D4);
+}
+
+.auth-button:disabled {
+    @apply opacity-50 cursor-not-allowed transform-none shadow-none;
 }
 
 .auth-button::after {
     content: '';
-    @apply absolute top-0 left-[-100%] w-[200%] h-full bg-gradient-to-r from-transparent 
-           via-white/20 to-transparent transition-transform duration-500;
+    @apply absolute top-0 left-[-100%] w-[200%] h-full;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 162, 212, 0.2),
+        transparent
+    );
+    transition: transform 0.5s ease;
 }
 
 .auth-button:hover::after {
@@ -1030,8 +1063,28 @@ export default {
            hover:shadow-[#00A2D4]/30 hover:-translate-y-0.5;
 }
 
+.continue-button::after {
+    @apply bg-gradient-to-r from-transparent via-[#00A2D4]/20 to-transparent;
+}
+
 .cancel-button {
     @apply w-full bg-transparent text-gray-400 py-3 rounded-lg font-medium 
-           transition-colors hover:bg-white/5 hover:text-white;
+           transition-colors hover:bg-[#00A2D4]/10 text-[#00A2D4];
+}
+
+.cf-turnstile-wrapper {
+    @apply flex justify-center items-center;
+    /* Ajusta o iframe do Turnstile para centralizar */
+    iframe {
+        @apply mx-auto;
+    }
+}
+
+/* Caso precise de ajuste adicional para telas menores */
+@media (max-width: 480px) {
+    .cf-turnstile-wrapper {
+        transform: scale(0.9);
+        transform-origin: center center;
+    }
 }
 </style> 

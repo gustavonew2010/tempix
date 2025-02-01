@@ -769,10 +769,6 @@ aside {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.category-header:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
 .subcategories {
     margin-top: 4px;
     margin-bottom: 8px;
@@ -956,7 +952,7 @@ aside {
                          class="category-group">
                         <!-- Cabeçalho da categoria principal -->
                         <div class="category-header gray-scale-menu cursor-pointer"
-                             @click="toggleCategory(category.id)"
+                             @click="handleCategoryClick(category)"
                              :class="{ 'active': isActiveCategory(category.id) }">
                             <img :src="`/storage/${category.icon}`" 
                                  alt="" 
@@ -970,28 +966,22 @@ aside {
                             </span>
                         </div>
 
-                        <!-- Lista de subcategorias com transição suave -->
-                        <transition 
-                            name="slide"
-                            @enter="onEnter"
-                            @leave="onLeave">
-                            <div v-if="hasSubCategories(category.id)"
-                                 class="subcategories"
-                                 v-show="isActiveCategory(category.id)"
-                                 :ref="'subcategory-' + category.id">
-                                <a v-for="subCategory in getSubCategories(category.id)"
-                                   :key="subCategory.id"
-                                   :href="subCategory.url"
-                                   class="gray-scale-menu"
-                                   :class="{ 'active': isActiveRoute(subCategory.url) }">
-                                    <img :src="`/storage/${subCategory.icon}`" 
-                                         alt="" 
-                                         width="16" 
-                                         class="mr-3">
-                                    <span class="text-sm">{{ $t(subCategory.name) }}</span>
-                                </a>
-                            </div>
-                        </transition>
+                        <!-- Lista de subcategorias -->
+                        <div v-if="hasSubCategories(category.id)"
+                             class="subcategories"
+                             v-show="isActiveCategory(category.id)">
+                            <a v-for="subCategory in getSubCategories(category.id)"
+                               :key="subCategory.id"
+                               @click.prevent="handleSubCategoryClick(subCategory)"
+                               class="gray-scale-menu"
+                               :class="{ 'active': isActiveRoute(subCategory.url) }">
+                                <img :src="`/storage/${subCategory.icon}`" 
+                                     alt="" 
+                                     width="16" 
+                                     class="mr-3">
+                                <span class="text-sm">{{ $t(subCategory.name) }}</span>
+                            </a>
+                        </div>
                         
                         <!-- Linha divisória após cada categoria -->
                         <div class="category-divider"></div>
@@ -1066,6 +1056,7 @@ aside {
                         <li v-for="category in mainCategories" 
                             :key="category.id" 
                             :title="$t(category.name)" 
+                            @click="handleCategoryClick(category)"
                             class="mb-3">
                             <div class="gray-scale-menu cursor-pointer p-2">
                                 <img :src="`/storage/${category.icon}`" alt="" width="26">
@@ -1101,7 +1092,7 @@ export default {
         };
 
         const isActiveCategory = (categoryId) => {
-            return activeCategories.value[categoryId] === true;
+            return activeCategories.value[categoryId] !== false;
         };
 
         return {
@@ -1142,10 +1133,83 @@ export default {
             // Força um reflow
             void el.offsetHeight;
             el.style.maxHeight = '0';
+        },
+        scrollToFilters() {
+            // Aguarda um pequeno momento para garantir que a página foi carregada
+            setTimeout(() => {
+                // Tenta primeiro pela classe search-section
+                let filterSection = document.querySelector('.search-section');
+                
+                // Se não encontrar, tenta por outros elementos que possam identificar a seção de filtros
+                if (!filterSection) {
+                    filterSection = document.querySelector('.game-filters') || 
+                                  document.querySelector('.filters-container') ||
+                                  document.querySelector('.search-container');
+                }
+
+                if (filterSection) {
+                    // Calcula a posição considerando o header fixo
+                    const headerOffset = 100; // Ajuste este valor de acordo com a altura do seu header
+                    const elementPosition = filterSection.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100); // 100ms de delay
+        },
+        handleSubCategoryClick(subCategory) {
+            // Emite o evento para a HomePage
+            this.$emit('select-category', subCategory);
+            
+            // Fecha o menu lateral em dispositivos móveis
+            if (this.isMobile) {
+                this.sidebar = true;
+            }
+            
+            // Navega para a rota de cassino com os filtros apropriados
+            this.$router.push({
+                name: 'cassino',
+                query: { 
+                    category: subCategory.id,
+                    provider: '',
+                    search: ''
+                }
+            }).then(() => {
+                this.scrollToFilters();
+            });
+        },
+        handleCategoryClick(category) {
+            this.toggleCategory(category.id);
+            
+            // Se a categoria não tiver subcategorias, navega diretamente
+            if (!this.hasSubCategories(category.id)) {
+                // Fecha o menu lateral em dispositivos móveis
+                if (this.isMobile) {
+                    this.sidebar = true;
+                }
+                
+                // Navega para a rota de cassino com os filtros apropriados
+                this.$router.push({
+                    name: 'cassino',
+                    query: { 
+                        category: category.id,
+                        provider: '',
+                        search: ''
+                    }
+                }).then(() => {
+                    this.scrollToFilters();
+                });
+            }
+        },
+        toggleCategory(categoryId) {
+            this.activeCategories[categoryId] = !this.activeCategories[categoryId];
         }
     },
     mounted() {
-        // Inicializa as categorias como expandidas
+        // Inicializa todas as categorias como expandidas
         this.mainCategories.forEach(category => {
             if (this.hasSubCategories(category.id)) {
                 this.activeCategories[category.id] = true;

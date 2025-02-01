@@ -20,7 +20,13 @@
           </button>
         </div>
       </div>
-      <a href="#" class="see-all">Ver todos</a>
+      <button 
+        @click="$emit('show-all')" 
+        class="see-all-button"
+      >
+        Ver todos
+        <i class="fas fa-arrow-right"></i>
+      </button>
     </header>
 
     <Carousel
@@ -110,15 +116,15 @@ const breakpoints = {
   width: 100%;
   max-width: var(--content-width, 1200px);
   margin: 0 auto;
-  padding: 20px 0;
+  padding: 12px 0;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 0 20px;
+  margin-bottom: 12px;
+  padding: 0 12px;
 }
 
 .header-left {
@@ -128,7 +134,7 @@ const breakpoints = {
 }
 
 .section-title_2 {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   color: #fff;
   margin: 0;
@@ -170,11 +176,11 @@ const breakpoints = {
 }
 
 .games-carousel {
-  padding: 0 20px;
+  padding: 0 12px;
 }
 
 .game-card-wrapper {
-  padding: 0 4px; /* Reduzido o espaço entre os cards */
+  padding: 0 2px;
   height: 100%;
   aspect-ratio: 3/4;
 }
@@ -182,7 +188,7 @@ const breakpoints = {
 /* Sobrescrevendo estilos da biblioteca */
 :deep(.carousel__track) {
   padding: 0;
-  gap: 8px; /* Espaço entre os slides */
+  gap: 4px;
 }
 
 :deep(.carousel__slide) {
@@ -204,11 +210,11 @@ const breakpoints = {
 
 @media (max-width: 768px) {
   .section-header {
-    padding: 0 12px;
+    padding: 0 8px;
   }
   
   .games-carousel {
-    padding: 0 12px;
+    padding: 0 8px;
   }
   
   .nav-btn {
@@ -221,18 +227,22 @@ const breakpoints = {
     margin-left: 12px;
   }
   
+  .section-title_2 {
+    font-size: 16px;
+  }
+  
   :deep(.carousel__track) {
-    gap: 6px; /* Espaço reduzido em telas menores */
+    gap: 3px;
   }
 }
 
 @media (max-width: 576px) {
   .game-section {
-    padding: 12px 0;
+    padding: 8px 0;
   }
   
   .section-header {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
   
   .nav-btn {
@@ -241,11 +251,29 @@ const breakpoints = {
   }
   
   .section-title_2 {
-    font-size: 20px;
+    font-size: 14px;
   }
   
   :deep(.carousel__track) {
-    gap: 4px; /* Espaço ainda menor em mobile */
+    gap: 2px;
   }
+}
+
+.see-all-button {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(0, 153, 255, 0.2) 100%);
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.see-all-button:hover {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(0, 153, 255, 0.25) 100%);
+  transform: translateY(-1px);
 }
 </style> 

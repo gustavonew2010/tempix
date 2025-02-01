@@ -27,8 +27,15 @@
                                     class="w-full h-full object-cover"
                                 >
                             </div>
-                            <div @click="$emit('update-avatar')" class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer">
-                                <i class="fa-duotone fa-camera-retro text-2xl text-white"></i>
+                            <div 
+                                @click="$emit('update-avatar')" 
+                                class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer"
+                                title="Clique para alterar sua foto"
+                            >
+                                <div class="text-center">
+                                    <i class="fa-duotone fa-camera-retro text-2xl text-white mb-1"></i>
+                                    <p class="text-xs text-white">Alterar foto</p>
+                                </div>
                             </div>
                         </div>
                     </div>

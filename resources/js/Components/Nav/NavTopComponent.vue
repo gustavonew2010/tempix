@@ -42,33 +42,31 @@
                                 </template>
 
                                 <!-- Menu do usuário apenas quando autenticado -->
-                                <div v-else class="flex items-center">
+                                <div v-else class="flex items-center h-full gap-3">
                                     <button @click="openDepositModal" 
-                                            class="ui-button-blue2 mr-3 hover:scale-105 transition-transform">
+                                            class="ui-button-blue2 h-10 mr-3 hover:scale-105 transition-transform">
                                         {{ $t('Deposit') }}
                                     </button>
                                     
-                                    <!-- Wallet Balance com novo design -->
-                                    <div class="wallet-container">
+                                    <!-- Wallet Balance com margem à direita -->
+                                    <div class="mr-3">
                                         <WalletBalance />
                                     </div>
                                     
                                     <!-- User Menu com novo design -->
-                                    <div class="flex items-center ml-3 margin-teste">
-                                        <div>
-                                            <button type="button" 
-                                                    @click="toggleUserDropdown"
-                                                    class="profile-button" 
-                                                    aria-expanded="false">
-                                                <span class="sr-only">Open user menu</span>
-                                                <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
-                                                     alt="avatar" 
-                                                     class="w-8 h-8 rounded-full border-2 border-primary">
-                                            </button>
-                                        </div>
+                                    <div class="flex items-center h-10 margin-teste relative">
+                                        <button type="button" 
+                                                @click="toggleUserDropdown"
+                                                class="profile-button h-full flex items-center"
+                                                aria-expanded="false">
+                                            <span class="sr-only">Open user menu</span>
+                                            <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
+                                                 alt="avatar" 
+                                                 class="w-10 h-10 rounded-full border-2 border-primary">
+                                        </button>
                                         
-                                        <!-- Dropdown Menu Redesenhado -->
-                                        <div class="user-dropdown" 
+                                        <!-- Dropdown Menu -->
+                                        <div class="user-dropdown absolute right-0 top-[calc(100%+0.5rem)] w-64"
                                              id="dropdown-user2" 
                                              :class="{ 'hidden': !showUserDropdown }">
                                             <div class="p-3 border-b border-gray-700">
@@ -93,8 +91,11 @@
                                                 </li>
                                                 
                                                 <li>
-                                                    <RouterLink :to="{ name: 'profileAffiliate' }"
-                                                              class="dropdown-item">
+                                                    <RouterLink 
+                                                        :to="{ name: 'profileAffiliate' }" 
+                                                        class="dropdown-item"
+                                                        @click="showUserDropdown = false"
+                                                    >
                                                         <i class="fa-duotone fa-users text-primary"></i>
                                                         <span>{{ $t('Painel Afiliado') }}</span>
                                                     </RouterLink>
@@ -144,6 +145,15 @@
                       @close="registerToggle"
                       @show-login="hideRegisterShowLoginToggle" />
 
+        <!-- Input file oculto para upload de avatar -->
+        <input 
+            type="file"
+            ref="fileInput"
+            @change="handleAvatarUpload"
+            accept="image/*"
+            class="hidden"
+        />
+        
         <ProfileModal 
             ref="profileModal"
             :userData="userData"
@@ -261,6 +271,21 @@ export default {
             profileName: '',
             avatarUrl: null,
             showDepositModal: false,
+            state: {
+                currencyFormat: (amount, currency = 'BRL') => {
+                    if (!amount) return 'R$ 0,00';
+                    
+                    const formatter = new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: currency || 'BRL',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    
+                    return formatter.format(amount);
+                }
+            },
+            profileModal: null
         }
     },
 
@@ -358,7 +383,51 @@ export default {
         },
         
         openFileInput() {
-            // Implement the logic to open the file input for updating the avatar
+            // Aciona o input file oculto
+            this.$refs.fileInput.click();
+        },
+        
+        async handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Validação do tipo de arquivo
+            if (!file.type.startsWith('image/')) {
+                this.toast.error('Por favor, selecione uma imagem válida');
+                return;
+            }
+            
+            // Validação do tamanho (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                this.toast.error('A imagem deve ter no máximo 2MB');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            try {
+                this.isLoadingProfile = true;
+                const response = await HttpApi.post('/profile/update-avatar', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                
+                // Atualiza o avatar no store
+                if (this.authStore && this.authStore.updateUserAvatar) {
+                    this.authStore.updateUserAvatar(response.data.avatar);
+                }
+                
+                this.toast.success('Avatar atualizado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao atualizar avatar:', error);
+                this.toast.error('Erro ao atualizar avatar. Tente novamente.');
+            } finally {
+                this.isLoadingProfile = false;
+                // Limpa o input file
+                event.target.value = '';
+            }
         },
         
         async openProfileModal() {
@@ -366,12 +435,16 @@ export default {
             this.isLoadingProfile = true;
             
             try {
-                await this.getProfile();
+                const response = await HttpApi.get('/profile');
+                this.sumBets = response.data.sumBets;
+                this.totalBets = response.data.totalBets;
+                this.totalEarnings = response.data.totalEarnings;
+                this.profileUser = response.data.user;
                 
                 this.$nextTick(() => {
                     const modalProfileEl = document.getElementById('modalProfileEl');
-                    if (!this.modalProfile && modalProfileEl) {
-                        this.modalProfile = new Modal(modalProfileEl, {
+                    if (!this.profileModal && modalProfileEl) {
+                        this.profileModal = new Modal(modalProfileEl, {
                             placement: 'center',
                             backdrop: 'dynamic',
                             backdropClasses: 'bg-black/80 fixed inset-0 z-40 backdrop-blur-md',
@@ -379,22 +452,21 @@ export default {
                         });
                     }
                     
-                    if (this.modalProfile) {
-                        this.modalProfile.show();
-                    } else {
-                        console.error('Modal não foi inicializado corretamente');
+                    if (this.profileModal) {
+                        this.profileModal.show();
                     }
                 });
             } catch (error) {
                 console.error('Erro ao carregar dados do perfil:', error);
+                this.toast.error('Erro ao carregar dados do perfil');
             } finally {
                 this.isLoadingProfile = false;
             }
         },
         
         closeProfileModal() {
-            if (this.modalProfile) {
-                this.modalProfile.hide();
+            if (this.profileModal) {
+                this.profileModal.hide();
             }
         },
         
@@ -429,6 +501,23 @@ export default {
 
         handleLogoClick(event) {
             this.navigateHome(event);
+        },
+
+        formatBalance(balance) {
+            if (!balance) return '0,00';
+            
+            // Converte para número e formata com 2 casas decimais
+            return Number(balance)
+                .toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+        },
+
+        // Método para navegar para o painel de afiliados (caso precise usar em outro lugar)
+        goToAffiliate() {
+            this.showUserDropdown = false; // Fecha o dropdown
+            this.$router.push({ name: 'profileAffiliate' });
         }
     },
 
@@ -495,7 +584,7 @@ export default {
         // Inicialização do modal de perfil
         const modalProfileEl = document.getElementById('modalProfileEl');
         if (modalProfileEl) {
-            this.modalProfile = new Modal(modalProfileEl, {
+            this.profileModal = new Modal(modalProfileEl, {
                 placement: 'center',
                 backdrop: 'dynamic',
                 backdropClasses: 'bg-black/80 fixed inset-0 z-40 backdrop-blur-md',
@@ -597,5 +686,79 @@ export default {
 /* Ajuste do fundo do menu para transparente */
 .nav-menu {
   background: transparent !important;
+}
+
+.user-dropdown {
+    background: #1E2024;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 50;
+}
+
+.dropdown-item {
+    @apply flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700/50 w-full transition-colors duration-150;
+}
+
+/* Garante que o nav não seja afetado pelo dropdown */
+.nav-menu {
+    @apply z-40;
+}
+
+/* Garante que o dropdown fique por cima */
+.margin-teste {
+    @apply z-50;
+}
+
+.ui-button-blue2 {
+    @apply flex items-center px-4 rounded-lg bg-[#00A2D4] hover:bg-[#0077FF] text-white font-medium;
+    height: 40px;
+}
+
+.wallet-container {
+    @apply flex items-center;
+    height: 40px;
+}
+
+.profile-button {
+    @apply flex items-center justify-center;
+    height: 40px;
+}
+
+.user-dropdown {
+    @apply bg-[#1E2024] border border-[rgba(255,255,255,0.1)] rounded-lg shadow-lg;
+    top: calc(100% + 8px);
+}
+
+.wallet-balance-button {
+    @apply flex items-center px-4 h-10 rounded-lg font-medium transition-all;
+    background: linear-gradient(to right, rgba(0, 162, 212, 0.1), rgba(0, 162, 212, 0.2));
+    border: 1px solid rgba(0, 162, 212, 0.2);
+    color: white;
+}
+
+.wallet-balance-button:hover {
+    background: linear-gradient(to right, rgba(0, 162, 212, 0.15), rgba(0, 162, 212, 0.25));
+    border-color: rgba(0, 162, 212, 0.3);
+}
+
+.wallet-balance-button i {
+    @apply text-[#00A2D4];
+    font-size: 1.1rem;
+}
+
+.wallet-balance-button span {
+    @apply text-sm;
+}
+
+/* Ajuste para mobile */
+@media (max-width: 768px) {
+    .wallet-balance-button {
+        @apply px-3;
+    }
+    
+    .wallet-balance-button span {
+        @apply text-xs;
+    }
 }
 </style>

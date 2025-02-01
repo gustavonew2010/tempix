@@ -191,7 +191,6 @@ export default defineComponent({
 .layout-content {
     width: 100%;
     max-width: var(--content-max-width, 1440px);
-    padding: 3rem 2rem;
     flex: 1;
     margin: 0 auto;
 }
