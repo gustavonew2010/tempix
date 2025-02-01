@@ -137,74 +137,84 @@ trait FiversTrait
      */
     public static function GameLaunchFivers($provider_code, $game_code, $lang, $userId)
     {
+        Log::channel('fivers')->info('Iniciando GameLaunchFivers', [
+            'provider_code' => $provider_code,
+            'game_code' => $game_code,
+            'lang' => $lang,
+            'userId' => $userId
+        ]);
+
+        if (!self::getCredentials()) {
+            Log::channel('fivers')->error('Falha ao obter credenciais');
+            return ['error' => 'Credenciais inválidas'];
+        }
+
         try {
-            \Log::info('Iniciando GameLaunchFivers', [
-                'provider_code' => $provider_code,
-                'game_code' => $game_code,
-                'lang' => $lang,
-                'userId' => $userId
+            $wallet = Wallet::where('user_id', $userId)
+                ->where('active', 1)
+                ->first();
+
+            Log::channel('fivers')->info('Dados da carteira', [
+                'wallet_id' => $wallet->id ?? null,
+                'balance' => $wallet->total_balance ?? 0
             ]);
 
-            $wallet = Wallet::where('user_id', $userId)->first();
-            
-            \Log::info('Dados da carteira', [
-                'wallet_id' => $wallet->id,
-                'balance' => $wallet->total_balance
-            ]);
+            if (!$wallet) {
+                Log::channel('fivers')->error('Carteira não encontrada', ['user_id' => $userId]);
+                return ['error' => 'Carteira não encontrada'];
+            }
 
-            $endpoint = 'https://api.playfivers.com/api/v2/game_launch';
-            
-            $request = [
-                'agentToken' => config('services.fivers.agent_token'),
-                'secretKey' => config('services.fivers.secret_key'),
-                'user_code' => (string)$userId,
-                'game_code' => $game_code,
-                'user_balance' => $wallet->total_balance,
-                'lang' => $lang
+            $postArray = [
+                "agentToken" => self::$agentToken,
+                "secretKey" => self::$agentSecretKey,
+                "user_code" => $userId.'',
+                "game_code" => $game_code,
+                "user_balance" => $wallet->total_balance ?? 0,
+                "lang" => $lang
             ];
 
-            \Log::info('Enviando requisição para Fivers', [
-                'endpoint' => $endpoint,
-                'request' => array_merge($request, ['secretKey' => '****'])
+            Log::channel('fivers')->info('Enviando requisição para Fivers', [
+                'endpoint' => rtrim(self::$apiEndpoint, '/') . '/game_launch',
+                'request' => array_merge($postArray, ['secretKey' => '****'])
             ]);
 
-            $response = Http::post($endpoint, $request);
+            $endpoint = rtrim(self::$apiEndpoint, '/') . '/game_launch';
+            $response = Http::post($endpoint, $postArray);
             
-            if ($response->status() === 403) {
-                \Log::error('Erro de autenticação na API Fivers', [
-                    'status' => $response->status(),
-                    'body' => $response->json()
-                ]);
-                return 'Erro de autenticação com o provedor. Por favor, contate o suporte.';
-            }
+            Log::channel('fivers')->info('Resposta da API Fivers', [
+                'status' => $response->status(),
+                'body' => $response->json()
+            ]);
 
             if (!$response->successful()) {
-                \Log::error('Erro na resposta da API Fivers', [
+                Log::channel('fivers')->error('Erro na resposta da API Fivers', [
                     'status' => $response->status(),
                     'body' => $response->json()
                 ]);
-                return 'Erro ao iniciar o jogo. Por favor, tente novamente.';
+                return ['error' => 'Erro na comunicação com o servidor'];
             }
 
-            $responseData = $response->json();
+            $data = $response->json();
             
-            if (!isset($responseData['launch_url'])) {
-                \Log::error('Resposta da API Fivers sem launch_url', [
-                    'response' => $responseData
+            if (!isset($data['launch_url'])) {
+                Log::channel('fivers')->error('URL de lançamento não encontrada', [
+                    'response' => $data
                 ]);
-                return 'URL de lançamento não encontrada';
+                return ['error' => 'URL de lançamento não encontrada na resposta'];
             }
 
-            return [
-                'launch_url' => $responseData['launch_url']
-            ];
+            Log::channel('fivers')->info('Jogo iniciado com sucesso', [
+                'launch_url' => $data['launch_url']
+            ]);
+
+            return $data;
 
         } catch (\Exception $e) {
-            \Log::error('Exceção no GameLaunchFivers', [
+            Log::channel('fivers')->error('Exceção ao executar GameLaunchFivers', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return 'Erro interno ao iniciar o jogo. Por favor, tente novamente.';
+            return ['error' => 'Erro interno do servidor'];
         }
     }
 
