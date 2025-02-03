@@ -165,7 +165,7 @@ trait FiversTrait
 
             $postArray = [
                 "agentToken" => self::$agentToken,
-                "secretKey" => '****', // Mascarado para log
+                "secretKey" => self::$agentSecretKey,
                 "user_code" => $userId.'',
                 "game_code" => $game_code,
                 "user_balance" => $wallet->total_balance ?? 0,
