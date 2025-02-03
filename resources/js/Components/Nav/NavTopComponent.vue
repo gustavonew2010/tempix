@@ -1,15 +1,29 @@
 <template>
     <nav :class="['fixed top-10 navtop-color nav-indexx', sidebar ? 'w-full' : 'w-full']">
-        <PromoBar />
+        <PromoBar v-if="!isGameActive" />
         
         <div class="nav-gradient-container">
             <div class="px-3 lg:px-5 lg:pl-3 nav-menu relative">
-                <NavCategories />
+                <NavCategories v-if="!isGameActive" />
                 
                 <div :class="[sidebar ? 'lg:ml-[65px]' : 'lg:ml-[280px]']">
                     <div class="mx-auto w-full" style="max-width: 1110px">
                         <div class="flex items-center justify-between">
-                            <NavBrand :setting="setting" @navigate-home="navigateHome" />
+                            <!-- Botão de voltar para mobile quando jogo está ativo -->
+                            <template v-if="isGameActive">
+                                <div class="flex items-center gap-3">
+                                    <button @click="goBack" class="text-white flex items-center gap-2">
+                                        <i class="fas fa-arrow-left"></i>
+                                        <span class="text-sm font-medium">Voltar</span>
+                                    </button>
+                                    <h1 class="text-white text-sm font-medium">{{ gameTitle }}</h1>
+                                </div>
+                            </template>
+                            
+                            <!-- Logo normal quando não há jogo ativo -->
+                            <NavBrand v-else 
+                                     :setting="setting" 
+                                     @navigate-home="navigateHome" />
                             
                             <div class="flex items-center py-3">
                                 <!-- Botões de Auth apenas quando não autenticado -->
@@ -201,6 +215,14 @@ export default {
         authStatus: {
             type: Boolean,
             required: true
+        },
+        isGameActive: {
+            type: Boolean,
+            default: false
+        },
+        gameTitle: {
+            type: String,
+            default: ''
         }
     },
 
@@ -497,6 +519,11 @@ export default {
         goToAffiliate() {
             this.showUserDropdown = false; // Fecha o dropdown
             this.$router.push({ name: 'profileAffiliate' });
+        },
+        
+        goBack() {
+            // Emite um evento para o componente pai lidar com o fechamento do jogo
+            this.$emit('close-game');
         }
     },
 
@@ -738,6 +765,22 @@ export default {
     
     .wallet-balance-button span {
         @apply text-xs;
+    }
+}
+
+/* Adicione estes estilos para o modo mobile com jogo ativo */
+@media (max-width: 768px) {
+    .nav-gradient-container {
+        background: rgba(30, 35, 40, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    /* Ajuste a altura do nav quando o jogo está ativo no mobile */
+    .nav-menu {
+        height: 56px;
+        display: flex;
+        align-items: center;
     }
 }
 </style>

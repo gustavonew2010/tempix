@@ -56,14 +56,14 @@
     "src": "resources/css/app.css"
   },
   "resources/js/Pages/Home/Components/ShowProviders.css": {
-    "file": "assets/ShowProviders-b212609f.css",
+    "file": "assets/ShowProviders-6816691a.css",
     "src": "resources/js/Pages/Home/Components/ShowProviders.css"
   },
   "resources/js/Pages/Home/Components/ShowProviders.vue": {
     "css": [
-      "assets/ShowProviders-b212609f.css"
+      "assets/ShowProviders-6816691a.css"
     ],
-    "file": "assets/ShowProviders-5b738efb.js",
+    "file": "assets/ShowProviders-6d705c0d.js",
     "imports": [
       "resources/js/app.js"
     ],
@@ -71,7 +71,7 @@
     "src": "resources/js/Pages/Home/Components/ShowProviders.vue"
   },
   "resources/js/app.css": {
-    "file": "assets/app-83f8d979.css",
+    "file": "assets/app-8a072957.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -82,7 +82,7 @@
       "assets/sport-small-5e566ee2.png"
     ],
     "css": [
-      "assets/app-83f8d979.css"
+      "assets/app-8a072957.css"
     ],
     "dynamicImports": [
       "resources/js/Pages/Home/Components/ShowProviders.vue",
@@ -95,7 +95,7 @@
       "lang/php_vendor.json",
       "lang/pt_BR.json"
     ],
-    "file": "assets/app-28ab0617.js",
+    "file": "assets/app-02722073.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

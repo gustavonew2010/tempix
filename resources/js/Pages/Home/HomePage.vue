@@ -2583,6 +2583,26 @@
         height: calc(100vh - 56px); /* Ajuste para mobile */
     }
 }
+
+/* Ajuste a posição do container do jogo para considerar o novo header */
+.mobile-fullscreen {
+    position: fixed;
+    top: 56px; /* Altura do novo header */
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 56px); /* Ajusta a altura considerando o header */
+    z-index: 40; /* Menor que o z-index do nav */
+}
+
+@media (max-width: 768px) {
+    .mobile-fullscreen + .mobile-menu-wrapper {
+        display: none !important;
+    }
+    
+    .mobile-fullscreen .game-container {
+        height: 100%; /* Usa toda a altura disponível */
+    }
+}
 </style>
 <template>
     <BaseLayout>
@@ -2797,6 +2817,12 @@
                 @login-success="handleLoginSuccess"
             />
         </div>
+        <NavTopComponent 
+            :auth-status="authStatus"
+            :is-game-active="!!activeGame"
+            :game-title="activeGame?.game_name"
+            @close-game="closeGameModal"
+        />
     </BaseLayout>
 </template>
 
