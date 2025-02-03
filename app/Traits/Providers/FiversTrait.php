@@ -495,37 +495,59 @@ trait FiversTrait
         ]);
 
         try {
-            if ($request->type === 'BALANCE') {
-                $wallet = Wallet::where('user_id', $request->user_code)
-                              ->where('active', 1)
-                              ->first();
-
-                Log::channel('fivers')->info('Requisição de saldo', [
-                    'user_code' => $request->user_code,
-                    'balance' => $wallet->total_balance ?? 0
+            // Validação das credenciais
+            if (!self::getCredentials()) {
+                Log::channel('fivers')->error('Credenciais inválidas');
+                return response()->json([
+                    'msg' => 'INVALID_CREDENTIALS',
+                    'balance' => 0
                 ]);
+            }
 
+            // Busca a carteira com lock para todas as operações
+            $wallet = Wallet::where('user_id', $request->user_code)
+                           ->where('active', 1)
+                           ->lockForUpdate()
+                           ->first();
+
+            if (!$wallet) {
+                Log::channel('fivers')->error('Carteira não encontrada', [
+                    'user_code' => $request->user_code
+                ]);
+                return response()->json([
+                    'msg' => 'INVALID_USER',
+                    'balance' => 0
+                ]);
+            }
+
+            if ($request->type === 'BALANCE') {
+                $currentBalance = number_format($wallet->total_balance, 2, '.', '');
+                Log::channel('fivers')->info('Retornando saldo atual', [
+                    'user_code' => $request->user_code,
+                    'balance' => $currentBalance
+                ]);
+                
                 return response()->json([
                     'msg' => 'SUCCESS',
-                    'balance' => $wallet->total_balance ?? 0
+                    'balance' => $currentBalance
                 ]);
             }
 
             if ($request->type === 'WinBet' && isset($request->slot)) {
                 DB::beginTransaction();
                 try {
-                    $wallet = Wallet::where('user_id', $request->user_code)
-                                  ->where('active', 1)
-                                  ->lockForUpdate()
-                                  ->first();
-
                     // Verifica transação duplicada
                     $existingTx = Order::where('transaction_id', $request->slot['txn_id'])->first();
                     if ($existingTx) {
                         DB::commit();
+                        $currentBalance = number_format($wallet->total_balance, 2, '.', '');
+                        Log::channel('fivers')->info('Transação duplicada detectada', [
+                            'txn_id' => $request->slot['txn_id'],
+                            'balance' => $currentBalance
+                        ]);
                         return response()->json([
                             'msg' => 'SUCCESS',
-                            'balance' => $wallet->total_balance
+                            'balance' => $currentBalance
                         ]);
                     }
 
@@ -544,23 +566,23 @@ trait FiversTrait
                     }
 
                     $wallet->refresh();
+                    $currentBalance = number_format($wallet->total_balance, 2, '.', '');
 
-                    // Log do saldo após a transação
-                    Log::channel('fivers')->info('Saldo após transação', [
+                    Log::channel('fivers')->info('Transação processada', [
                         'txn_id' => $request->slot['txn_id'],
                         'user_code' => $request->user_code,
-                        'new_balance' => $wallet->total_balance,
+                        'new_balance' => $currentBalance,
                         'expected_balance' => $request->slot['user_after_balance']
                     ]);
 
                     DB::commit();
 
                     // Broadcast do novo saldo
-                    broadcast(new BalanceUpdated($request->user_code, $wallet->total_balance))->toOthers();
+                    broadcast(new BalanceUpdated($request->user_code, $currentBalance))->toOthers();
 
                     return response()->json([
                         'msg' => 'SUCCESS',
-                        'balance' => number_format($wallet->total_balance, 2, '.', '')
+                        'balance' => $currentBalance
                     ]);
 
                 } catch (\Exception $e) {
@@ -573,19 +595,21 @@ trait FiversTrait
 
                     return response()->json([
                         'msg' => 'INSUFFICIENT_FUNDS',
-                        'balance' => $wallet->total_balance ?? 0
+                        'balance' => number_format($wallet->total_balance, 2, '.', '')
                     ]);
                 }
             }
 
+            // Resposta padrão para outros tipos de requisição
             return response()->json([
                 'msg' => 'SUCCESS',
-                'balance' => $wallet->total_balance ?? 0
+                'balance' => number_format($wallet->total_balance, 2, '.', '')
             ]);
 
         } catch (\Exception $e) {
             Log::channel('fivers')->error('Erro geral', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             return response()->json([
                 'msg' => 'INTERNAL_ERROR',
