@@ -495,129 +495,96 @@ trait FiversTrait
         ]);
 
         try {
-            // Validação do tipo de requisição
-            if ($request->type === 'BALANCE') {
-                Log::channel('fivers')->info('Requisição de saldo recebida', [
-                    'user_code' => $request->user_code
-                ]);
-                
-                $wallet = Wallet::where('user_id', $request->user_code)
-                              ->where('active', 1)
-                              ->first();
-
-                if (!$wallet) {
-                    Log::channel('fivers')->error('Carteira não encontrada', [
-                        'user_code' => $request->user_code
-                    ]);
-                    return response()->json([
-                        'status' => 0,
-                        'msg' => 'INVALID_USER'
-                    ]);
-                }
-
-                // Retorna o saldo total atualizado
+            // Validação das credenciais primeiro
+            if (!self::getCredentials()) {
                 return response()->json([
-                    'status' => 1,
-                    'balance' => $wallet->total_balance,
-                    'currency' => $wallet->currency
+                    'msg' => 'INVALID_CREDENTIALS',
+                    'balance' => 0
                 ]);
             }
 
-            if ($request->type === 'WinBet') {
-                // Validação das credenciais
-                if (!self::getCredentials()) {
-                    Log::channel('fivers')->error('Credenciais inválidas');
-                    return response()->json(['status' => 0, 'msg' => 'INVALID_CREDENTIALS']);
-                }
+            // Busca a carteira uma única vez
+            $wallet = Wallet::where('user_id', $request->user_code)
+                           ->where('active', 1)
+                           ->lockForUpdate()
+                           ->first();
 
+            if (!$wallet) {
+                return response()->json([
+                    'msg' => 'INVALID_USER',
+                    'balance' => 0
+                ]);
+            }
+
+            if ($request->type === 'BALANCE') {
+                return response()->json([
+                    'msg' => 'SUCCESS',
+                    'balance' => $wallet->total_balance
+                ]);
+            }
+
+            if ($request->type === 'WinBet' && isset($request->slot)) {
                 DB::beginTransaction();
                 try {
-                    $wallet = Wallet::where('user_id', $request->user_code)
-                                  ->where('active', 1)
-                                  ->lockForUpdate()
-                                  ->first();
-
-                    if (!$wallet) {
-                        throw new \Exception('INVALID_USER');
-                    }
-
                     // Verifica transação duplicada
-                    if (isset($request->slot['txn_id'])) {
-                        $existingTransaction = Order::where('transaction_id', $request->slot['txn_id'])->first();
-                        if ($existingTransaction) {
-                            Log::channel('fivers')->info('Transação duplicada detectada', [
-                                'txn_id' => $request->slot['txn_id']
-                            ]);
-                            return response()->json([
-                                'status' => 1,
-                                'balance' => $wallet->total_balance
-                            ]);
-                        }
+                    $existingTx = Order::where('transaction_id', $request->slot['txn_id'])->first();
+                    if ($existingTx) {
+                        return response()->json([
+                            'msg' => 'SUCCESS',
+                            'balance' => $wallet->total_balance
+                        ]);
                     }
 
-                    // Processa a transação
                     $transaction = self::PrepareTransactions(
                         $wallet,
                         $request->user_code,
-                        $request->slot['txn_id'] ?? '',
-                        $request->slot['bet'] ?? 0,
-                        $request->slot['win'] ?? 0,
-                        $request->slot['game_code'] ?? '',
-                        $request->slot['provider_code'] ?? ''
+                        $request->slot['txn_id'],
+                        $request->slot['bet'],
+                        $request->slot['win'],
+                        $request->slot['game_code'],
+                        $request->slot['provider_code']
                     );
 
                     if (!$transaction) {
-                        throw new \Exception('TRANSACTION_FAILED');
+                        throw new \Exception('INSUFFICIENT_FUNDS');
                     }
 
-                    // Atualiza o saldo
                     $wallet->refresh();
-
-                    // Broadcast do novo saldo
-                    broadcast(new BalanceUpdated($request->user_code, $wallet->total_balance))->toOthers();
-
                     DB::commit();
 
-                    Log::channel('fivers')->info('Transação processada com sucesso', [
-                        'user_code' => $request->user_code,
-                        'new_balance' => $wallet->total_balance,
-                        'txn_id' => $request->slot['txn_id'] ?? null
-                    ]);
+                    broadcast(new BalanceUpdated($request->user_code, $wallet->total_balance))->toOthers();
 
                     return response()->json([
-                        'status' => 1,
+                        'msg' => 'SUCCESS',
                         'balance' => $wallet->total_balance
                     ]);
 
                 } catch (\Exception $e) {
                     DB::rollBack();
-                    Log::channel('fivers')->error('Erro ao processar transação', [
+                    Log::channel('fivers')->error('Erro na transação', [
                         'error' => $e->getMessage(),
-                        'user_code' => $request->user_code,
-                        'trace' => $e->getTraceAsString()
+                        'user_code' => $request->user_code
                     ]);
 
                     return response()->json([
-                        'status' => 0,
-                        'msg' => $e->getMessage(),
-                        'balance' => $wallet->total_balance ?? 0
+                        'msg' => 'INSUFFICIENT_FUNDS',
+                        'balance' => $wallet->total_balance
                     ]);
                 }
             }
 
             return response()->json([
-                'status' => 0,
-                'msg' => 'INVALID_REQUEST_TYPE'
+                'msg' => 'INVALID_REQUEST_TYPE',
+                'balance' => $wallet->total_balance
             ]);
 
         } catch (\Exception $e) {
-            Log::channel('fivers')->error('Erro geral no webhook', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::channel('fivers')->error('Erro geral', [
+                'error' => $e->getMessage()
             ]);
             return response()->json([
-                'status' => 0,
-                'msg' => 'INTERNAL_ERROR'
+                'msg' => 'INTERNAL_ERROR',
+                'balance' => 0
             ]);
         }
     }
