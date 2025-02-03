@@ -62,7 +62,7 @@ const handleImageError = (event) => {
 
 <style scoped>
 .game-card {
-  width: 100%; /* Ocupa todo o espaço disponível do container pai */
+  width: 100%;
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -70,7 +70,7 @@ const handleImageError = (event) => {
 .game-thumbnail {
   position: relative;
   width: 100%;
-  aspect-ratio: 3/4; /* Mantém proporção consistente */
+  aspect-ratio: 3/4;
   border-radius: 8px;
   overflow: hidden;
   background: #1a1a1a;
@@ -172,13 +172,35 @@ const handleImageError = (event) => {
 }
 
 @media (max-width: 767px) {
+  .game-thumbnail {
+    aspect-ratio: 3/4;
+  }
+
   .play-btn {
-    padding: 6px 20px;
-    font-size: 11px;
+    display: none;
   }
   
   .game-title {
-    font-size: 11px;
+    font-size: 10px;
+    margin-top: 4px;
+  }
+
+  .hover-overlay {
+    opacity: 0;
+    background: none;
+  }
+
+  .game-thumbnail img {
+    opacity: 1 !important;
+  }
+}
+
+/* Ajuste para o grid de 3 colunas no mobile */
+@media (max-width: 767px) {
+  :deep(.results-grid) {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 8px !important;
   }
 }
 </style>

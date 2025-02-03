@@ -798,6 +798,8 @@ export default {
 /* Mobile Layout */
 .mobile-layout {
     @apply fixed inset-0 bg-[#1A1D21] flex flex-col w-full h-full;
+    height: 100vh; /* Força altura total */
+    height: -webkit-fill-available; /* Suporte para iOS */
 }
 
 /* Desktop Layout */
@@ -816,7 +818,8 @@ export default {
 
 /* Mobile Styles */
 .mobile-header {
-    @apply flex items-center justify-between p-4 border-b border-gray-800;
+    @apply flex items-center justify-between px-6 py-5 border-b border-gray-800;
+    @apply sticky top-0 bg-[#1A1D21] z-10;
 }
 
 .mobile-back {
@@ -828,33 +831,36 @@ export default {
 }
 
 .mobile-content {
-    @apply flex-1 overflow-y-auto px-6 py-4;
+    @apply flex-1 flex flex-col p-6;
+    @apply overflow-y-auto;
+    @apply pb-6;
 }
 
 .mobile-logo {
-    @apply h-8 mx-auto mb-6;
+    @apply h-10 mx-auto mb-10;
 }
 
 .mobile-tabs {
-    @apply flex gap-3 mb-6;
+    @apply flex gap-4 mb-10 w-full;
 }
 
 .mobile-tab-btn {
-    @apply flex-1 py-2.5 px-4 text-center rounded-lg bg-gray-800/50 text-gray-400 
-           text-sm font-medium transition-colors;
+    @apply flex-1 py-3 px-4 text-center rounded-lg text-gray-400 
+           transition-all duration-200;
 }
 
 .mobile-tab-btn.active {
-    @apply bg-[#00A2D4] text-white;
+    @apply bg-[#00A2D4] text-white font-medium;
 }
 
 .mobile-input-group {
-    @apply space-y-3;
+    @apply space-y-4 w-full;
 }
 
 .mobile-input {
-    @apply bg-gray-800 border border-gray-700 
-           transition-all focus:border-[#00A2D4] focus:ring-1 focus:ring-[#00A2D4]/20;
+    @apply w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3.5
+           text-white placeholder-gray-400 focus:outline-none focus:border-[#00A2D4]
+           transition-colors;
 }
 
 .mobile-password-wrapper {
@@ -1083,8 +1089,16 @@ export default {
 /* Caso precise de ajuste adicional para telas menores */
 @media (max-width: 480px) {
     .cf-turnstile-wrapper {
-        transform: scale(0.9);
+        transform: scale(0.85);
         transform-origin: center center;
+        margin: 0 auto;
     }
+}
+
+/* Fix para iOS */
+@supports (-webkit-touch-callout: none) {
+  .mobile-layout {
+    min-height: -webkit-fill-available;
+  }
 }
 </style> 

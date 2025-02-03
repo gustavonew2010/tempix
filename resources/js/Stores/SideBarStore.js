@@ -9,8 +9,10 @@ export const sidebarStore = defineStore('sidebar', {
     },
     actions: {
         setSidebarToogle() {
-            this.sidebarStatus = !this.sidebarStatus
-            localStorage.setItem('sidebarStatus', this.sidebarStatus)
+            this.sidebarStatus = !this.sidebarStatus;
+        },
+        setSidebarStatus(status) {
+            this.sidebarStatus = status;
         }
     }
 })

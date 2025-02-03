@@ -210,6 +210,19 @@ export default {
 </script>
 
 <style scoped>
+.search-container {
+    position: relative;
+    width: 100%;
+    z-index: 20;
+    margin: 0.5rem 0; /* Reduzido margin top/bottom */
+}
+
+@media (max-width: 768px) {
+    .search-container {
+        margin: 0.25rem 0; /* Ainda menor no mobile */
+    }
+}
+
 .search-results-dropdown {
   position: absolute;
   top: 100%;
@@ -220,7 +233,7 @@ export default {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   height: 600px;
   overflow: hidden;
-  z-index: 1000;
+  z-index: 30;
   border: 1px solid #333;
   display: flex;
   flex-direction: column;

@@ -9,9 +9,11 @@
 <template>
     <div class="mobile-menu-wrapper aparecer-menu" style="background-color: var(--navtop-color-dark);">
         <div class="mobile-menu">
-            <button @click.prevent="toggleMenu" class="btn">
+            <button @click="toggleMenu" class="btn menu-toggle">
                 <svg
-                    height="1em" viewBox="0 0 448 512" width="1em" xmlns="http://www.w3.org/2000/svg">
+                    height="1em" viewBox="0 0 448 512" width="1em" xmlns="http://www.w3.org/2000/svg"
+                    :class="{ 'menu-active': sidebarStatus }"
+                >
                     <path
                         d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"
                         fill="currentColor"></path>
@@ -85,7 +87,7 @@
     import { sidebarStore } from "@/Stores/SideBarStore.js";
     import { useSettingStore } from '@/Stores/SettingStore.js';
     import { useAuthStore } from "@/Stores/Auth.js";
-    import { inject } from 'vue';
+    import { inject, onMounted } from 'vue';
     import { emitter } from '@/Pages/Home/HomePage.vue';
 
     export default {
@@ -96,10 +98,17 @@
             }
         },
         setup() {
+            const sidebarMenuStore = sidebarStore();
             const filterGamesByCategory = inject('filterGamesByCategory', () => {});
             const openGameModal = inject('openGameModal', () => {});
             
+            onMounted(() => {
+                console.log('BottomNavComponent mounted');
+                console.log('Initial sidebar status:', sidebarMenuStore.getSidebarStatus);
+            });
+
             return {
+                sidebarMenuStore,
                 filterGamesByCategory,
                 openGameModal
             };
@@ -111,12 +120,8 @@
             }
         },
         computed: {
-            sidebarMenuStore() {
-                return sidebarStore();
-            },
-            sidebarMenu() {
-                const sidebar = sidebarStore()
-                return sidebar.getSidebarStatus;
+            sidebarStatus() {
+                return this.sidebarMenuStore.getSidebarStatus;
             }
         },
         methods: {
@@ -134,8 +139,6 @@
                 event?.preventDefault();
                 
                 try {
-                    console.log('Categoria clicada no BottomNav:', category);
-                    
                     const categoryData = {
                         id: category.id || category.type,
                         name: category.name,
@@ -143,14 +146,9 @@
                     };
                     
                     emitter.emit('filter-category', categoryData);
-                    console.log('Evento de filtro emitido:', categoryData);
                     
-                    // Fecha o menu lateral se estiver aberto
-                    if (this.sidebarMenu) {
-                        this.toggleMenu();
-                    }
+                    this.sidebarMenuStore.setSidebarStatus(false);
                     
-                    // Rola até a seção de jogos
                     const gamesSection = document.querySelector('.featured-games-section');
                     if (gamesSection) {
                         gamesSection.scrollIntoView({ behavior: 'smooth' });
@@ -163,10 +161,55 @@
         created() {
             this.getSetting();
             this.custom = custom;
+        },
+        mounted() {
+            console.log('Component mounted, sidebar status:', this.sidebarStatus);
         }
     };
 </script>
 
 <style scoped>
+.menu-toggle {
+    position: relative;
+    z-index: 1000;
+    cursor: pointer;
+}
 
+.menu-toggle svg {
+    transition: transform 0.3s ease;
+}
+
+.menu-toggle .menu-active {
+    transform: rotate(90deg);
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+@media (min-width: 1025px) {
+    .mobile-menu-wrapper {
+        display: none;
+    }
+}
+
+/* Adicione estas classes para melhorar a visibilidade do estado ativo */
+.menu-toggle.active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-toggle:active {
+    transform: scale(0.95);
+}
 </style>

@@ -115,14 +115,12 @@
 /* Updated sidebar styles */
 aside {
     background: #1E2328;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    width: 280px !important;
+    width: 280px;
     position: fixed;
-    top: 115px; /* 50px PromoBar + 65px NavTop */
+    height: 100vh;
+    top: 0;
     left: 0;
-    bottom: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    z-index: 40;
 }
 
 .sidebar-content {
@@ -662,9 +660,11 @@ aside {
 /* Mobile styles */
 @media (max-width: 1023px) {
     aside {
-        width: 100% !important;
-        max-width: 300px !important;
-        transition: none !important;
+        display: none;
+    }
+
+    aside.active {
+        display: block;
     }
 
     .gray-scale-menu {
@@ -672,7 +672,7 @@ aside {
         padding: 12px !important;
     }
 
-    /* Ajuste para o backdrop/overlay no mobile */
+    /* Backdrop só aparece no mobile */
     .sidebar-backdrop {
         position: fixed;
         top: 0;
@@ -680,15 +680,12 @@ aside {
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
-        z-index: 30;
-        opacity: 0;
-        visibility: hidden;
-        transition: none !important;
+        z-index: 35;
+        display: none;
     }
 
     .sidebar-backdrop.active {
-        opacity: 1;
-        visibility: visible;
+        display: block;
     }
 }
 
@@ -908,32 +905,89 @@ aside {
 .support-links svg {
     margin-right: 12px;
 }
+
+/* Adicione estes estilos */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 35;
+    display: none;
+}
+
+.sidebar-backdrop.active {
+    display: block;
+}
+
+aside {
+    background: #1E2328;
+    width: 280px;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    z-index: 40;
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+    aside {
+        display: block !important; /* Força o sidebar a ficar visível no desktop */
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 1023px) {
+    aside {
+        display: none;
+    }
+
+    aside.active {
+        display: block;
+    }
+
+    .gray-scale-menu {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 35;
+        display: none;
+    }
+
+    .sidebar-backdrop.active {
+        display: block;
+    }
+}
 </style>
 <template>
     <div>
         <!-- Backdrop para mobile -->
         <div 
             v-if="isMobile" 
-            @click="sidebar = true"
+            @click="toggleSidebar"
             :class="[
                 'sidebar-backdrop',
-                { 'active': !sidebar }
+                { 'active': sidebarStatus }
             ]"
         ></div>
 
         <aside
             :class="[
-                'fixed top-0 left-0 z-40 h-screen pt-20 transition-all duration-300',
-                {
-                    'sidebar-collapsed': sidebar && !isMobile,
-                    'sidebar-expanded': !sidebar && !isMobile,
-                    '-translate-x-full': sidebar && isMobile,
-                    'translate-x-0': !sidebar && isMobile
-                }
+                'pt-20',
+                { 'active': sidebarStatus && isMobile }
             ]"
         >
-            <!-- Menu expandido -->
-            <div v-if="!sidebar" class="h-full pb-4 overflow-y-auto sidebar-content">
+            <div class="h-full pb-4 overflow-y-auto sidebar-content">
                 <div class="px-4">
                     <button @click.prevent="$router.push('/profile/affiliate')"
                         class="opacidade-hover bg-primary rounded-[3px] flex w-full items-center h-auto" 
@@ -988,11 +1042,8 @@ aside {
                     </div>
                 </div>
 
-                <!-- Após o bloco das categorias principais, adicione: -->
+                <!-- Links de Suporte -->
                 <div class="space-y-2 font-medium py-2 px-6">
-                    <!-- Divisória -->
-
-                    <!-- Links de Suporte -->
                     <div class="support-links">
                         <a href="#" class="gray-scale-menu">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1040,116 +1091,118 @@ aside {
                     </div>
                 </div>
             </div>
-
-            <!-- Menu minimizado -->
-            <div v-else>
-                <div class="h-[100vh] overflow-auto flex-col justify-between px-2 py-2 hidden lg:flex" 
-                     style="padding-top: 45px;color: var(--title-color);border-right: 1px solid #27292A;">
-                    <ul>
-                        <li class="mb-3" title="Ganhe R$ 5,00 grátis">
-                            <div @click.prevent="$router.push('/profile/affiliate')" 
-                                 class="flex items-center justify-center bg-primary hover:bg-gray-600 py-2 rounded-[3px] text-center cursor-pointer">
-                                <span class="text-[20px]">💥</span>
-                            </div>
-                        </li>
-
-                        <li v-for="category in mainCategories" 
-                            :key="category.id" 
-                            :title="$t(category.name)" 
-                            @click="handleCategoryClick(category)"
-                            class="mb-3">
-                            <div class="gray-scale-menu cursor-pointer p-2">
-                                <img :src="`/storage/${category.icon}`" alt="" width="26">
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </aside>
     </div>
 </template>
 
 <script>
 import { ref, computed } from 'vue'
+import { sidebarStore } from "@/Stores/SideBarStore.js";
+import { useRouter } from 'vue-router';
 
 export default {
     props: {
         categories: {
             type: Array,
-            required: true
-        },
-        sidebar: {
-            type: Boolean,
-            default: false
+            required: true,
+            default: () => []
         }
     },
     setup() {
-        // Use ref para reatividade
-        const activeCategories = ref({});
+        const sidebarMenuStore = sidebarStore();
+        const activeCategories = ref(new Set());
+        const router = useRouter();
+        const isMobile = ref(window.innerWidth <= 1023);
 
-        const toggleCategory = (categoryId) => {
-            activeCategories.value[categoryId] = !activeCategories.value[categoryId];
-        };
-
-        const isActiveCategory = (categoryId) => {
-            return activeCategories.value[categoryId] !== false;
-        };
-
+        // Atualiza isMobile quando a janela é redimensionada
+        window.addEventListener('resize', () => {
+            isMobile.value = window.innerWidth <= 1023;
+        });
+        
+        // Fecha o sidebar no mobile quando a rota muda
+        router.afterEach(() => {
+            if (isMobile.value) {
+                sidebarMenuStore.setSidebarStatus(false);
+            }
+        });
+        
         return {
+            sidebarMenuStore,
             activeCategories,
-            toggleCategory,
-            isActiveCategory
+            isMobile
         }
     },
     computed: {
+        sidebarStatus() {
+            return this.sidebarMenuStore.getSidebarStatus;
+        },
         mainCategories() {
             return this.categories?.filter(cat => !cat.parent_id) || [];
-        },
-        isMobile() {
-            return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         }
     },
     methods: {
-        getSubCategories(parentId) {
-            const subCategories = this.categories?.filter(cat => 
-                cat.parent_id === parentId && cat.is_menu_item
-            ) || [];
-            return subCategories;
+        toggleSidebar() {
+            this.sidebarMenuStore.setSidebarToogle();
+        },
+        isActiveCategory(categoryId) {
+            return this.activeCategories.has(categoryId);
+        },
+        handleCategoryClick(category) {
+            if (this.hasSubCategories(category.id)) {
+                if (this.isActiveCategory(category.id)) {
+                    this.activeCategories.delete(category.id);
+                } else {
+                    this.activeCategories.add(category.id);
+                }
+            }
+            this.$emit('select-category', category);
+            
+            if (!this.hasSubCategories(category.id)) {
+                this.navigateToCategory(category);
+                // Fecha o sidebar no mobile após selecionar uma categoria
+                if (this.isMobile) {
+                    this.sidebarMenuStore.setSidebarStatus(false);
+                }
+            }
+        },
+        handleSubCategoryClick(subCategory) {
+            this.$emit('select-category', subCategory);
+            this.navigateToCategory(subCategory);
+        },
+        navigateToCategory(category) {
+            if (this.isMobile) {
+                this.toggleSidebar();
+            }
+            
+            this.$router.push({
+                name: 'cassino',
+                query: { 
+                    category: category.id,
+                    provider: '',
+                    search: ''
+                }
+            }).then(() => {
+                this.scrollToFilters();
+            });
         },
         hasSubCategories(categoryId) {
-            return this.getSubCategories(categoryId).length > 0;
+            return this.categories.some(cat => cat.parent_id === categoryId);
+        },
+        getSubCategories(categoryId) {
+            return this.categories.filter(cat => cat.parent_id === categoryId);
         },
         isActiveRoute(url) {
-            return window.location.href === url;
-        },
-        onEnter(el) {
-            el.style.maxHeight = '0';
-            // Força um reflow
-            void el.offsetHeight;
-            el.style.maxHeight = el.scrollHeight + 'px';
-        },
-        onLeave(el) {
-            el.style.maxHeight = el.scrollHeight + 'px';
-            // Força um reflow
-            void el.offsetHeight;
-            el.style.maxHeight = '0';
+            return this.$route.path === url;
         },
         scrollToFilters() {
-            // Aguarda um pequeno momento para garantir que a página foi carregada
             setTimeout(() => {
-                // Tenta primeiro pela classe search-section
-                let filterSection = document.querySelector('.search-section');
-                
-                // Se não encontrar, tenta por outros elementos que possam identificar a seção de filtros
-                if (!filterSection) {
-                    filterSection = document.querySelector('.game-filters') || 
-                                  document.querySelector('.filters-container') ||
-                                  document.querySelector('.search-container');
-                }
+                const filterSection = document.querySelector('.search-section') || 
+                                    document.querySelector('.game-filters') || 
+                                    document.querySelector('.filters-container') ||
+                                    document.querySelector('.search-container');
 
                 if (filterSection) {
-                    // Calcula a posição considerando o header fixo
-                    const headerOffset = 100; // Ajuste este valor de acordo com a altura do seu header
+                    const headerOffset = 100;
                     const elementPosition = filterSection.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -1158,61 +1211,14 @@ export default {
                         behavior: 'smooth'
                     });
                 }
-            }, 100); // 100ms de delay
-        },
-        handleSubCategoryClick(subCategory) {
-            // Emite o evento para a HomePage
-            this.$emit('select-category', subCategory);
-            
-            // Fecha o menu lateral em dispositivos móveis
-            if (this.isMobile) {
-                this.sidebar = true;
-            }
-            
-            // Navega para a rota de cassino com os filtros apropriados
-            this.$router.push({
-                name: 'cassino',
-                query: { 
-                    category: subCategory.id,
-                    provider: '',
-                    search: ''
-                }
-            }).then(() => {
-                this.scrollToFilters();
-            });
-        },
-        handleCategoryClick(category) {
-            this.toggleCategory(category.id);
-            
-            // Se a categoria não tiver subcategorias, navega diretamente
-            if (!this.hasSubCategories(category.id)) {
-                // Fecha o menu lateral em dispositivos móveis
-                if (this.isMobile) {
-                    this.sidebar = true;
-                }
-                
-                // Navega para a rota de cassino com os filtros apropriados
-                this.$router.push({
-                    name: 'cassino',
-                    query: { 
-                        category: category.id,
-                        provider: '',
-                        search: ''
-                    }
-                }).then(() => {
-                    this.scrollToFilters();
-                });
-            }
-        },
-        toggleCategory(categoryId) {
-            this.activeCategories[categoryId] = !this.activeCategories[categoryId];
+            }, 100);
         }
     },
     mounted() {
-        // Inicializa todas as categorias como expandidas
+        // Inicializa todas as categorias principais como expandidas
         this.mainCategories.forEach(category => {
             if (this.hasSubCategories(category.id)) {
-                this.activeCategories[category.id] = true;
+                this.activeCategories.add(category.id);
             }
         });
     }

@@ -13,6 +13,8 @@ use App\Traits\Missions\MissionTrait;
 use Illuminate\Support\Facades\Http;
 use App\Events\BalanceUpdated;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 trait FiversTrait
 {
@@ -141,11 +143,12 @@ trait FiversTrait
             'provider_code' => $provider_code,
             'game_code' => $game_code,
             'lang' => $lang,
-            'userId' => $userId
+            'userId' => $userId,
+            'timestamp' => now()
         ]);
 
         if (!self::getCredentials()) {
-            Log::channel('fivers')->error('Falha ao obter credenciais');
+            Log::channel('fivers')->error('Falha ao obter credenciais para GameLaunchFivers');
             return ['error' => 'Credenciais inválidas'];
         }
 
@@ -154,19 +157,15 @@ trait FiversTrait
                 ->where('active', 1)
                 ->first();
 
-            Log::channel('fivers')->info('Dados da carteira', [
+            Log::channel('fivers')->info('Dados da carteira para GameLaunchFivers', [
                 'wallet_id' => $wallet->id ?? null,
-                'balance' => $wallet->total_balance ?? 0
+                'balance' => $wallet->total_balance ?? 0,
+                'userId' => $userId
             ]);
-
-            if (!$wallet) {
-                Log::channel('fivers')->error('Carteira não encontrada', ['user_id' => $userId]);
-                return ['error' => 'Carteira não encontrada'];
-            }
 
             $postArray = [
                 "agentToken" => self::$agentToken,
-                "secretKey" => self::$agentSecretKey,
+                "secretKey" => '****', // Mascarado para log
                 "user_code" => $userId.'',
                 "game_code" => $game_code,
                 "user_balance" => $wallet->total_balance ?? 0,
@@ -175,46 +174,26 @@ trait FiversTrait
 
             Log::channel('fivers')->info('Enviando requisição para Fivers', [
                 'endpoint' => rtrim(self::$apiEndpoint, '/') . '/game_launch',
-                'request' => array_merge($postArray, ['secretKey' => '****'])
+                'request' => $postArray
             ]);
 
-            $endpoint = rtrim(self::$apiEndpoint, '/') . '/game_launch';
-            $response = Http::post($endpoint, $postArray);
+            $response = Http::post(rtrim(self::$apiEndpoint, '/') . '/game_launch', $postArray);
             
-            Log::channel('fivers')->info('Resposta da API Fivers', [
-                'status' => $response->status(),
-                'body' => $response->json()
+            Log::channel('fivers')->info('Resposta do servidor Fivers', [
+                'status_code' => $response->status(),
+                'response_body' => $response->json()
             ]);
 
-            if (!$response->successful()) {
-                Log::channel('fivers')->error('Erro na resposta da API Fivers', [
-                    'status' => $response->status(),
-                    'body' => $response->json()
-                ]);
-                return ['error' => 'Erro na comunicação com o servidor'];
-            }
-
-            $data = $response->json();
-            
-            if (!isset($data['launch_url'])) {
-                Log::channel('fivers')->error('URL de lançamento não encontrada', [
-                    'response' => $data
-                ]);
-                return ['error' => 'URL de lançamento não encontrada na resposta'];
-            }
-
-            Log::channel('fivers')->info('Jogo iniciado com sucesso', [
-                'launch_url' => $data['launch_url']
-            ]);
-
-            return $data;
+            return $response->json();
 
         } catch (\Exception $e) {
-            Log::channel('fivers')->error('Exceção ao executar GameLaunchFivers', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::channel('fivers')->error('Erro em GameLaunchFivers', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'userId' => $userId,
+                'game_code' => $game_code
             ]);
-            return ['error' => 'Erro interno do servidor'];
+            return ['error' => 'Erro ao iniciar o jogo'];
         }
     }
 
@@ -394,91 +373,119 @@ trait FiversTrait
      */
     private static function PrepareTransactions($wallet, $userCode, $txnId, $betMoney, $winMoney, $gameCode, $providerCode)
     {
-        $user = User::find($wallet->user_id);
+        Log::channel('fivers')->info('Iniciando PrepareTransactions', [
+            'user_code' => $userCode,
+            'txn_id' => $txnId,
+            'bet_amount' => $betMoney,
+            'win_amount' => $winMoney,
+            'game_code' => $gameCode,
+            'provider_code' => $providerCode
+        ]);
 
-        if(!empty($user)) {
-            $typeAction  = 'bet';
-            $changeBonus = 'balance';
+        DB::beginTransaction();
+        try {
+            $user = User::find($userCode);
+            if (!$user) {
+                Log::channel('fivers')->error('Usuário não encontrado', ['user_code' => $userCode]);
+                throw new \Exception('User not found');
+            }
+
             $bet = floatval($betMoney);
             $win = floatval($winMoney);
-            $result = $bet - $win;
 
-            /// deduz o saldo apostado
-            if($wallet->balance_bonus > $bet) {
-                $wallet->decrement('balance_bonus', $bet); /// retira do bonus
-                $changeBonus = 'balance_bonus'; /// define o tipo de transação
-            }elseif($wallet->balance >= $bet) {
-                $wallet->decrement('balance', $bet); /// retira do saldo depositado
-                $changeBonus = 'balance'; /// define o tipo de transação
-            }elseif($wallet->balance_withdrawal >= $bet) {
-                $wallet->decrement('balance_withdrawal', $bet); /// retira do saldo liberado pra saque
-                $changeBonus = 'balance_withdrawal'; /// define o tipo de transação 
-            }else{
-                return response()->json([
-                    'status' => 0,
-                    'msg' => 'INSUFFICIENT_USER_FUNDS'
+            Log::channel('fivers')->info('Saldos antes da transação', [
+                'total_balance' => $wallet->total_balance,
+                'balance' => $wallet->balance,
+                'balance_bonus' => $wallet->balance_bonus,
+                'balance_withdrawal' => $wallet->balance_withdrawal
+            ]);
+
+            // Verifica saldo
+            if ($wallet->total_balance < $bet) {
+                Log::channel('fivers')->warning('Saldo insuficiente', [
+                    'required' => $bet,
+                    'available' => $wallet->total_balance
                 ]);
+                throw new \Exception('Insufficient funds');
             }
 
-            if($win > 0) {
-                $typeAction = 'win';
-                $transaction = self::CreateTransactions($userCode, time(), $txnId, $typeAction, $changeBonus, $win, 'fivers', $gameCode, $gameCode);
+            // Processa transações
+            if ($bet > 0) {
+                Log::channel('fivers')->info('Processando aposta', [
+                    'bet_amount' => $bet,
+                    'txn_id' => $txnId
+                ]);
 
-                if(!empty($transaction)) {
-                    /// salvar transação GGR
-                    GGRGamesFiver::create([
-                        'user_id' => $userCode,
-                        'provider' => $providerCode,
-                        'game' => $gameCode,
-                        'balance_bet' => $betMoney,
-                        'balance_win' => $winMoney,
-                        'currency' => $wallet->currency
-                    ]);
-
-                    /// pagar afiliado
-                    Helper::generateGameHistory($user->id, $typeAction, $winMoney, $bet, $changeBonus, $txnId);
-
-                    // Broadcast balance update via WebSocket
-                    broadcast(new BalanceUpdated($userCode, $wallet->total_balance))->toOthers();
-
-                    return response()->json([
-                        'status' => 1,
-                        'user_balance' => $wallet->total_balance
-                    ]);
+                // Deduz o saldo
+                if ($wallet->balance_bonus >= $bet) {
+                    $wallet->decrement('balance_bonus', $bet);
+                    $changeBonus = 'balance_bonus';
+                } elseif ($wallet->balance >= $bet) {
+                    $wallet->decrement('balance', $bet);
+                    $changeBonus = 'balance';
+                } elseif ($wallet->balance_withdrawal >= $bet) {
+                    $wallet->decrement('balance_withdrawal', $bet);
+                    $changeBonus = 'balance_withdrawal';
                 }
+
+                // Registra transação de aposta
+                self::CreateTransactions($userCode, time(), $txnId, 'bet', $changeBonus, $bet, 'fivers', $gameCode, $gameCode);
             }
 
-            /// criar uma transação
-            $checkTransaction = Order::where('transaction_id', $txnId)->first();
-            if(empty($checkTransaction)) {
-                $checkTransaction = self::CreateTransactions($userCode, time(), $txnId, $typeAction, $changeBonus, $bet, 'fivers', $gameCode, $gameCode);
+            // Processa ganhos
+            if ($win > 0) {
+                Log::channel('fivers')->info('Processando ganho', [
+                    'win_amount' => $win,
+                    'txn_id' => $txnId
+                ]);
+                
+                $wallet->increment('balance', $win);
+                self::CreateTransactions($userCode, time(), $txnId . '_win', 'win', 'balance', $win, 'fivers', $gameCode, $gameCode);
             }
 
-            /// salvar transação GGR
+            // Registra GGR
             GGRGamesFiver::create([
                 'user_id' => $userCode,
                 'provider' => $providerCode,
                 'game' => $gameCode,
                 'balance_bet' => $bet,
-                'balance_win' => 0,
+                'balance_win' => $win,
                 'currency' => $wallet->currency
             ]);
 
-            Helper::generateGameHistory($user->id, $typeAction, $winMoney, $bet, $changeBonus, $checkTransaction->transaction_id);
+            $wallet->refresh();
+            Log::channel('fivers')->info('Saldos após a transação', [
+                'total_balance' => $wallet->total_balance,
+                'balance' => $wallet->balance,
+                'balance_bonus' => $wallet->balance_bonus,
+                'balance_withdrawal' => $wallet->balance_withdrawal
+            ]);
 
-            // Broadcast balance update via WebSocket
-            broadcast(new BalanceUpdated($userCode, $wallet->total_balance))->toOthers();
+            DB::commit();
+            
+            Log::channel('fivers')->info('Transação completada com sucesso', [
+                'txn_id' => $txnId,
+                'user_code' => $userCode
+            ]);
 
             return response()->json([
                 'status' => 1,
                 'user_balance' => $wallet->total_balance
             ]);
-        }
 
-        return response()->json([
-            'status' => 0,
-            'msg' => 'USER_NOT_FOUND'
-        ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::channel('fivers')->error('Erro na transação', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_code' => $userCode,
+                'txn_id' => $txnId
+            ]);
+            return response()->json([
+                'status' => 0,
+                'msg' => 'TRANSACTION_ERROR'
+            ]);
+        }
     }
 
     /**
@@ -494,98 +501,126 @@ trait FiversTrait
         ]);
 
         try {
-            $logFile = storage_path('logs/fivers-webhook.log');
-            
-            // Log inicial da requisição
-            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Nova requisição recebida\n", FILE_APPEND);
-            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Dados: " . json_encode($request->all()) . "\n", FILE_APPEND);
+            // Validação inicial das credenciais
+            if (!self::getCredentials()) {
+                Log::error('Fivers: Credenciais inválidas');
+                return response()->json(['status' => 0, 'msg' => 'INVALID_CREDENTIALS']);
+            }
 
-            if($request->type === 'WinBet') {
-                $credentialsLoaded = self::getCredentials();
-                
-                file_put_contents($logFile, date('Y-m-d H:i:s') . " - getCredentials retornou: " . ($credentialsLoaded ? 'true' : 'false') . "\n", FILE_APPEND);
+            // Validação do tipo de requisição
+            if ($request->type === 'GetBalance') {
+                return self::GetBalanceInfo($request);
+            }
 
-                if(!$credentialsLoaded) {
-                    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Falha ao carregar credenciais\n", FILE_APPEND);
-                    return response()->json(['msg' => 'INVALID_CREDENTIALS', 'balance' => 0]);
-                }
-
-                // Comparação das credenciais
-                $isValid = ($request->agent_code === self::$agentCode && 
-                           $request->agent_secret === self::$agentSecretKey);
-
-                file_put_contents($logFile, date('Y-m-d H:i:s') . " - Validação de credenciais: " . json_encode([
-                    'recebido' => [
-                        'agent_code' => $request->agent_code,
-                        'agent_secret' => $request->agent_secret
-                    ],
-                    'esperado' => [
-                        'agent_code' => self::$agentCode,
-                        'agent_secret' => self::$agentSecretKey
-                    ],
-                    'is_valid' => $isValid
-                ]) . "\n", FILE_APPEND);
-
-                if(!$isValid) {
-                    return response()->json(['msg' => 'INVALID_CREDENTIALS', 'balance' => 0]);
-                }
-
-                // Processa a transação
+            if ($request->type === 'WinBet' || $request->type === 'PlaceBet') {
+                // Validação do usuário e carteira
                 $wallet = Wallet::where('user_id', $request->user_code)
                               ->where('active', 1)
+                              ->lockForUpdate() // Adiciona lock para evitar race conditions
                               ->first();
 
-                if(empty($wallet)) {
-                    return response()->json([
-                        'msg' => 'INVALID_USER',
-                        'balance' => 0
-                    ]);
+                if (!$wallet) {
+                    Log::error('Fivers: Carteira não encontrada', ['user_code' => $request->user_code]);
+                    return response()->json(['status' => 0, 'msg' => 'INVALID_USER']);
                 }
 
-                // Verifica se tem saldo suficiente para a aposta
-                if(isset($request->slot) && $request->slot['bet'] > $wallet->total_balance) {
+                // Verifica transação duplicada
+                $existingTransaction = Order::where('transaction_id', $request->slot['txn_id'] ?? '')->first();
+                if ($existingTransaction) {
+                    Log::info('Fivers: Transação duplicada detectada', ['txn_id' => $request->slot['txn_id']]);
                     return response()->json([
-                        'msg' => 'INSUFFICIENT_USER_FUNDS',
-                        'balance' => $wallet->total_balance
+                        'status' => 1,
+                        'user_balance' => $wallet->total_balance
                     ]);
                 }
 
                 // Processa a transação
-                if(isset($request->slot)) {
+                try {
+                    DB::beginTransaction();
+
                     $transaction = self::PrepareTransactions(
                         $wallet,
                         $request->user_code,
-                        $request->slot['txn_id'],
-                        $request->slot['bet'],
-                        $request->slot['win'],
-                        $request->slot['game_code'],
-                        $request->slot['provider_code']
+                        $request->slot['txn_id'] ?? '',
+                        $request->slot['bet'] ?? 0,
+                        $request->slot['win'] ?? 0,
+                        $request->slot['game_code'] ?? '',
+                        $request->slot['provider_code'] ?? ''
                     );
 
-                    // Atualiza o saldo após a transação
+                    // Atualiza o saldo e envia via WebSocket
                     $wallet->refresh();
+                    broadcast(new BalanceUpdated($request->user_code, $wallet->total_balance))->toOthers();
+
+                    DB::commit();
 
                     return response()->json([
-                        'msg' => '',
-                        'balance' => $wallet->total_balance
+                        'status' => 1,
+                        'user_balance' => $wallet->total_balance
                     ]);
+
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Fivers: Erro ao processar transação', [
+                        'error' => $e->getMessage(),
+                        'user_code' => $request->user_code
+                    ]);
+                    return response()->json(['status' => 0, 'msg' => 'TRANSACTION_ERROR']);
                 }
             }
 
-            return response()->json([
-                'msg' => 'INVALID_REQUEST',
-                'balance' => 0
-            ]);
+            // Atualização de sessão
+            if ($request->type === 'UpdateSession') {
+                return self::updateGameSession($request);
+            }
+
+            return response()->json(['status' => 0, 'msg' => 'INVALID_REQUEST_TYPE']);
 
         } catch (\Exception $e) {
-            Log::channel('fivers')->error('Erro no webhook Fivers', [
-                'message' => $e->getMessage(),
+            Log::error('Fivers: Erro geral', [
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['status' => 0, 'msg' => 'INTERNAL_ERROR']);
         }
     }
 
+    // Adicionar novo método para gerenciar sessão
+    private static function updateGameSession($request)
+    {
+        try {
+            $wallet = Wallet::where('user_id', $request->user_code)
+                           ->where('active', 1)
+                           ->first();
+
+            if (!$wallet) {
+                return response()->json(['status' => 0, 'msg' => 'INVALID_USER']);
+            }
+
+            // Atualiza a sessão do jogo
+            Cache::put(
+                'game_session_' . $request->user_code,
+                [
+                    'session_id' => $request->session_id,
+                    'game_code' => $request->game_code,
+                    'last_activity' => now()
+                ],
+                now()->addHours(4)
+            );
+
+            return response()->json([
+                'status' => 1,
+                'user_balance' => $wallet->total_balance
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Fivers: Erro ao atualizar sessão', [
+                'error' => $e->getMessage(),
+                'user_code' => $request->user_code
+            ]);
+            return response()->json(['status' => 0, 'msg' => 'SESSION_UPDATE_ERROR']);
+        }
+    }
 
     /**
      * Create Transactions

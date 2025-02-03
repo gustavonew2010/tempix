@@ -1,6 +1,6 @@
 <style scoped>
 /* Base Styles */
-.deposit-widget {
+.deposit-widget { 
     background: var(--background-color);
     min-height: 100%;
     display: flex;
@@ -11,7 +11,7 @@
 }
 
 /* Modal Backdrop */
-.modal-backdrop {
+.modal-backdrop { 
     position: fixed;
     inset: 0;
     background-color: rgba(0, 0, 0, 0.75);
@@ -23,14 +23,20 @@
 
 /* Base do Modal */
 .modal-container {
-    background: #1A1D24;
-    border-radius: 16px;
-    width: min(480px, 95%);
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    margin: 1rem;
+    @apply fixed inset-0 flex flex-col bg-[#1A1D24] overflow-hidden;
+}
+
+@media (min-width: 768px) {
+    .modal-container {
+        position: relative;
+        background: #1A1D24;
+        border-radius: 16px;
+        width: min(480px, 95%);
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        margin: 1rem;
+    }
 }
 
 /* Scrollbar Styles - Simplificado */
@@ -46,38 +52,44 @@
 /* Header Styles */
 .modal-header {
     position: relative;
-    padding: 2rem 2rem;
+    padding: 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     background: inherit;
-    border-radius: 16px 16px 0 0;
+    @apply sticky top-0 z-10 bg-[#1A1D21];
 }
 
 .header-content {
-    position: absolute;
-    left: 2rem;
     display: flex;
     align-items: center;
+    gap: 4;
 }
 
 .close-button {
-    position: absolute;
-    right: 2rem;
+    @apply w-8 h-8 flex items-center justify-center;
+    @apply bg-white/5 rounded-lg transition-colors;
+    @apply hover:bg-white/10;
 }
 
 .modal-title {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: white;
     margin: 0;
 }
 
+.modal-subtitle {
+    font-size: 0.875rem;
+    color: #9CA3AF;
+    margin-top: 0.25rem;
+}
+
 /* Input Styles */
 .input-wrapper {
     position: relative;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 0.5rem;
@@ -106,21 +118,19 @@
 
 /* Conteúdo do Modal */
 .modal-content {
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    @apply flex-1 overflow-y-auto;
 }
 
 .deposit-step {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    @apply p-6;
 }
 
 /* Grupos de Seção */
 .section-group {
-    padding: 0;
+    @apply p-6 pt-0;
 }
 
 .section-divider {
@@ -193,7 +203,7 @@
 /* Summary Section */
 .summary-section {
     background: rgba(0, 0, 0, 0.2);
-    padding: 1.5rem 2rem;
+    @apply p-6;
     margin: 0 -2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -244,11 +254,8 @@
 
 /* Timer Container */
 .timer-container {
+    background: transparent;
     text-align: center;
-    margin-bottom: 2.5rem;
-    padding: 1.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
 }
 
 .timer {
@@ -258,32 +265,47 @@
 }
 
 .timer-text {
-    color: var(--text-color);
-    opacity: 0.7;
+    color: #9CA3AF;
     font-size: 0.875rem;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 /* QR Code Section */
 .qr-section {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    align-items: center;
+    @apply flex flex-col items-center gap-8;
+    @apply p-10;
+    @apply bg-gradient-to-b from-black/20 to-black/10;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qr-instructions {
+    text-align: center;
+    color: #9CA3AF;
+    font-size: 0.875rem;
+    margin: 1rem;
 }
 
 .qr-wrapper {
-    background: white;
-    padding: 1rem;
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    @apply bg-[#1A1D24] border border-gray-800;
+    padding: 2rem;
+    border-radius: 16px;
+    @apply flex items-center justify-center;
+}
+
+/* Estilo para o QR Code */
+:deep(.qrcode > img) {
+    @apply invert; /* Inverte as cores do QR code para ficar branco */
+    margin: 0 auto; /* Centraliza horizontalmente */
 }
 
 /* PIX Code Container */
 .pix-code-container {
     width: 100%;
+    @apply mt-6;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem;
 }
 
 .pix-label {
@@ -299,23 +321,25 @@
 
 .pix-code-input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.75rem;
+    padding: 0.875rem 1rem;
     border-radius: 8px;
     color: var(--text-color);
     font-size: 0.875rem;
+    font-family: monospace;
 }
 
 .copy-button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0 1rem;
-    background: var(--ci-primary-color);
+    padding: 0 1.25rem;
+    background: #0284c7;
     color: white;
     border-radius: 8px;
     font-weight: 500;
+    transition: all 0.2s;
 }
 
 /* Mobile Payment Section */
@@ -509,9 +533,10 @@
 
 /* Valor do Depósito Display */
 .deposit-amount-display {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
-    border-radius: 12px;
-    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
     text-align: center;
     margin-bottom: 2rem;
 }
@@ -520,30 +545,35 @@
     display: block;
     color: #9CA3AF;
     font-size: 0.875rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .amount-value {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 600;
     color: var(--ci-primary-color);
+    line-height: 1.2;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 /* Timer Container */
 .timer-container {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
 }
 
 .timer {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: bold;
     color: var(--ci-primary-color);
+    line-height: 1;
     margin-bottom: 0.5rem;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .timer-text {
@@ -551,30 +581,42 @@
     font-size: 0.875rem;
 }
 
-/* QR Code Section */
+/* QR Section */
 .qr-section {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    align-items: center;
+    @apply flex flex-col items-center gap-8 p-8;
+    @apply bg-gradient-to-b from-black/20 to-black/10;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qr-instructions {
+    text-align: center;
+    color: #9CA3AF;
+    @apply flex flex-col gap-2;
 }
 
 .qr-wrapper {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    border-radius: 16px;
+    @apply flex items-center justify-center;
 }
 
 /* PIX Code Container */
 .pix-code-container {
     width: 100%;
+    @apply mt-6;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem;
 }
 
 .pix-label {
     color: #9CA3AF;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     font-size: 0.875rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .copy-wrapper {
@@ -592,7 +634,7 @@
     font-size: 0.875rem;
     font-family: monospace;
 }
-
+ 
 .copy-button {
     display: flex;
     align-items: center;
@@ -615,198 +657,90 @@
 
 /* Responsividade */
 @media (max-width: 768px) {
-    .qr-wrapper {
-        padding: 1rem;
-    }
-
-    .deposit-amount-display {
-        padding: 1.25rem;
-    }
-
-    .timer-container {
-        padding: 1.25rem;
-    }
-}
-
-/* PIX Step Styles */
-.pix-step {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 1.5rem;
-}
-
-.pix-header {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-/* Valor do Depósito Display */
-.deposit-amount-display {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-}
-
-.amount-label {
-    display: block;
-    color: #9CA3AF;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-}
-
-.amount-value {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--ci-primary-color);
-    line-height: 1.2;
-}
-
-/* Timer Container */
-.timer-container {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-}
-
-.timer {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--ci-primary-color);
-    line-height: 1;
-    margin-bottom: 0.5rem;
-}
-
-.timer-text {
-    color: #9CA3AF;
-    font-size: 0.875rem;
-}
-
-/* QR Section */
-.qr-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.qr-instructions {
-    text-align: center;
-    color: #9CA3AF;
-    font-size: 0.875rem;
-}
-
-.qr-wrapper {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-/* PIX Code Container */
-.pix-code-container {
-    width: 100%;
-}
-
-.pix-label {
-    color: #9CA3AF;
-    margin-bottom: 0.75rem;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-.copy-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.pix-code-input {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem;
-    border-radius: 12px;
-    color: var(--text-color);
-    font-size: 0.875rem;
-    font-family: monospace;
-}
-
-.copy-button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: var(--ci-primary-color);
-    color: white;
-    border-radius: 12px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.copy-button:hover {
-    opacity: 0.9;
-}
-
-.copy-button:active {
-    transform: scale(0.98);
-}
-
-/* Responsividade */
-@media (min-width: 768px) {
-    .copy-wrapper {
-        flex-direction: row;
-    }
-
-    .copy-button {
-        width: auto;
-        padding: 0 1.5rem;
-    }
-
-    .pix-code-input {
-        text-align: left;
-    }
-
-    .qr-wrapper {
-        padding: 2rem;
-    }
-}
-
-@media (max-width: 767px) {
     .pix-step {
-        padding: 1rem;
+        @apply flex-1 flex flex-col gap-4 p-4;
+    }
+
+    .qr-section {
+        @apply flex-1 flex flex-col gap-6 p-6;
     }
 
     .deposit-amount-display,
     .timer-container {
-        padding: 1.25rem;
+        padding: 1.5rem;
     }
 
-    .qr-section {
-        padding: 1.5rem 1rem;
-    }
-
-    .timer {
-        font-size: 2rem;
+    .qr-wrapper {
+        padding: 1.5rem;
+        @apply mx-auto; /* Centraliza na versão mobile */
+        max-width: 280px;
     }
 
     .amount-value {
         font-size: 1.75rem;
     }
 
-    .copy-button span {
-        display: inline-block;
+    .timer {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .pix-step {
+        @apply flex-1 flex flex-col gap-4;
+        @apply min-h-full;
+        @apply p-4;
+    }
+
+    .section-group {
+        @apply p-0;
+    }
+
+    .qr-section {
+        @apply flex-1 flex flex-col gap-6;
+        @apply p-6;
+    }
+
+    .deposit-amount-display,
+    .timer-container {
+        padding: 1.5rem;
+    }
+
+    .qr-wrapper {
+        padding: 1.5rem;
+        @apply mx-auto; /* Centraliza na versão mobile */
+        max-width: 280px;
+    }
+
+    .amount-value {
+        font-size: 1.75rem;
+    }
+
+    .timer {
+        font-size: 2rem;
+    }
+
+    .modal-content {
+        @apply h-[calc(100vh-64px)] overflow-y-auto; /* Altura total menos header com scroll */
+    }
+
+    /* Ajusta o container do timer para ficar no final da tela */
+    .timer-container {
+        @apply mt-auto mb-4;
+    }
+}
+
+@media (max-width: 380px) {
+    .copy-wrapper {
+        @apply flex-col;
+    }
+
+    .copy-button {
+        @apply w-full justify-center py-3;
+    }
+
+    .pix-code-input {
+        @apply text-center;
     }
 }
 </style>
@@ -814,32 +748,17 @@
 <template>
     <Transition name="modal">
         <div v-if="modalStore.showDepositModal" class="modal-backdrop">
-            <!-- Modal de Confirmação -->
-            <div v-if="showCloseConfirmation" class="confirmation-modal">
-                <div class="confirmation-content">
-                    <h3>Tem certeza?</h3>
-                    <p>Seu processo de depósito será cancelado.</p>
-                    <div class="confirmation-buttons">
-                        <button @click="confirmClose" class="confirm-btn">Sim, cancelar</button>
-                        <button @click="showCloseConfirmation = false" class="cancel-btn">Não, continuar</button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Modal Principal -->
             <div class="modal-container" @click.stop>
                 <div class="modal-header">
                     <div class="header-content">
-                        <button 
-                            v-if="showPixQRCode" 
-                            @click="goBack" 
-                            class="back-button"
-                        >
+                        <button v-if="showPixQRCode" @click="goBack" class="back-button">
                             <i class="fa-light fa-arrow-left"></i>
                         </button>
-                        <h2 class="modal-title">
-                            {{ showPixQRCode ? 'Finalizar Depósito' : 'Novo Depósito' }}
-                        </h2>
+                        <div>
+                            <h2 class="modal-title">Depositar</h2>
+                            <p class="modal-subtitle">Adicione saldo à sua conta</p>
+                        </div>
                     </div>
                     <button @click="handleClose" class="close-button">
                         <i class="fa-light fa-x"></i>
@@ -849,7 +768,7 @@
                 <div class="modal-content">
                     <!-- Step 1: Valor -->
                     <div v-if="!showPixQRCode" class="deposit-step">
-                        <div class="section-group">
+                        <div class="section-group"> 
                             <div class="amount-input-container">
                                 <label class="input-label">Valor do depósito</label>
                                 <div class="input-wrapper">
@@ -866,7 +785,7 @@
 
                             <div class="section-divider"></div>
 
-                            <div class="quick-values-section">
+                            <div class="quick-values-section"> 
                                 <label class="section-label">Valores sugeridos</label>
                                 <div class="quick-values-grid">
                                     <button 
@@ -910,52 +829,45 @@
                     </div>
 
                     <!-- Step 2: QR Code -->
-                    <div v-else class="pix-step">
-                        <!-- Valor e Timer -->
-                        <div class="pix-header">
-                            <div class="deposit-amount-display">
-                                <span class="amount-label">Valor a depositar</span>
-                                <span class="amount-value">{{ formatPrice(amount) }}</span>
-                            </div>
-                            
-                            <div class="timer-container">
-                                <div class="timer">{{ formattedTimer }}</div>
-                                <p class="timer-text">Tempo restante para pagamento</p>
+                    <div v-if="showPixQRCode" class="pix-step">
+                        <p class="qr-instructions">Escaneie a imagem para realizar o pagamento</p>
+                        
+                        <div class="qr-wrapper">
+                            <QRCodeVue3
+                                :value="qrcodecopypast"
+                                :width="240"
+                                :height="240"
+                                :qrOptions="{ typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'H' }"
+                                :imageOptions="{ hideBackgroundDots: true, imageSize: 0.4, margin: 0 }"
+                            />
+                        </div>
+
+                        <ol class="qr-instructions">
+                            <li>1. Leia o código QR acima no aplicativo Pix</li>
+                            <li>2. Conclua o depósito com seu banco</li>
+                            <li>3. O saldo de R$ {{ amount.toFixed(2) }} e qualquer bônus de depósito aplicável serão creditados</li>
+                        </ol>
+
+                        <!-- Código PIX -->
+                        <div class="pix-code-container">
+                            <div class="copy-wrapper">
+                                <input 
+                                    type="text" 
+                                    :value="qrcodecopypast" 
+                                    readonly 
+                                    class="pix-code-input"
+                                />
+                                <button @click="copyQRCode" class="copy-button">
+                                    <i class="fa-regular fa-copy"></i>
+                                    <span>Copiar Código</span>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- QR Code Section -->
-                        <div class="qr-section">
-                            <div class="qr-instructions">
-                                <p>Escaneie o QR Code ou copie o código PIX</p>
-                            </div>
-
-                            <div class="qr-wrapper">
-                                <QRCodeVue3
-                                    :value="qrcodecopypast"
-                                    :width="240"
-                                    :height="240"
-                                    :qrOptions="{ typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'H' }"
-                                    :imageOptions="{ hideBackgroundDots: true, imageSize: 0.4, margin: 0 }"
-                                />
-                            </div>
-                            
-                            <!-- Código PIX -->
-                            <div class="pix-code-container">
-                                <p class="pix-label">Código PIX para copiar</p>
-                                <div class="copy-wrapper">
-                                    <input 
-                                        type="text" 
-                                        :value="qrcodecopypast" 
-                                        readonly 
-                                        class="pix-code-input"
-                                    />
-                                    <button @click="copyQRCode" class="copy-button">
-                                        <i class="fa-regular fa-copy"></i>
-                                        <span>Copiar código</span>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="timer-container">
+                            <p class="timer-text">O tempo para você pagar acaba em:</p>
+                            <div class="timer">{{ formattedTimer }}</div>
+                            <div class="timer-progress"></div>
                         </div>
                     </div>
                 </div>

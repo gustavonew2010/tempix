@@ -11,7 +11,10 @@
             <div class="flex items-center justify-between">
                 <!-- Título e Navegação -->
                 <div class="flex items-center gap-3">
-                    <h2 class="provider-title">{{ $t(provider.name) }}</h2>
+                    <h2 class="provider-title">
+                        <span class="hide-on-mobile">Jogos da </span>
+                        {{ $t(provider.name) }}
+                    </h2>
                     <div class="navigation-buttons">
                         <button @click.prevent="ckCarousel.prev()" 
                                 class="nav-button celular-providers-setas">
@@ -74,7 +77,7 @@ export default {
         return {
             isLoading: false,
             settingsGames: {
-                itemsToShow: 2.5,
+                itemsToShow: 3,
                 snapAlign: 'start',
             },
             breakpointsGames: {
@@ -187,38 +190,99 @@ export default {
     margin: 0 -0.5rem; /* Compensa o padding do header */
 }
 
-/* Responsivo */
+/* Responsivo refinado */
 @media (max-width: 768px) {
     .game-list {
-        margin-bottom: 1.5rem;
-    }
-    
-    .provider-header {
         margin-bottom: 0.75rem;
     }
     
+    .provider-header {
+        margin-bottom: 0.5rem;
+        padding: 0 0.5rem;
+    }
+    
+    .hide-on-mobile {
+        display: none; /* Esconde "Jogos da" no mobile */
+    }
+    
     .provider-title {
-        font-size: 1rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .nav-button {
-        width: 24px;
-        height: 24px;
+        width: 20px; /* Ainda menor */
+        height: 20px;
+        min-width: 20px; /* Evita que o botão encolha */
+    }
+    
+    .nav-button i {
+        font-size: 8px; /* Ícones ainda menores */
     }
     
     .view-all-link {
-        padding: 4px 10px;
-        font-size: 0.75rem;
+        padding: 3px 6px;
+        font-size: 0.625rem; /* Ainda menor */
+        white-space: nowrap;
+        min-width: fit-content; /* Garante que não quebre */
+    }
+
+    .view-all-link i {
+        font-size: 0.5rem;
+    }
+
+    /* Ajuste dos containers */
+    .flex.items-center.gap-3 {
+        gap: 0.25rem !important;
+    }
+
+    .flex.items-center.justify-between {
+        gap: 0.25rem;
+    }
+
+    .navigation-buttons {
+        gap: 0.25rem;
+        margin-left: 0.25rem;
     }
 }
 
 @media (max-width: 600px) {
-    .celular-providers-setas {
-        display: none;
+    .game-list {
+        margin-bottom: 0.5rem;
     }
-    
+
     .provider-header {
-        padding: 0 0.75rem;
+        padding: 0 0.25rem;
+    }
+
+    .provider-header .flex {
+        gap: 0.25rem;
+    }
+
+    /* Container principal mais compacto */
+    .flex.items-center.justify-between {
+        padding: 0 0.25rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .provider-title {
+        font-size: 0.688rem;
+        max-width: 100px; /* Ainda menor para telas muito pequenas */
+    }
+
+    .nav-button {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+    }
+
+    .view-all-link {
+        padding: 2px 4px;
+        font-size: 0.563rem;
     }
 }
 </style>

@@ -2,7 +2,10 @@
   <section class="game-section" v-if="games && games.length > 0">
     <header class="section-header">
       <div class="header-left">
-        <h2 class="section-title_2">{{ title }}</h2>
+        <h2 class="section-title_2">
+          <span class="hide-on-mobile">Jogos da </span>
+          {{ title }}
+        </h2>
         <div class="nav-buttons">
           <button 
             class="nav-btn" 
@@ -86,10 +89,10 @@ const handleNext = () => {
   }
 };
 
-// Breakpoints responsivos com gap reduzido
+// Breakpoints responsivos atualizados
 const breakpoints = {
   300: {
-    itemsToShow: 2,
+    itemsToShow: 3,
     snapAlign: 'start',
   },
   576: {
@@ -211,38 +214,19 @@ const breakpoints = {
 @media (max-width: 768px) {
   .section-header {
     padding: 0 8px;
+    margin-bottom: 8px;
   }
   
-  .games-carousel {
-    padding: 0 8px;
-  }
-  
-  .nav-btn {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .nav-buttons {
-    gap: 4px;
-    margin-left: 12px;
+  .hide-on-mobile {
+    display: none; /* Esconde "Jogos da" no mobile */
   }
   
   .section-title_2 {
-    font-size: 16px;
-  }
-  
-  :deep(.carousel__track) {
-    gap: 3px;
-  }
-}
-
-@media (max-width: 576px) {
-  .game-section {
-    padding: 8px 0;
-  }
-  
-  .section-header {
-    margin-bottom: 8px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .nav-btn {
@@ -250,12 +234,44 @@ const breakpoints = {
     height: 24px;
   }
   
-  .section-title_2 {
-    font-size: 14px;
+  .nav-buttons {
+    gap: 4px;
+    margin-left: 8px;
   }
   
-  :deep(.carousel__track) {
-    gap: 2px;
+  .see-all-button {
+    padding: 3px 8px;
+    font-size: 0.688rem;
+    gap: 4px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .game-section {
+    padding: 6px 0;
+  }
+  
+  .section-header {
+    margin-bottom: 6px;
+  }
+  
+  .nav-btn {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .section-title_2 {
+    font-size: 0.688rem;
+    max-width: 100px;
+  }
+  
+  .see-all-button {
+    padding: 2px 6px;
+    font-size: 0.625rem;
   }
 }
 

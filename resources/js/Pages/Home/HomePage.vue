@@ -29,7 +29,11 @@
 }
 
 .categories-margin {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
+    max-width: 1000px; /* Limita a largura máxima */
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
 }
 
 .show-btn-scroll-top {
@@ -94,9 +98,37 @@
 
 @media (max-width:768px) {
     .categories-margin {
-        margin-top: 0;
-        margin-left: 20px;
-        margin-bottom: 0.25rem;
+        margin: 0;
+        padding: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+
+    .categories-margin::-webkit-scrollbar {
+        display: none; /* Chrome, Safari and Opera */
+    }
+
+    .categories-container {
+        display: flex;
+        padding: 0.5rem 1rem;
+        gap: 1rem;
+        width: max-content;
+    }
+
+    .category-item {
+        flex: 0 0 auto;
+        width: 70px; /* Largura fixa para cada item */
+    }
+
+    .category-icon {
+        padding: 0.6rem;
+    }
+
+    .category-name {
+        font-size: 0.7rem;
+        margin-top: 0.5rem;
     }
 
     #svg-lupa {
@@ -114,7 +146,11 @@
 
     .padding-mobile-banner {
         padding: 0;
-        padding-top: 40px;
+        padding-top: 20px; /* Reduzido o padding no mobile */
+    }
+
+    .search-section {
+        margin-bottom: 0.5rem; /* Reduzido margin no mobile */
     }
 }
 
@@ -168,7 +204,7 @@
 
 .search-container {
     position: relative;
-    z-index: 40;
+    z-index: 30;
     width: 100%;
     margin: 1rem 0;
 }
@@ -183,14 +219,14 @@
 
 .category-item {
     position: relative;
-    padding: 10px;
+    padding: 8px; /* Reduzido de 10px para 8px */
     overflow: hidden;
 }
 
 .category-icon {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
-    padding: 1.2rem;
+    padding: 0.8rem; /* Reduzido de 1.2rem para 0.8rem */
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 1;
@@ -458,7 +494,7 @@
 
 .search-container {
     position: relative;
-    z-index: 40;
+    z-index: 30;
     margin: 1rem 0;
     width: 100%;
 }
@@ -538,111 +574,6 @@
     height: 100%;
     object-fit: cover;
     border-radius: 16px;
-}
-
-.latest-bets-container {
-    @apply w-full px-4 mt-8 mb-16;
-}
-
-.latest-bets-wrapper {
-    @apply bg-gray-900/40 rounded-2xl backdrop-blur-sm;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-.latest-bets-header {
-    @apply p-6 border-b border-gray-700/50;
-}
-
-.header-content {
-    @apply flex items-center;
-}
-
-.header-content h2 {
-    @apply text-xl font-semibold text-white;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.table-scroll-container {
-    @apply overflow-x-auto;
-    mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
-}
-
-.latest-bets-table {
-    @apply w-full min-w-[800px];
-}
-
-.table-header {
-    @apply grid grid-cols-6 py-4 px-6 text-sm font-medium text-gray-400;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.table-body {
-    @apply divide-y divide-gray-800/30;
-}
-
-.table-row {
-    @apply grid grid-cols-6 py-4 px-6 text-sm text-gray-300 transition-colors duration-200;
-    position: relative;
-}
-
-.table-row:hover {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.table-row.win {
-    background: rgba(34, 197, 94, 0.05);
-}
-
-.table-row.loss {
-    background: rgba(239, 68, 68, 0.05);
-}
-
-.cell {
-    @apply flex items-center;
-}
-
-.multiplier-cell, .prize-cell {
-    @apply font-medium;
-}
-
-.win .multiplier-cell,
-.win .prize-cell {
-    @apply text-green-400;
-}
-
-.loss .multiplier-cell,
-.loss .prize-cell {
-    @apply text-red-400;
-}
-
-@keyframes floatAnimation {
-    0%, 100% {
-        transform: translateY(0) rotateX(1deg);
-    }
-    50% {
-        transform: translateY(-10px) rotateX(-1deg);
-    }
-}
-
-/* Responsivo */
-@media (max-width: 768px) {
-    .latest-bets-header {
-        @apply p-4;
-    }
-
-    .header-content h2 {
-        @apply text-lg;
-    }
-
-    .table-header, .table-row {
-        @apply px-4 py-3;
-        font-size: 0.75rem;
-    }
-
-    .cell i {
-        @apply text-xs;
-    }
 }
 
 .game-modal-overlay {
@@ -1147,7 +1078,7 @@
 .banner-section {
     position: relative;
     width: 100%;
-    margin-bottom: 2rem;
+    margin-bottom: 0; /* Removido margin-bottom */
 }
 
 .auth-overlay {
@@ -2554,13 +2485,71 @@
     opacity: 0.7;
     cursor: not-allowed;
 }
+
+.banner-section {
+    position: relative;
+    width: 100%;
+    margin-bottom: 0; /* Removido margin-bottom */
+}
+
+.search-section {
+    position: relative;
+    z-index: 20;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.padding-mobile-banner {
+    padding-top: 100px;
+}
+
+@media (max-width: 768px) {
+    .padding-mobile-banner {
+        padding-top: 20px; /* Reduzido o padding no mobile */
+    }
+
+    .search-section {
+        margin-bottom: 0.5rem; /* Reduzido margin no mobile */
+    }
+}
+
+/* Estilo base para os indicadores */
+.banner-indicators {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .banner-indicators {
+        position: static; /* Remove o posicionamento absoluto no mobile */
+        transform: none;
+        justify-content: center;
+        padding: 0.5rem 0;
+        margin-top: -0.5rem; /* Ajuste fino para aproximar do banner */
+    }
+
+    .padding-mobile-banner {
+        padding-top: 20px;
+    }
+
+    /* Container do banner para melhor organização no mobile */
+    .banner-container {
+        display: flex;
+        flex-direction: column;
+    }
+}
 </style>
 <template>
     <BaseLayout>
         <!-- Adicione os listeners no SideBarComponent -->
         <SideBarComponent
             :categories="categories"
-            :sidebar="sidebar"
+            :sidebar="sidebarStatus"
             @select-category="handleCategorySelect"
         />
         <div class="home-container">
@@ -2609,60 +2598,70 @@
             </template>
             <template v-else>
                 <!-- Banner Section -->
-                <section class="banner-section" ref="bannerSection">
-                    <template v-if="showLoginMessage">
-                        <div class="auth-overlay">
-                            <div class="auth-content">
-                                <div class="auth-icon">
-                                    <i class="fa-solid fa-shield-exclamation"></i>
-                                </div>
-                                <h2 class="auth-title">Você precisa entrar para jogar.</h2>
-                                <button @click="openAuthModal" class="auth-button">
-                                    <i class="fa-solid fa-right-to-bracket"></i>
-                                    Entrar
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                    <template v-else>
-                        <div class="carousel">
-                            <div class="carousel-container">
-                                <div class="carousel-track" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-                                    <div class="carousel-slide">
-                                        <img 
-                                            src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVX1ANJXPCQFGYHRCTY33R.png" 
-                                            alt="Banner 1"
-                                            class="banner-image"
-                                        >
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img 
-                                            src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVYPK805BB7Q482965KTY8.png" 
-                                            alt="Banner 2"
-                                            class="banner-image"
-                                        >
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img 
-                                            src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVVC1MYKKJJG6M5CPEZKWC.png" 
-                                            alt="Banner 3"
-                                            class="banner-image"
-                                        >
+                <section class="banner-section">
+                    <div class="banner-container">
+                        <!-- Banner Carousel -->
+                        <div class="banner-carousel">
+                            <template v-if="showLoginMessage">
+                                <div class="auth-overlay">
+                                    <div class="auth-content">
+                                        <div class="auth-icon">
+                                            <i class="fa-solid fa-shield-exclamation"></i>
+                                        </div>
+                                        <h2 class="auth-title">Você precisa entrar para jogar.</h2>
+                                        <button @click="openAuthModal" class="auth-button">
+                                            <i class="fa-solid fa-right-to-bracket"></i>
+                                            Entrar
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="custom-pagination">
-                                <button 
-                                    v-for="index in 3" 
-                                    :key="index"
-                                    @click="goToSlide(index - 1)"
-                                    :class="['pagination-dot', { active: currentSlide === index - 1 }]"
-                                >
-                                </button>
-                            </div>
+                            </template>
+                            <template v-else>
+                                <div class="carousel">
+                                    <div class="carousel-container">
+                                        <div class="carousel-track" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+                                            <div class="carousel-slide">
+                                                <img 
+                                                    src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVX1ANJXPCQFGYHRCTY33R.png" 
+                                                    alt="Banner 1"
+                                                    class="banner-image"
+                                                >
+                                            </div>
+                                            <div class="carousel-slide">
+                                                <img 
+                                                    src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVYPK805BB7Q482965KTY8.png" 
+                                                    alt="Banner 2"
+                                                    class="banner-image"
+                                                >
+                                            </div>
+                                            <div class="carousel-slide">
+                                                <img 
+                                                    src="https://casb7k.s3.sa-east-1.amazonaws.com/uploads/storage/01JHGVVC1MYKKJJG6M5CPEZKWC.png" 
+                                                    alt="Banner 3"
+                                                    class="banner-image"
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="custom-pagination">
+                                        <button 
+                                            v-for="index in 3" 
+                                            :key="index"
+                                            @click="goToSlide(index - 1)"
+                                            :class="['pagination-dot', { active: currentSlide === index - 1 }]"
+                                        >
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
-                    </template>
+                        
+                        <!-- Indicadores -->
+                        <div class="banner-indicators">
+                            <!-- ... indicadores do banner ... -->
+                        </div>
+                    </div>
                 </section>
             </template>
 
@@ -2749,59 +2748,7 @@
             </div>
 
             <!-- Latest Bets Section -->
-            <div v-if="!activeCategory" class="latest-bets-container">
-                <div class="latest-bets-wrapper">
-                    <div class="latest-bets-header">
-                        <div class="header-content">
-                            <i class="fa-solid fa-chart-line-up text-primary-500 mr-2"></i>
-                            <h2>Últimas Apostas</h2>
-                        </div>
-                    </div>
-                    <div class="table-scroll-container">
-                        <div class="latest-bets-table">
-                            <div class="table-header">
-                                <div class="header-cell">Horário</div>
-                                <div class="header-cell">Jogo</div>
-                                <div class="header-cell">Usuário</div>
-                                <div class="header-cell">Valor da Aposta</div>
-                                <div class="header-cell">Multiplicador</div>
-                                <div class="header-cell">Premiação</div>
-                            </div>
-                            <div class="table-body">
-                                <div v-for="bet in latestBets" 
-                                     :key="bet.id" 
-                                     class="table-row"
-                                     :class="{ 'win': bet.multiplier > 1, 'loss': bet.multiplier < 1 }">
-                                    <div class="cell time-cell">
-                                        <i class="fa-regular fa-clock mr-2 opacity-50"></i>
-                                        {{ bet.time }}
-                                    </div>
-                                    <div class="cell game-cell">
-                                        <i class="fa-solid fa-gamepad-modern mr-2 opacity-50"></i>
-                                        {{ bet.game }}
-                                    </div>
-                                    <div class="cell user-cell">
-                                        <i class="fa-regular fa-user mr-2 opacity-50"></i>
-                                        {{ bet.user }}
-                                    </div>
-                                    <div class="cell amount-cell">
-                                        <i class="fa-solid fa-money-bill-wave mr-2 opacity-50"></i>
-                                        R$ {{ bet.amount.toFixed(2) }}
-                                    </div>
-                                    <div class="cell multiplier-cell">
-                                        <i class="fa-solid fa-chart-line mr-2 opacity-50"></i>
-                                        x{{ bet.multiplier.toFixed(3) }}
-                                    </div>
-                                    <div class="cell prize-cell">
-                                        <i class="fa-solid fa-coins mr-2 opacity-50"></i>
-                                        R$ {{ bet.prize.toFixed(2) }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <LatestBetsSection v-if="!activeCategory" />
 
             <!-- Auth Modal -->
             <AuthModal 
@@ -2859,6 +2806,8 @@ import GameSection from './Components/GameSection.vue';
 import AuthModal from '@/Components/Nav/AuthModal.vue'
 import SideBarComponent from '@/Components/Nav/SideBarComponent.vue'
 import SearchComponent from '@/Components/Search/SearchComponent.vue';
+import { sidebarStore } from "@/Stores/SideBarStore.js";
+import LatestBetsSection from './Components/LatestBetsSection.vue';
 
 export const emitter = mitt();
 
@@ -2887,7 +2836,8 @@ export default {
         GameSection,
         AuthModal,
         SideBarComponent,
-        SearchComponent
+        SearchComponent,
+        LatestBetsSection
     },
     data() {
         return {
@@ -2971,8 +2921,6 @@ export default {
             showSearchResults: false,
             searchResults: [],
             isSearchLoading: false,
-            latestBets: [],
-            updateInterval: null,
             allGamesNames: [], // Será preenchido com os nomes dos jogos reais
             activeGame: null,
             gameUrl: null,
@@ -3006,6 +2954,7 @@ export default {
         const ckCarouselOriginals = ref(null)
         const fgCarousel = ref(null)
         const router = useRouter();
+        const sidebarMenuStore = sidebarStore();
 
         onMounted(() => {
             // Prefetch components when idle
@@ -3020,7 +2969,8 @@ export default {
         return {
             ckCarouselOriginals,
             fgCarousel,
-            router
+            router,
+            sidebarMenuStore
         };
 
     },
@@ -3066,6 +3016,9 @@ export default {
         },
         hasMoreResults() {
             return this.searchResults.length < this.searchPagination.total;
+        },
+        sidebarStatus() {
+            return this.sidebarMenuStore.getSidebarStatus;
         }
     },
     async mounted() {
@@ -3099,14 +3052,6 @@ export default {
                 this.showSearchResults = false;
             }
         });
-
-        // Inicializa com algumas apostas
-        for (let i = 0; i < 10; i++) {
-            this.latestBets.push(this.generateRandomBet());
-        }
-
-        // Inicia as atualizações
-        this.updateBets();
 
         // Adiciona os listeners usando o emitter
         emitter.on('filter-category', (category) => {
@@ -3427,21 +3372,6 @@ export default {
             };
         },
 
-        updateBets() {
-            // Atualiza a cada 3-7 segundos (intervalo aleatório para parecer mais natural)
-            const updateInterval = Math.floor(Math.random() * 4000) + 3000;
-            
-            setTimeout(() => {
-                // Remove a última aposta
-                this.latestBets.pop();
-                
-                // Adiciona nova aposta no início
-                this.latestBets.unshift(this.generateRandomBet());
-                
-                // Continua o ciclo
-                this.updateBets();
-            }, updateInterval);
-        },
         async handleCategoryClick(category) {
             console.log('Category clicked:', category);
 
