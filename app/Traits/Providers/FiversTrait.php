@@ -495,40 +495,34 @@ trait FiversTrait
         ]);
 
         try {
-            // Validação das credenciais primeiro
-            if (!self::getCredentials()) {
-                return response()->json([
-                    'msg' => 'INVALID_CREDENTIALS',
-                    'balance' => 0
-                ]);
-            }
-
-            // Busca a carteira uma única vez
-            $wallet = Wallet::where('user_id', $request->user_code)
-                           ->where('active', 1)
-                           ->lockForUpdate()
-                           ->first();
-
-            if (!$wallet) {
-                return response()->json([
-                    'msg' => 'INVALID_USER',
-                    'balance' => 0
-                ]);
-            }
-
             if ($request->type === 'BALANCE') {
+                $wallet = Wallet::where('user_id', $request->user_code)
+                              ->where('active', 1)
+                              ->first();
+
+                Log::channel('fivers')->info('Requisição de saldo', [
+                    'user_code' => $request->user_code,
+                    'balance' => $wallet->total_balance ?? 0
+                ]);
+
                 return response()->json([
                     'msg' => 'SUCCESS',
-                    'balance' => $wallet->total_balance
+                    'balance' => $wallet->total_balance ?? 0
                 ]);
             }
 
             if ($request->type === 'WinBet' && isset($request->slot)) {
                 DB::beginTransaction();
                 try {
+                    $wallet = Wallet::where('user_id', $request->user_code)
+                                  ->where('active', 1)
+                                  ->lockForUpdate()
+                                  ->first();
+
                     // Verifica transação duplicada
                     $existingTx = Order::where('transaction_id', $request->slot['txn_id'])->first();
                     if ($existingTx) {
+                        DB::commit();
                         return response()->json([
                             'msg' => 'SUCCESS',
                             'balance' => $wallet->total_balance
@@ -550,32 +544,43 @@ trait FiversTrait
                     }
 
                     $wallet->refresh();
+
+                    // Log do saldo após a transação
+                    Log::channel('fivers')->info('Saldo após transação', [
+                        'txn_id' => $request->slot['txn_id'],
+                        'user_code' => $request->user_code,
+                        'new_balance' => $wallet->total_balance,
+                        'expected_balance' => $request->slot['user_after_balance']
+                    ]);
+
                     DB::commit();
 
+                    // Broadcast do novo saldo
                     broadcast(new BalanceUpdated($request->user_code, $wallet->total_balance))->toOthers();
 
                     return response()->json([
                         'msg' => 'SUCCESS',
-                        'balance' => $wallet->total_balance
+                        'balance' => number_format($wallet->total_balance, 2, '.', '')
                     ]);
 
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::channel('fivers')->error('Erro na transação', [
                         'error' => $e->getMessage(),
-                        'user_code' => $request->user_code
+                        'user_code' => $request->user_code,
+                        'txn_id' => $request->slot['txn_id'] ?? null
                     ]);
 
                     return response()->json([
                         'msg' => 'INSUFFICIENT_FUNDS',
-                        'balance' => $wallet->total_balance
+                        'balance' => $wallet->total_balance ?? 0
                     ]);
                 }
             }
 
             return response()->json([
-                'msg' => 'INVALID_REQUEST_TYPE',
-                'balance' => $wallet->total_balance
+                'msg' => 'SUCCESS',
+                'balance' => $wallet->total_balance ?? 0
             ]);
 
         } catch (\Exception $e) {
