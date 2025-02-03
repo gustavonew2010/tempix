@@ -2547,6 +2547,42 @@
         flex-direction: column;
     }
 }
+
+/* Adicione estes estilos */
+.mobile-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #000;
+}
+
+.game-header {
+    position: relative;
+    z-index: 10;
+}
+
+.game-container {
+    height: calc(100vh - 60px); /* Ajuste conforme a altura do seu header */
+}
+
+/* Esconde o BottomNavComponent quando o jogo está ativo no mobile */
+@media (max-width: 768px) {
+    .mobile-fullscreen + .mobile-menu-wrapper {
+        display: none !important;
+    }
+    
+    .mobile-fullscreen .game-header {
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .mobile-fullscreen .game-container {
+        height: calc(100vh - 56px); /* Ajuste para mobile */
+    }
+}
 </style>
 <template>
     <BaseLayout>
@@ -2560,13 +2596,13 @@
             <!-- Apenas a seção do banner/jogo alterna -->
             <template v-if="activeGame">
                 <!-- Container do Jogo -->
-                <div class="game-section w-full bg-gray-900 relative">
+                <div v-if="activeGame" class="game-section w-full bg-gray-900 relative" :class="{'mobile-fullscreen': activeGame}">
                     <div class="game-header flex items-center justify-between p-4 bg-gray-800">
-                        <h3 class="text-white text-lg font-medium">
-                            {{ activeGame.game_name }}
-                        </h3>
-                        <button @click="closeGameModal" class="text-white hover:text-primary-500">
-                            <i class="fas fa-times"></i>
+                        <button @click="closeGameModal" class="text-white hover:text-primary-500 flex items-center gap-2">
+                            <i class="fas fa-arrow-left"></i>
+                            <h3 class="text-white text-lg font-medium">
+                                {{ activeGame.game_name }}
+                            </h3>
                         </button>
                     </div>
                     
