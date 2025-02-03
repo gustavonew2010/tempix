@@ -8,19 +8,24 @@
                 
                 <div :class="[sidebar ? 'lg:ml-[65px]' : 'lg:ml-[280px]']">
                     <div class="mx-auto w-full" style="max-width: 1110px">
-                        <!-- Layout Mobile para Jogo -->
-                        <div v-if="isGameActive && isMobile" class="flex items-center h-14 justify-between">
-                            <button @click="goBack" class="text-white flex items-center gap-2">
-                                <i class="fas fa-arrow-left text-lg"></i>
-                                <span class="text-sm font-medium truncate max-w-[200px]">{{ gameTitle }}</span>
-                            </button>
-                        </div>
+                        <div class="flex items-center justify-between h-14">
+                            <!-- Lado Esquerdo -->
+                            <div class="flex-1 flex justify-start">
+                                <!-- Botão Voltar (Mobile + Jogo Ativo) -->
+                                <button v-if="isGameActive" 
+                                        @click="goBack" 
+                                        class="text-white flex items-center">
+                                    <i class="fas fa-arrow-left text-lg"></i>
+                                </button>
+                                
+                                <!-- Logo (Quando não há jogo ativo) -->
+                                <NavBrand v-else 
+                                         :setting="setting" 
+                                         @navigate-home="navigateHome" />
+                            </div>
 
-                        <!-- Layout Normal -->
-                        <div v-else class="flex items-center justify-between">
-                            <NavBrand :setting="setting" @navigate-home="navigateHome" />
-                            
-                            <div class="flex items-center gap-2">
+                            <!-- Lado Direito -->
+                            <div v-if="!isGameActive" class="flex-1 flex justify-end items-center gap-2">
                                 <!-- Botões de Auth apenas quando não autenticado -->
                                 <template v-if="!authStatus">
                                     <AuthButtons 
@@ -724,5 +729,37 @@ export default {
         @apply px-3 text-sm;
         height: 36px;
     }
+    
+    /* Ajustes para o botão de voltar no mobile */
+    button i.fa-arrow-left {
+        @apply text-xl;
+        margin-left: -8px; /* Ajusta o alinhamento */
+    }
+}
+
+/* Ajustes gerais de layout */
+.nav-menu > div {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Centralização dos elementos */
+.flex.items-center.justify-between {
+    max-width: 1110px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Ajuste do espaçamento dos botões */
+.flex.items-center.gap-2 > * {
+    margin-left: 0.5rem;
+}
+
+/* Ajuste do container principal */
+.nav-gradient-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 </style>

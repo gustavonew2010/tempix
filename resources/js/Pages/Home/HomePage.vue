@@ -2551,11 +2551,11 @@
 /* Adicione estes estilos */
 .mobile-fullscreen {
     position: fixed;
-    top: 0;
+    top: 56px; /* Altura do header mobile */
     left: 0;
     width: 100vw;
-    height: 100vh;
-    z-index: 9999;
+    height: calc(100vh - 56px);
+    z-index: 40;
     background: #000;
 }
 
