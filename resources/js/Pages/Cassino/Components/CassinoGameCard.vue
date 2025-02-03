@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onUnmounted } from 'vue';
 
 const props = defineProps({
   game: {
@@ -45,19 +45,35 @@ const providerName = computed(() => {
 });
 
 const handleGameClick = () => {
-  // Rola a página para o topo suavemente
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  
-  // Dispara o evento de abrir o jogo
-  window.dispatchEvent(new CustomEvent('openGame', { 
-    detail: props.game 
-  }));
+  if (window.innerWidth <= 768) { // Verifica se é mobile
+    // Ajusta o layout para tela cheia
+    document.body.style.overflow = 'hidden';
+    
+    // Dispara evento com flag para mobile
+    window.dispatchEvent(new CustomEvent('openGame', { 
+      detail: {
+        ...props.game,
+        isMobile: true
+      }
+    }));
+  } else {
+    // Comportamento desktop normal
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.dispatchEvent(new CustomEvent('openGame', { 
+      detail: props.game 
+    }));
+  }
 };
 
 const handleImageError = (event) => {
   console.error('Erro ao carregar imagem:', props.game);
   event.target.src = '/images/default-game.jpg';
 };
+
+// Limpa os estilos quando o componente é destruído
+onUnmounted(() => {
+  document.body.style.overflow = '';
+});
 </script>
 
 <style scoped>
@@ -201,6 +217,19 @@ const handleImageError = (event) => {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 8px !important;
     padding: 8px !important;
+  }
+}
+
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+  .game-card.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    background: var(--bg-color);
   }
 }
 </style>

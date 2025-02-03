@@ -709,8 +709,7 @@
     color: white;
     cursor: pointer;
     z-index: 10;
-}
- 
+} 
 .game-loading {
     position: absolute;
     inset: 0;
@@ -2032,6 +2031,11 @@
     padding: 0 10px;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
 .carousel-container::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Opera */
