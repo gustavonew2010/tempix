@@ -2634,22 +2634,23 @@
                         
                         <!-- Game Iframe -->
                         <iframe
-                            v-if="gameUrl"
+                            v-if="gameUrl && isAuthenticated"
                             :src="gameUrl"
                             class="w-full h-full border-0"
                             allow="fullscreen"
                         ></iframe>
                         
-                        <!-- Error State -->
-                        <div v-if="!isLoadingGame && !gameUrl" class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center p-8">
-                                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
-                                <p class="text-white text-lg mb-4">{{ errorMessage || 'Não foi possível carregar o jogo' }}</p>
+                        <!-- Mensagem de login necessário -->
+                        <div v-if="!isAuthenticated" class="flex items-center justify-center h-full bg-gray-900">
+                            <div class="text-center p-6">
+                                <i class="fas fa-lock text-4xl text-yellow-500 mb-4"></i>
+                                <h3 class="text-white text-xl mb-4">Login Necessário</h3>
+                                <p class="text-gray-400 mb-4">Faça login para jogar este jogo</p>
                                 <button 
-                                    @click="retryLoadGame" 
+                                    @click="openAuthModal('login')" 
                                     class="px-6 py-2 bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
                                 >
-                                    Tentar Novamente
+                                    Fazer Login
                                 </button>
                             </div>
                         </div>
@@ -3512,6 +3513,11 @@ export default {
         },
 
         async openGameModal(game) {
+            if (!this.isAuthenticated) {
+                this.openAuthModal('login');
+                return;
+            }
+            
             // Rola a página para o topo suavemente
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
@@ -3866,8 +3872,8 @@ export default {
                 document.body.style.overflow = 'auto';
             }
         },
-        openAuthModal() {
-            this.showAuthModal = true;
+        openAuthModal(tab = 'login') {
+            this.$emit('open-auth-modal', tab);
         },
         handleLoginSuccess() {
             this.showAuthModal = false;

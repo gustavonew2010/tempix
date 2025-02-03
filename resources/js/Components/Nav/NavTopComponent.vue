@@ -1,5 +1,5 @@
 <template>
-    <nav :class="['fixed top-10 navtop-color nav-indexx', sidebar ? 'w-full' : 'w-full']">
+    <nav :class="['fixed top-0 navtop-color nav-indexx w-full']">
         <PromoBar v-if="!isGameActive" />
         
         <div class="nav-gradient-container">
@@ -8,24 +8,19 @@
                 
                 <div :class="[sidebar ? 'lg:ml-[65px]' : 'lg:ml-[280px]']">
                     <div class="mx-auto w-full" style="max-width: 1110px">
-                        <div class="flex items-center justify-between">
-                            <!-- Botão de voltar para mobile quando jogo está ativo -->
-                            <template v-if="isGameActive">
-                                <div class="flex items-center gap-3">
-                                    <button @click="goBack" class="text-white flex items-center gap-2">
-                                        <i class="fas fa-arrow-left"></i>
-                                        <span class="text-sm font-medium">Voltar</span>
-                                    </button>
-                                    <h1 class="text-white text-sm font-medium">{{ gameTitle }}</h1>
-                                </div>
-                            </template>
+                        <!-- Layout Mobile para Jogo -->
+                        <div v-if="isGameActive && isMobile" class="flex items-center h-14 justify-between">
+                            <button @click="goBack" class="text-white flex items-center gap-2">
+                                <i class="fas fa-arrow-left text-lg"></i>
+                                <span class="text-sm font-medium truncate max-w-[200px]">{{ gameTitle }}</span>
+                            </button>
+                        </div>
+
+                        <!-- Layout Normal -->
+                        <div v-else class="flex items-center justify-between">
+                            <NavBrand :setting="setting" @navigate-home="navigateHome" />
                             
-                            <!-- Logo normal quando não há jogo ativo -->
-                            <NavBrand v-else 
-                                     :setting="setting" 
-                                     @navigate-home="navigateHome" />
-                            
-                            <div class="flex items-center py-3">
+                            <div class="flex items-center gap-2">
                                 <!-- Botões de Auth apenas quando não autenticado -->
                                 <template v-if="!authStatus">
                                     <AuthButtons 
@@ -35,85 +30,19 @@
                                 </template>
 
                                 <!-- Menu do usuário apenas quando autenticado -->
-                                <div v-else class="flex items-center h-full gap-3">
+                                <div v-else class="flex items-center gap-2">
                                     <button @click="openDepositModal" 
-                                            class="ui-button-blue2 h-10 mr-3 hover:scale-105 transition-transform">
+                                            class="ui-button-blue2 hover:scale-105 transition-transform">
                                         {{ $t('Deposit') }}
                                     </button>
                                     
-                                    <!-- Wallet Balance com margem à direita -->
-                                    <div class="mr-3">
-                                        <WalletBalance />
-                                    </div>
+                                    <WalletBalance />
                                     
-                                    <!-- User Menu com novo design -->
-                                    <div class="flex items-center h-10 margin-teste relative">
-                                        <button type="button" 
-                                                @click="toggleUserDropdown"
-                                                class="profile-button h-full flex items-center"
-                                                aria-expanded="false">
-                                            <span class="sr-only">Open user menu</span>
-                                            <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
-                                                 alt="avatar" 
-                                                 class="w-10 h-10 rounded-full border-2 border-primary">
-                                        </button>
-                                        
-                                        <!-- Dropdown Menu -->
-                                        <div class="user-dropdown absolute right-0 top-[calc(100%+0.5rem)] w-64"
-                                             id="dropdown-user2" 
-                                             :class="{ 'hidden': !showUserDropdown }">
-                                            <div class="p-3 border-b border-gray-700">
-                                                <div class="flex items-center space-x-3">
-                                                    <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
-                                                         alt="avatar" 
-                                                         class="w-12 h-12 rounded-full border-2 border-primary">
-                                                    <div>
-                                                        <p class="text-sm font-bold text-white">{{ userData?.name }}</p>
-                                                        <p class="text-xs text-gray-400">{{ userData?.email }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <ul class="py-2" role="none">
-                                                <li>
-                                                    <RouterLink :to="{ name: 'profileWallet' }" 
-                                                              class="dropdown-item">
-                                                        <i class="fa-duotone fa-wallet text-primary"></i>
-                                                        <span>Carteira</span>
-                                                    </RouterLink>
-                                                </li>
-                                                
-                                                <li>
-                                                    <RouterLink 
-                                                        :to="{ name: 'profileAffiliate' }" 
-                                                        class="dropdown-item"
-                                                        @click="showUserDropdown = false"
-                                                    >
-                                                        <i class="fa-duotone fa-users text-primary"></i>
-                                                        <span>{{ $t('Painel Afiliado') }}</span>
-                                                    </RouterLink>
-                                                </li>
-                                                
-                                                <li>
-                                                    <a @click.prevent="openProfileModal" 
-                                                       href="#" 
-                                                       class="dropdown-item">
-                                                        <i class="fa-duotone fa-user text-primary"></i>
-                                                        <span>{{ $t('Dados da conta') }}</span>
-                                                    </a>
-                                                </li>
-
-                                                <li>
-                                                    <a @click.prevent="logoutAccount" 
-                                                       href="#"
-                                                       class="dropdown-item text-red-500 hover:bg-red-500/10">
-                                                        <i class="fa-duotone fa-right-from-bracket"></i>
-                                                        <span>Sair</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <UserMenu 
+                                        :user-data="userData"
+                                        @logout="logoutAccount"
+                                        @open-profile="openProfileModal"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -286,7 +215,8 @@ export default {
                     return formatter.format(amount);
                 }
             },
-            profileModal: null
+            profileModal: null,
+            isMobile: window.innerWidth <= 768
         }
     },
 
@@ -524,6 +454,10 @@ export default {
         goBack() {
             // Emite um evento para o componente pai lidar com o fechamento do jogo
             this.$emit('close-game');
+        },
+
+        checkMobile() {
+            this.isMobile = window.innerWidth <= 768;
         }
     },
 
@@ -604,10 +538,14 @@ export default {
                 }
             });
         }
+
+        // Detecta mudanças no tamanho da tela
+        window.addEventListener('resize', this.checkMobile);
     },
 
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutside);
+        window.removeEventListener('resize', this.checkMobile);
     }
 }
 </script>
@@ -778,9 +716,13 @@ export default {
     
     /* Ajuste a altura do nav quando o jogo está ativo no mobile */
     .nav-menu {
+        @apply px-4;
         height: 56px;
-        display: flex;
-        align-items: center;
+    }
+    
+    .ui-button-blue2 {
+        @apply px-3 text-sm;
+        height: 36px;
     }
 }
 </style>
