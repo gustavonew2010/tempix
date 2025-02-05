@@ -30,10 +30,8 @@
 
 .categories-margin {
     margin-bottom: 0.25rem;
-    max-width: 1000px; /* Limita a largura máxima */
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 1rem;
+    max-width: 100%;
+    padding: 0 1rem; /* Adicionado padding lateral de 1rem (16px) */
 }
 
 .show-btn-scroll-top {
@@ -99,27 +97,23 @@
 @media (max-width:768px) {
     .categories-margin {
         margin: 0;
-        padding: 0;
+        padding: 0 0.75rem; /* Adicionado padding lateral de 0.75rem (12px) para mobile */
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE and Edge */
-    }
-
-    .categories-margin::-webkit-scrollbar {
-        display: none; /* Chrome, Safari and Opera */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
     .categories-container {
         display: flex;
-        padding: 0.5rem 1rem;
-        gap: 1rem;
+        padding: 0.5rem;
+        gap: 0.5rem;
         width: max-content;
     }
 
     .category-item {
         flex: 0 0 auto;
-        width: 70px; /* Largura fixa para cada item */
+        width: 65px;
     }
 
     .category-icon {
@@ -709,7 +703,8 @@
     color: white;
     cursor: pointer;
     z-index: 10;
-} 
+}
+ 
 .game-loading {
     position: absolute;
     inset: 0;
@@ -2031,11 +2026,6 @@
     padding: 0 10px;
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
 
 .carousel-container::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Opera */
@@ -2548,61 +2538,25 @@
     }
 }
 
-/* Adicione estes estilos */
-.mobile-fullscreen {
-    position: fixed;
-    top: 56px; /* Altura do header mobile */
-    left: 0;
-    width: 100vw;
-    height: calc(100vh - 56px);
-    z-index: 40;
-    background: #000;
-}
-
-.game-header {
-    position: relative;
-    z-index: 10;
-}
-
-.game-container {
-    height: calc(100vh - 60px); /* Ajuste conforme a altura do seu header */
-}
-
-/* Esconde o BottomNavComponent quando o jogo está ativo no mobile */
-@media (max-width: 768px) {
-    .mobile-fullscreen + .mobile-menu-wrapper {
-        display: none !important;
-    }
-    
-    .mobile-fullscreen .game-header {
-        padding: 1rem;
-        background: rgba(0, 0, 0, 0.8);
-    }
-    
-    .mobile-fullscreen .game-container {
-        height: calc(100vh - 56px); /* Ajuste para mobile */
-    }
-}
-
-/* Ajuste a posição do container do jogo para considerar o novo header */
-.mobile-fullscreen {
-    position: fixed;
-    top: 56px; /* Altura do novo header */
-    left: 0;
-    width: 100vw;
-    height: calc(100vh - 56px); /* Ajusta a altura considerando o header */
-    z-index: 40; /* Menor que o z-index do nav */
-}
 
 @media (max-width: 768px) {
-    .mobile-fullscreen + .mobile-menu-wrapper {
-        display: none !important;
+    .banner-carousel {
+      position: relative;
+      overflow: visible;
     }
-    
-    .mobile-fullscreen .game-container {
-        height: 100%; /* Usa toda a altura disponível */
+
+    .custom-pagination {
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      position: relative !important;
+      margin-top: 2.5rem; /* ajuste conforme a distância desejada */
+      background: transparent;
+      padding: 0;
+      z-index: auto !important;
     }
-}
+  }
 </style>
 <template>
     <BaseLayout>
@@ -2615,47 +2569,58 @@
         <div class="home-container">
             <!-- Apenas a seção do banner/jogo alterna -->
             <template v-if="activeGame">
-                <!-- Container do Jogo -->
-                <div v-if="activeGame" class="game-section w-full bg-gray-900 relative" :class="{'mobile-fullscreen': activeGame}">
-                    <div class="game-header flex items-center justify-between p-4 bg-gray-800">
-                        <button @click="closeGameModal" class="text-white hover:text-primary-500 flex items-center gap-2">
-                            <i class="fas fa-arrow-left"></i>
+                <template v-if="isMobile">
+                    <!-- Para mobile, use o MobileGamePlayer (passando a prop 'game') -->
+                    <MobileGamePlayer 
+                        :game="activeGame" 
+                        :gameUrl="gameUrl" 
+                        :isLoadingGame="isLoadingGame" 
+                        :errorMessage="errorMessage" 
+                        @close="closeGameModal"
+                    />
+                </template>
+                <template v-else>
+                    <!-- Para web, mantém o código atual -->
+                    <div class="game-section w-full bg-gray-900 relative">
+                        <div class="game-header flex items-center justify-between p-4 bg-gray-800">
                             <h3 class="text-white text-lg font-medium">
                                 {{ activeGame.game_name }}
                             </h3>
-                        </button>
-                    </div>
-                    
-                    <div class="game-container relative">
-                        <!-- Loading State -->
-                        <div v-if="isLoadingGame" class="absolute inset-0 flex items-center justify-center bg-gray-900">
-                            <div class="loading-spinner"></div>
+                            <button @click="closeGameModal" class="text-white hover:text-primary-500">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                         
-                        <!-- Game Iframe -->
-                        <iframe
-                            v-if="gameUrl && isAuthenticated"
-                            :src="gameUrl"
-                            class="w-full h-full border-0"
-                            allow="fullscreen"
-                        ></iframe>
-                        
-                        <!-- Mensagem de login necessário -->
-                        <div v-if="!isAuthenticated" class="flex items-center justify-center h-full bg-gray-900">
-                            <div class="text-center p-6">
-                                <i class="fas fa-lock text-4xl text-yellow-500 mb-4"></i>
-                                <h3 class="text-white text-xl mb-4">Login Necessário</h3>
-                                <p class="text-gray-400 mb-4">Faça login para jogar este jogo</p>
-                                <button 
-                                    @click="openAuthModal('login')" 
-                                    class="px-6 py-2 bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
-                                >
-                                    Fazer Login
-                                </button>
+                        <div class="game-container relative">
+                            <!-- Loading State -->
+                            <div v-if="isLoadingGame" class="absolute inset-0 flex items-center justify-center bg-gray-900">
+                                <div class="loading-spinner"></div>
+                            </div>
+                            
+                            <!-- Game Iframe -->
+                            <iframe
+                                v-if="gameUrl"
+                                :src="gameUrl"
+                                class="w-full h-full border-0"
+                                allow="fullscreen"
+                            ></iframe>
+                            
+                            <!-- Error State -->
+                            <div v-if="!isLoadingGame && !gameUrl" class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center p-8">
+                                    <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                                    <p class="text-white text-lg mb-4">{{ errorMessage || 'Não foi possível carregar o jogo' }}</p>
+                                    <button 
+                                        @click="retryLoadGame" 
+                                        class="px-6 py-2 bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
+                                    >
+                                        Tentar Novamente
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </template>
             </template>
             <template v-else>
                 <!-- Banner Section -->
@@ -2723,14 +2688,14 @@
                             <!-- ... indicadores do banner ... -->
                         </div>
                     </div>
-                </section>
+            </section>
             </template>
 
             <!-- Search Section -->
             <section class="search-section">
                 <div class="w-full">
                     <SearchComponent @open-game="openGameModal" />
-                </div>
+        </div>
             </section>
 
             <!-- Categories Section -->
@@ -2770,7 +2735,7 @@
                     />
                 </div>
             </div>
-            <div v-else>
+        <div v-else>
                 <!-- Mostra CassinoHeader e GamesDisplay quando uma categoria está selecionada -->
                 <CassinoHeader
                     :providers="providers"
@@ -2818,12 +2783,6 @@
                 @login-success="handleLoginSuccess"
             />
         </div>
-        <NavTopComponent 
-            :auth-status="authStatus"
-            :is-game-active="!!activeGame"
-            :game-title="activeGame?.game_name"
-            @close-game="closeGameModal"
-        />
     </BaseLayout>
 </template>
 
@@ -2875,12 +2834,13 @@ import SideBarComponent from '@/Components/Nav/SideBarComponent.vue'
 import SearchComponent from '@/Components/Search/SearchComponent.vue';
 import { sidebarStore } from "@/Stores/SideBarStore.js";
 import LatestBetsSection from './Components/LatestBetsSection.vue';
+import MobileGamePlayer from '@/Pages/Home/Components/MobileGamePlayer.vue'
 
 export const emitter = mitt();
 
 export default {
     props: [],
-    components: {
+  components: {
         CustomPagination,
         Pagination,
         ShowProviders: defineAsyncComponent(() => 
@@ -2904,10 +2864,11 @@ export default {
         AuthModal,
         SideBarComponent,
         SearchComponent,
-        LatestBetsSection
-    },
-    data() {
-        return {
+        LatestBetsSection,
+        MobileGamePlayer
+  },
+  data() {
+    return {
             gameState: reactive({
                 isLoading: false,
                 isLoadingMore: false,
@@ -3015,6 +2976,15 @@ export default {
                 lastPage: 1,
                 total: 0
             },
+            userData: {
+                avatar: '/assets/images/default-avatar.png',
+                name: 'Gustavo Ribeiro',
+                email: 'gustavo.ribeiro01001@gmail.com',
+                balance: '0,00',
+                displayName: 'Gustavo Ribeiro da Silva Santos',
+                phone: '(15) 99184-4611',
+                password: '******'
+            }
         }
     },
     setup(props) {
@@ -3086,6 +3056,9 @@ export default {
         },
         sidebarStatus() {
             return this.sidebarMenuStore.getSidebarStatus;
+        },
+        isMobile() {
+            return window.innerWidth < 768; // Adicione esta linha
         }
     },
     async mounted() {
@@ -3139,6 +3112,14 @@ export default {
         })
 
         await this.loadProvidersWithGames();
+
+        // Adiciona o listener para atualizar isMobile ao redimensionar a janela
+        window.addEventListener('resize', this.handleResize);
+
+        // Cleanup quando o componente for desmontado (ou via onUnmounted se estiver usando composition API)
+        onUnmounted(() => {
+          window.removeEventListener('resize', this.handleResize);
+        });
     },
     methods: {
         async loadInitialData() {
@@ -3513,11 +3494,6 @@ export default {
         },
 
         async openGameModal(game) {
-            if (!this.isAuthenticated) {
-                this.openAuthModal('login');
-                return;
-            }
-            
             // Rola a página para o topo suavemente
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
@@ -3598,16 +3574,14 @@ export default {
         },
         handleSearchFocus() {
             this.showSearchResults = true;
-            
+            // Removendo a transformação para não interferir com o dropdown
+            // Se for necessário rolar até o input, use um scroll suave:
             if (this.$refs.searchContainer) {
-                const headerHeight = 80;
-                const containerTop = this.$refs.searchContainer.getBoundingClientRect().top;
-                const targetScroll = window.pageYOffset + containerTop - headerHeight - 20;
-                
-                // Usar transform ao invés de scroll
-                document.body.style.transform = `translateY(-${targetScroll}px)`;
-                document.body.style.transition = 'transform 0.3s ease';
+                this.$refs.searchContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+            // Limpar transform
+            document.body.style.transform = '';
+            document.body.style.transition = '';
         },
         handleEnterKey(event) {
             // Fecha o teclado no mobile
@@ -3872,8 +3846,8 @@ export default {
                 document.body.style.overflow = 'auto';
             }
         },
-        openAuthModal(tab = 'login') {
-            this.$emit('open-auth-modal', tab);
+        openAuthModal() {
+            this.showAuthModal = true;
         },
         handleLoginSuccess() {
             this.showAuthModal = false;
@@ -3950,7 +3924,10 @@ export default {
             if (searchContainer && !searchContainer.contains(event.target)) {
                 this.closeSearchDropdown();
             }
-        }
+        },
+        handleResize() {
+            this.isMobile = window.innerWidth < 768;
+        },
     },
     async beforeMount() {
         await this.loadInitialData();
@@ -3998,6 +3975,7 @@ export default {
         document.removeEventListener('click', this.closeLoginMessage);
         // Remover listener quando o componente for desmontado
         document.removeEventListener('click', this.handleClickOutside);
+        window.removeEventListener('resize', this.handleResize);
     },
     created() {
         // Adiciona os listeners dos eventos

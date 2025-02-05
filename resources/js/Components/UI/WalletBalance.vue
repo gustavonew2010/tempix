@@ -220,4 +220,12 @@
         font-size: 1rem;
     }
 }
+
+@media (max-width: 768px) {
+    .wallet-balance-button {
+        @apply px-2;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+}
 </style>

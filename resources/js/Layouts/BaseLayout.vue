@@ -1,16 +1,11 @@
 <template>
-    <div class="layout-wrapper">
+    <div class="layout-wrapper" :class="{ 'sidebar-collapsed': sidebarStatus }">
         <NavTopComponent 
             :auth-status="isAuthenticated"
             class="layout-header"
         />
         
-        <SideBarComponent 
-            :categories="categories"
-            :sidebar="sidebar"
-            class="layout-sidebar"
-            :class="{ 'sidebar-collapsed': sidebar }"
-        />
+        <SideBarComponent :categories="categories" />
 
         <div class="layout-container">
             <main class="layout-main">
@@ -38,12 +33,12 @@
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+import { defineComponent, defineAsyncComponent, computed } from 'vue'
 import { useAuthStore } from '@/Stores/Auth.js'
 import { storeToRefs } from 'pinia'
 import { initFlowbite } from 'flowbite'
 import NavTopComponent from "@/Components/Nav/NavTopComponent.vue"
-import SideBarComponent from "@/Components/Nav/SideBarComponent.vue"
+import SideBarComponent from '@/Components/Nav/SideBarComponent.vue'
 import FooterComponent from "@/Components/UI/FooterComponent.vue"
 import BottomNavComponent from "@/Components/Nav/BottomNavComponent.vue"
 import DepositWidget from "@/Components/Widgets/DepositWidget.vue"
@@ -66,27 +61,21 @@ export default defineComponent({
         const modalStore = useModalStore()
         const authStore = useAuthStore()
         const { isAuth } = storeToRefs(authStore)
+        const sidebarStoreInstance = sidebarStore()
+        const sidebarStatus = computed(() => sidebarStoreInstance.getSidebarStatus)
+        const categories = []
         
         return {
             modalStore,
             isAuthenticated: isAuth,
+            sidebarStatus,
+            categories,
         }
     },
     data() {
         return {
-            categories: [],
-            sidebar: this.getInitialSidebarState(),
             logo: '/assets/images/logo_verde.png',
         }
-    },
-    computed: {
-        sidebarMenuStore() {
-            return sidebarStore()
-        },
-        sidebarMenu() {
-            const sidebar = sidebarStore()
-            return sidebar.getSidebarStatus
-        },
     },
     async mounted() {
         try {
@@ -114,9 +103,6 @@ export default defineComponent({
         },
     },
     watch: {
-        sidebarMenu(newVal) {
-            this.sidebar = newVal
-        },
         isAuthenticated(newValue) {
             this.$nextTick(() => {
                 this.$forceUpdate()
@@ -169,14 +155,14 @@ export default defineComponent({
 .layout-container {
     display: flex;
     flex: 1;
-    margin-left: 280px;
+    margin-left: 300px;
     transition: margin-left 0.3s ease;
-    width: calc(100% - 280px);
+    width: calc(100% - 300px);
 }
 
-.sidebar-collapsed ~ .layout-container {
-    margin-left: 65px;
-    width: calc(100% - 65px);
+.sidebar-collapsed .layout-container {
+    margin-left: 80px;
+    width: calc(100% - 80px);
 }
 
 .layout-main {

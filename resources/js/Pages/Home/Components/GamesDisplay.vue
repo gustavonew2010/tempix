@@ -130,7 +130,7 @@ const hasMoreGames = computed(() => {
 
 @media (max-width: 480px) {
     .games-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr); /* Alterado de 2 para 3 */
         gap: 8px;
     }
     

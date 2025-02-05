@@ -1108,7 +1108,7 @@ export default {
             default: () => []
         }
     },
-    setup() {
+    setup(props) {
         const sidebarMenuStore = sidebarStore();
         const activeCategories = ref(new Set());
         const router = useRouter();
@@ -1126,92 +1126,57 @@ export default {
             }
         });
         
+        const sidebarStatus = computed(() => sidebarMenuStore.getSidebarStatus);
+
+        function handleCategoryClick(category) {
+            if (activeCategories.value.has(category.id)) {
+                activeCategories.value.delete(category.id);
+            } else {
+                activeCategories.value.add(category.id);
+            }
+        }
+
+        function hasSubCategories(categoryId) {
+            return props.categories.some(cat => cat.parent_id === categoryId);
+        }
+
+        function getSubCategories(categoryId) {
+            return props.categories.filter(cat => cat.parent_id === categoryId);
+        }
+
+        function handleSubCategoryClick(subCategory) {
+            router.push(subCategory.url);
+        }
+
+        function isActiveCategory(categoryId) {
+            return activeCategories.value.has(categoryId);
+        }
+
+        function isActiveRoute(url) {
+            return router.currentRoute.value.path === url;
+        }
+
+        function toggleSidebar() {
+            sidebarMenuStore.setSidebarStatus(!sidebarStatus.value);
+        }
+
         return {
             sidebarMenuStore,
             activeCategories,
-            isMobile
+            isMobile,
+            sidebarStatus,
+            handleCategoryClick,
+            hasSubCategories,
+            getSubCategories,
+            handleSubCategoryClick,
+            isActiveCategory,
+            isActiveRoute,
+            toggleSidebar
         }
     },
     computed: {
-        sidebarStatus() {
-            return this.sidebarMenuStore.getSidebarStatus;
-        },
         mainCategories() {
             return this.categories?.filter(cat => !cat.parent_id) || [];
-        }
-    },
-    methods: {
-        toggleSidebar() {
-            this.sidebarMenuStore.setSidebarToogle();
-        },
-        isActiveCategory(categoryId) {
-            return this.activeCategories.has(categoryId);
-        },
-        handleCategoryClick(category) {
-            if (this.hasSubCategories(category.id)) {
-                if (this.isActiveCategory(category.id)) {
-                    this.activeCategories.delete(category.id);
-                } else {
-                    this.activeCategories.add(category.id);
-                }
-            }
-            this.$emit('select-category', category);
-            
-            if (!this.hasSubCategories(category.id)) {
-                this.navigateToCategory(category);
-                // Fecha o sidebar no mobile após selecionar uma categoria
-                if (this.isMobile) {
-                    this.sidebarMenuStore.setSidebarStatus(false);
-                }
-            }
-        },
-        handleSubCategoryClick(subCategory) {
-            this.$emit('select-category', subCategory);
-            this.navigateToCategory(subCategory);
-        },
-        navigateToCategory(category) {
-            if (this.isMobile) {
-                this.toggleSidebar();
-            }
-            
-            this.$router.push({
-                name: 'cassino',
-                query: { 
-                    category: category.id,
-                    provider: '',
-                    search: ''
-                }
-            }).then(() => {
-                this.scrollToFilters();
-            });
-        },
-        hasSubCategories(categoryId) {
-            return this.categories.some(cat => cat.parent_id === categoryId);
-        },
-        getSubCategories(categoryId) {
-            return this.categories.filter(cat => cat.parent_id === categoryId);
-        },
-        isActiveRoute(url) {
-            return this.$route.path === url;
-        },
-        scrollToFilters() {
-            setTimeout(() => {
-                const filterSection = document.querySelector('.search-section') || 
-                                    document.querySelector('.game-filters') || 
-                                    document.querySelector('.filters-container') ||
-                                    document.querySelector('.search-container');
-
-                if (filterSection) {
-                    const headerOffset = 100;
-                    const elementPosition = filterSection.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            }, 100);
         }
     },
     mounted() {

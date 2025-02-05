@@ -1,53 +1,93 @@
 <template>
-    <nav :class="['fixed top-0 navtop-color nav-indexx w-full']">
-        <PromoBar v-if="!isGameActive" />
+    <nav :class="['fixed', inGameMode ? 'top-0' : 'top-10', 'navtop-color', 'nav-indexx', 'w-full']">
+        <PromoBar v-if="!inGameMode" />
         
         <div class="nav-gradient-container">
             <div class="px-3 lg:px-5 lg:pl-3 nav-menu relative">
-                <NavCategories v-if="!isGameActive" />
+                <NavCategories />
                 
                 <div :class="[sidebar ? 'lg:ml-[65px]' : 'lg:ml-[280px]']">
                     <div class="mx-auto w-full" style="max-width: 1110px">
-                        <div class="flex items-center justify-between h-14">
-                            <!-- Lado Esquerdo -->
-                            <div class="flex-1 flex justify-start">
-                                <!-- Botão Voltar (Mobile + Jogo Ativo) -->
-                                <button v-if="isGameActive" 
-                                        @click="goBack" 
-                                        class="text-white flex items-center">
-                                    <i class="fas fa-arrow-left text-lg"></i>
+                        <div class="flex items-center justify-between">
+                            <template v-if="inGameMode">
+                                <button class="back-button ml-4" @click="$emit('back')">
+                                    <i class="fas fa-arrow-left"></i>
                                 </button>
-                                
-                                <!-- Logo (Quando não há jogo ativo) -->
-                                <NavBrand v-else 
-                                         :setting="setting" 
-                                         @navigate-home="navigateHome" />
-                            </div>
-
-                            <!-- Lado Direito -->
-                            <div v-if="!isGameActive" class="flex-1 flex justify-end items-center gap-2">
+                            </template>
+                            <template v-else>
+                                <NavBrand :setting="setting" @navigate-home="navigateHome" />
+                            </template>
+                            
+                            <div class="flex items-center py-3">
                                 <!-- Botões de Auth apenas quando não autenticado -->
-                                <template v-if="!authStatus">
-                                    <AuthButtons 
+                                <template v-if="!authStatus && !inGameMode">
+                                    <AuthButtons  
                                         @login="openAuthModal('login')" 
                                         @register="openAuthModal('register')" 
+                                        class="space-x-2"
                                     />
                                 </template>
 
                                 <!-- Menu do usuário apenas quando autenticado -->
-                                <div v-else class="flex items-center gap-2">
+                                <div v-else class="flex items-center h-full gap-2">
                                     <button @click="openDepositModal" 
-                                            class="ui-button-blue2 hover:scale-105 transition-transform">
+                                            class="ui-button-blue2 h-9 hover:scale-105 transition-transform text-sm">
                                         {{ $t('Deposit') }}
                                     </button>
                                     
-                                    <WalletBalance />
+                                    <!-- Wallet Balance com margem reduzida -->
+                                    <div class="mr-2">
+                                        <WalletBalance />
+                                    </div>
                                     
-                                    <UserMenu 
-                                        :user-data="userData"
-                                        @logout="logoutAccount"
-                                        @open-profile="openProfileModal"
-                                    />
+                                    <!-- User Menu apenas em desktop -->
+                                    <div class="hidden md:flex items-center h-9 margin-teste relative">
+                                        <button type="button" 
+                                                @click="toggleUserDropdown"
+                                                class="profile-button h-full flex items-center"
+                                                aria-expanded="false">
+                                            <span class="sr-only">Open user menu</span>
+                                            <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
+                                                 alt="avatar" 
+                                                 class="w-8 h-8 rounded-full border-2 border-primary">
+                                        </button>
+                                        
+                                        <!-- Dropdown Menu -->
+                                        <div class="user-dropdown absolute right-0 top-[calc(100%+0.5rem)] w-64"
+                                             id="dropdown-user2" 
+                                             :class="{ 'hidden': !showUserDropdown }">
+                                            <div class="flex flex-col items-center p-4 bg-[#1E2024]">
+                                                <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`"
+                                                     alt="avatar" class="w-16 h-16 rounded-full border-2 border-primary mb-2">
+                                                <p class="text-base font-bold text-white">{{ userData?.name }}</p>
+                                                <p class="text-sm text-gray-400">{{ userData?.email }}</p>
+                                                <button @click="navigateToAccountManagement" class="mt-3 w-full border border-gray-500 rounded p-2 text-sm text-white">
+                                                    {{ $t('Administrar Conta') }}
+                                                </button>
+                                            </div>
+                                            <div class="mt-3 border-t border-gray-700"></div>
+                                            <ul class="py-2" role="none">
+                                                <li>
+                                                    <RouterLink :to="{ name: 'profileWallet' }" class="dropdown-item">
+                                                        <i class="fa-duotone fa-wallet text-primary"></i>
+                                                        <span>Carteira</span>
+                                                    </RouterLink>
+                                                </li>
+                                                <li>
+                                                    <RouterLink :to="{ name: 'profileAffiliate' }" class="dropdown-item" @click="showUserDropdown = false">
+                                                        <i class="fa-duotone fa-users text-primary"></i>
+                                                        <span>{{ $t('Painel Afiliado') }}</span>
+                                                    </RouterLink>
+                                                </li>
+                                                <li>
+                                                    <a @click.prevent="logoutAccount" href="#" class="dropdown-item text-red-500 hover:bg-red-500/10">
+                                                        <i class="fa-duotone fa-right-from-bracket"></i>
+                                                        <span>Sair</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -91,6 +131,9 @@
             @update-name="updateName"
             @update-avatar="openFileInput"
         />
+
+        <!-- Remova ou comente esta linha se não for mais utilizar o componente inline -->
+        <!-- <AccountManagement v-if="showAccountManagement" :userData="userData" /> -->
     </nav>
 </template>
 
@@ -114,6 +157,7 @@ import ProfileModal from '@/Components/UI/ProfileModal.vue'
 import { useCacheStore } from '@/Stores/CacheStore.js'
 import { useModalStore } from '@/Stores/ModalStore'
 import DepositWidget from '@/Components/Widgets/DepositWidget.vue'
+import AccountManagement from '@/Pages/Profile/AccountManagementPage.vue'
 
 // Componentes
 import PromoBar from './PromoBar.vue'
@@ -142,7 +186,8 @@ export default {
         DropdownDarkLight,
         RouterLink,
         ProfileModal,
-        DepositWidget
+        DepositWidget,
+        AccountManagement
     },
     
     props: {
@@ -150,13 +195,9 @@ export default {
             type: Boolean,
             required: true
         },
-        isGameActive: {
+        inGameMode: {
             type: Boolean,
             default: false
-        },
-        gameTitle: {
-            type: String,
-            default: ''
         }
     },
 
@@ -221,7 +262,16 @@ export default {
                 }
             },
             profileModal: null,
-            isMobile: window.innerWidth <= 768
+            showAccountManagement: false,
+            userData: {
+                avatar: '/assets/images/default-avatar.png',
+                name: 'Gustavo Ribeiro',
+                email: 'gustavo.ribeiro01001@gmail.com',
+                balance: '0,00',
+                displayName: 'Gustavo Ribeiro da Silva Santos',
+                phone: '(15) 99184-4611',
+                password: '******'
+            }
         }
     },
 
@@ -455,14 +505,9 @@ export default {
             this.showUserDropdown = false; // Fecha o dropdown
             this.$router.push({ name: 'profileAffiliate' });
         },
-        
-        goBack() {
-            // Emite um evento para o componente pai lidar com o fechamento do jogo
-            this.$emit('close-game');
-        },
 
-        checkMobile() {
-            this.isMobile = window.innerWidth <= 768;
+        navigateToAccountManagement() {
+            this.$router.push({ name: 'accountManagement' });
         }
     },
 
@@ -543,14 +588,10 @@ export default {
                 }
             });
         }
-
-        // Detecta mudanças no tamanho da tela
-        window.addEventListener('resize', this.checkMobile);
     },
 
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutside);
-        window.removeEventListener('resize', this.checkMobile);
     }
 }
 </script>
@@ -660,18 +701,18 @@ export default {
 }
 
 .ui-button-blue2 {
-    @apply flex items-center px-4 rounded-lg bg-[#00A2D4] hover:bg-[#0077FF] text-white font-medium;
-    height: 40px;
+    @apply flex items-center px-3 rounded-lg bg-[#00A2D4] hover:bg-[#0077FF] text-white font-medium;
+    height: 36px;
 }
 
 .wallet-container {
     @apply flex items-center;
-    height: 40px;
+    height: 36px;
 }
 
 .profile-button {
     @apply flex items-center justify-center;
-    height: 40px;
+    height: 36px;
 }
 
 .user-dropdown {
@@ -703,63 +744,11 @@ export default {
 /* Ajuste para mobile */
 @media (max-width: 768px) {
     .wallet-balance-button {
-        @apply px-3;
-    }
-    
-    .wallet-balance-button span {
-        @apply text-xs;
-    }
-}
-
-/* Adicione estes estilos para o modo mobile com jogo ativo */
-@media (max-width: 768px) {
-    .nav-gradient-container {
-        background: rgba(30, 35, 40, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-    
-    /* Ajuste a altura do nav quando o jogo está ativo no mobile */
-    .nav-menu {
-        @apply px-4;
-        height: 56px;
+        @apply px-2;
     }
     
     .ui-button-blue2 {
-        @apply px-3 text-sm;
-        height: 36px;
+        @apply px-2 text-xs;
     }
-    
-    /* Ajustes para o botão de voltar no mobile */
-    button i.fa-arrow-left {
-        @apply text-xl;
-        margin-left: -8px; /* Ajusta o alinhamento */
-    }
-}
-
-/* Ajustes gerais de layout */
-.nav-menu > div {
-    height: 100%;
-    display: flex;
-    align-items: center;
-}
-
-/* Centralização dos elementos */
-.flex.items-center.justify-between {
-    max-width: 1110px;
-    margin: 0 auto;
-    padding: 0 1rem;
-}
-
-/* Ajuste do espaçamento dos botões */
-.flex.items-center.gap-2 > * {
-    margin-left: 0.5rem;
-}
-
-/* Ajuste do container principal */
-.nav-gradient-container {
-    height: 100%;
-    display: flex;
-    align-items: center;
 }
 </style>

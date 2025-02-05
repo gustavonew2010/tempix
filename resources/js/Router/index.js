@@ -35,6 +35,7 @@ import ForgotPassword from "@/Pages/Auth/ForgotPassword.vue";
 import ResetPassword from "@/Pages/Auth/ResetPassword.vue";
 import GameLoader from '@/Pages/Games/GameLoader.vue'
 import { useCacheStore } from '@/Stores/CacheStore'
+import AccountManagement from "@/Pages/Profile/AccountManagementPage.vue";
 
 export const routes = [
     {
@@ -166,6 +167,15 @@ export const routes = [
             });
             document.body.style.overflow = 'auto';
             next();
+        }
+    },
+    {
+        name: 'accountManagement',
+        path: '/profile/account-management',
+        component: AccountManagement,
+        meta: {
+            auth: true,
+            hideModals: true
         }
     },
     {
