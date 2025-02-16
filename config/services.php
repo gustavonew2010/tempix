@@ -110,4 +110,24 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'number' => env('TWILIO_NUMBER'),
+    ],
+
+    'cpf' => [
+        'base_url' => env('CPF_API_BASE_URL', 'https://apigateway.conectagov.estaleiro.serpro.gov.br/api-cpf-light'),
+        'token_url' => env('CPF_API_TOKEN_URL', 'https://apigateway.conectagov.estaleiro.serpro.gov.br/oauth2/jwt-token'),
+        'client_id' => env('CPF_API_CLIENT_ID'),
+        'client_secret' => env('CPF_API_CLIENT_SECRET'),
+        'user_cpf' => env('CPF_API_USER_CPF'),
+    ],
+
+    'apibrasil' => [
+        'email' => env('APIBRASIL_EMAIL'),
+        'password' => env('APIBRASIL_PASSWORD'),
+        'device_token' => env('APIBRASIL_DEVICE_TOKEN'),
+    ],
+
 ];

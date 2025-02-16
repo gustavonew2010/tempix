@@ -1,746 +1,195 @@
 <style scoped>
-/* Base Styles */
-.deposit-widget { 
-    background: var(--background-color);
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
+.modal-backdrop {
+    @apply fixed inset-0 bg-black/75 flex items-center justify-center;
+    backdrop-filter: blur(4px);
+    z-index: 99990;
 }
 
-/* Modal Backdrop */
-.modal-backdrop { 
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999;
-}
-
-/* Base do Modal */
 .modal-container {
     @apply fixed inset-0 flex flex-col bg-[#1A1D24] overflow-hidden;
+    background: linear-gradient(180deg, 
+        rgba(26, 29, 36, 0.95) 0%,
+        rgba(26, 29, 36, 1) 100%
+    );
+    z-index: 99991;
 }
 
 @media (min-width: 768px) {
     .modal-container {
-        position: relative;
-        background: #1A1D24;
-        border-radius: 16px;
-        width: min(480px, 95%);
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        margin: 1rem;
+        @apply relative rounded-2xl w-[480px] max-h-[90vh] m-4 overflow-y-auto;
+        box-shadow: 
+            0 0 0 1px rgba(255, 255, 255, 0.05),
+            0 8px 32px rgba(0, 0, 0, 0.4);
     }
 }
 
-/* Scrollbar Styles - Simplificado */
-.modal-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.modal-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-/* Header Styles */
 .modal-header {
-    position: relative;
-    padding: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: inherit;
-    @apply sticky top-0 z-10 bg-[#1A1D21];
+    @apply sticky top-0 z-10 px-4 py-3;
+    background: linear-gradient(180deg, 
+        rgba(26, 29, 36, 1) 0%,
+        rgba(26, 29, 36, 0.95) 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
 }
 
 .header-content {
-    display: flex;
-    align-items: center;
-    gap: 4;
+    @apply flex items-center gap-3;
 }
 
-.close-button {
-    @apply w-8 h-8 flex items-center justify-center;
-    @apply bg-white/5 rounded-lg transition-colors;
-    @apply hover:bg-white/10;
+.back-button {
+    @apply flex items-center justify-center w-8 h-8 rounded-lg transition-all;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.back-button:hover {
+    @apply bg-white/10;
+    transform: translateX(-2px);
+}
+
+.header-text {
+    @apply flex-1;
 }
 
 .modal-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: white;
-    margin: 0;
+    @apply text-lg font-semibold text-white flex items-center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .modal-subtitle {
-    font-size: 0.875rem;
-    color: #9CA3AF;
-    margin-top: 0.25rem;
+    @apply text-xs text-gray-400 mt-0.5;
 }
 
-/* Input Styles */
-.input-wrapper {
-    position: relative;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 0.5rem;
+.close-button {
+    @apply flex items-center justify-center w-8 h-8 rounded-lg ml-auto transition-all;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.currency-symbol {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-color);
-    opacity: 0.7;
-    font-size: 1rem;
-    pointer-events: none;
+.close-button:hover {
+    @apply bg-white/10;
+    transform: scale(1.05);
 }
 
-.amount-input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
-    color: var(--text-color);
-    font-size: 1rem;
-    outline: none;
-}
-
-/* Conteúdo do Modal */
 .modal-content {
     @apply flex-1 overflow-y-auto;
 }
 
-.deposit-step {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    @apply p-6;
+.modal-enter-active,
+.modal-leave-active {
+    transition: all 0.3s ease-out;
 }
 
-/* Grupos de Seção */
-.section-group {
-    @apply p-6 pt-0;
+.modal-enter-from {
+    opacity: 0;
+    transform: scale(0.95);
 }
 
-.section-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 2rem 0;
+.modal-leave-to {
+    opacity: 0;
+    transform: scale(0.95);
 }
 
-/* Valores Rápidos */
-.quick-values-section {
-    margin-top: 1.5rem;
-}
-
-.quick-values-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.quick-value-btn {
-    position: relative;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 1rem 0.75rem;
-    color: var(--text-color);
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.quick-value-btn.active {
-    background: var(--ci-primary-color);
-    border-color: var(--ci-primary-color);
-    color: white;
-}
-
-/* Adicionar estilos para tags nos valores */
-.value-tag {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    font-size: 0.625rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-.tag-bonus {
-    background: #4CAF50;
-    color: white;
-}
-
-.tag-popular {
-    background: #FF9800;
-    color: white;
-}
-
-.tag-best {
-    background: #f44336;
-    color: white;
-}
-
-.tag-hot {
-    background: #DC2626;
-    color: white;
-}
-
-/* Summary Section */
-.summary-section {
-    background: rgba(0, 0, 0, 0.2);
-    @apply p-6;
-    margin: 0 -2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.summary {
-    margin-bottom: 1.5rem;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--text-color);
-    font-size: 0.875rem;
-}
-
-.summary-row.total {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-/* Submit Button */
-.submit-button {
-    width: 100%;
-    height: 48px;
-    background: var(--ci-primary-color);
-    color: white;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    border: none;
-    transition: all 0.2s;
-}
-
-.submit-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-/* QR Code Container */
-.pix-container {
-    padding: 0 2rem 2rem;
-}
-
-/* Timer Container */
-.timer-container {
-    background: transparent;
-    text-align: center;
-}
-
-.timer {
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--ci-primary-color);
-}
-
-.timer-text {
-    color: #9CA3AF;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-/* QR Code Section */
-.qr-section {
-    @apply flex flex-col items-center gap-8;
-    @apply p-10;
-    @apply bg-gradient-to-b from-black/20 to-black/10;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.qr-instructions {
-    text-align: center;
-    color: #9CA3AF;
-    font-size: 0.875rem;
-    margin: 1rem;
-}
-
-.qr-wrapper {
-    @apply bg-[#1A1D24] border border-gray-800;
-    padding: 2rem;
-    border-radius: 16px;
-    @apply flex items-center justify-center;
-}
-
-/* Estilo para o QR Code */
-:deep(.qrcode > img) {
-    @apply invert; /* Inverte as cores do QR code para ficar branco */
-    margin: 0 auto; /* Centraliza horizontalmente */
-}
-
-/* PIX Code Container */
-.pix-code-container {
-    width: 100%;
-    @apply mt-6;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 0.75rem;
-}
-
-.pix-label {
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.copy-wrapper {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.pix-code-input {
-    flex: 1;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-    color: var(--text-color);
-    font-size: 0.875rem;
-    font-family: monospace;
-}
-
-.copy-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 1.25rem;
-    background: #0284c7;
-    color: white;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-/* Mobile Payment Section */
-.mobile-payment-section {
-    width: 100%;
-    margin-top: 1rem;
-}
-
-.mobile-payment-title {
-    color: var(--text-color);
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-.bank-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
-}
-
-.bank-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-color);
-    transition: all 0.2s;
-}
-
-.bank-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.bank-icon {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-}
-
-/* Responsive Adjustments */
 @media (max-width: 768px) {
-    .qr-wrapper {
-        width: 100%;
-        max-width: 280px;
-    }
-
-    .bank-buttons {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .modal-header {
-        padding: 1.25rem 1.5rem;
+        @apply py-4;
     }
 
-    .header-content {
-        left: 1.5rem;
-    }
-
-    .close-button {
-        right: 1.5rem;
-    }
-
-    .modal-content {
-        padding: 1.5rem;
-    }
-
-    .summary-section {
-        padding: 1.5rem;
-        margin: 0 -1.5rem;
-    }
-
-    .pix-container {
-        padding: 0 1.5rem 1.5rem;
+    .modal-title {
+        @apply text-base;
     }
 }
 
-.spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #ffffff;
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.wallet-icon {
+    @apply mr-2 text-lg;
+    color: #00A2D4;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+@supports not (background-clip: text) {
+    .wallet-icon {
+        color: #00A2D4;
+        -webkit-text-fill-color: currentColor;
+    }
 }
 
 .confirmation-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100000;
+    @apply fixed inset-0 flex items-center justify-center;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 99992;
 }
 
 .confirmation-content {
-    background: #1A1D24;
-    padding: 2rem;
-    border-radius: 12px;
-    text-align: center;
-    max-width: 90%;
-    width: 400px;
+    @apply bg-[#1A1D24] p-6 rounded-xl max-w-sm w-full mx-4 relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 99993;
 }
 
 .confirmation-content h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: white;
+    @apply text-lg font-semibold text-white mb-2;
 }
 
 .confirmation-content p {
-    color: #9CA3AF;
-    margin-bottom: 1.5rem;
+    @apply text-sm text-gray-400 mb-6;
 }
 
 .confirmation-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
-.confirm-btn, .cancel-btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
+    @apply flex gap-3;
 }
 
 .confirm-btn {
-    background: #DC2626;
-    color: white;
+    @apply flex-1 py-2.5 px-4 rounded-lg text-gray-400 text-sm font-medium transition-all;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+}
+
+.confirm-btn:hover {
+    @apply text-white bg-white/5;
 }
 
 .cancel-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    @apply flex-1 py-2.5 px-4 rounded-lg text-white text-sm font-medium transition-all;
+    background: linear-gradient(135deg, #00A2D4, #0072ff);
 }
 
-.back-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    margin-right: 1rem;
+.cancel-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 114, 255, 0.2);
 }
 
-.value-tag {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
+/* Animações */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
 }
 
-.tag-popular {
-    background: #3B82F6;
-    color: white;
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
-.tag-bonus {
-    background: #10B981;
-    color: white;
+.fade-enter-to,
+.fade-leave-from {
+    opacity: 1;
 }
 
-.tag-best {
-    background: #F59E0B;
-    color: white;
+/* Animação do conteúdo do modal */
+.confirmation-content {
+    animation: modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.tag-hot {
-    background: #DC2626;
-    color: white;
-}
-
-/* Valor do Depósito Display */
-.deposit-amount-display {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 2rem;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.amount-label {
-    display: block;
-    color: #9CA3AF;
-    font-size: 0.875rem;
-    margin-bottom: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.amount-value {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--ci-primary-color);
-    line-height: 1.2;
-    text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-}
-
-/* Timer Container */
-.timer-container {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-}
-
-.timer {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--ci-primary-color);
-    line-height: 1;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-}
-
-.timer-text {
-    color: #9CA3AF;
-    font-size: 0.875rem;
-}
-
-/* QR Section */
-.qr-section {
-    @apply flex flex-col items-center gap-8 p-8;
-    @apply bg-gradient-to-b from-black/20 to-black/10;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.qr-instructions {
-    text-align: center;
-    color: #9CA3AF;
-    @apply flex flex-col gap-2;
-}
-
-.qr-wrapper {
-    padding: 2rem;
-    border-radius: 16px;
-    @apply flex items-center justify-center;
-}
-
-/* PIX Code Container */
-.pix-code-container {
-    width: 100%;
-    @apply mt-6;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 0.75rem;
-}
-
-.pix-label {
-    color: #9CA3AF;
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.copy-wrapper {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.pix-code-input {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-    color: var(--text-color);
-    font-size: 0.875rem;
-    font-family: monospace;
-}
- 
-.copy-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 1.25rem;
-    background: var(--ci-primary-color);
-    color: white;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.copy-button:hover {
-    opacity: 0.9;
-}
-
-.copy-button:active {
-    transform: scale(0.98);
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .pix-step {
-        @apply flex-1 flex flex-col gap-4 p-4;
+@keyframes modal-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
     }
-
-    .qr-section {
-        @apply flex-1 flex flex-col gap-6 p-6;
-    }
-
-    .deposit-amount-display,
-    .timer-container {
-        padding: 1.5rem;
-    }
-
-    .qr-wrapper {
-        padding: 1.5rem;
-        @apply mx-auto; /* Centraliza na versão mobile */
-        max-width: 280px;
-    }
-
-    .amount-value {
-        font-size: 1.75rem;
-    }
-
-    .timer {
-        font-size: 2rem;
-    }
-}
-
-@media (max-width: 767px) {
-    .pix-step {
-        @apply flex-1 flex flex-col gap-4;
-        @apply min-h-full;
-        @apply p-4;
-    }
-
-    .section-group {
-        @apply p-0;
-    }
-
-    .qr-section {
-        @apply flex-1 flex flex-col gap-6;
-        @apply p-6;
-    }
-
-    .deposit-amount-display,
-    .timer-container {
-        padding: 1.5rem;
-    }
-
-    .qr-wrapper {
-        padding: 1.5rem;
-        @apply mx-auto; /* Centraliza na versão mobile */
-        max-width: 280px;
-    }
-
-    .amount-value {
-        font-size: 1.75rem;
-    }
-
-    .timer {
-        font-size: 2rem;
-    }
-
-    .modal-content {
-        @apply h-[calc(100vh-64px)] overflow-y-auto; /* Altura total menos header com scroll */
-    }
-
-    /* Ajusta o container do timer para ficar no final da tela */
-    .timer-container {
-        @apply mt-auto mb-4;
-    }
-}
-
-@media (max-width: 380px) {
-    .copy-wrapper {
-        @apply flex-col;
-    }
-
-    .copy-button {
-        @apply w-full justify-center py-3;
-    }
-
-    .pix-code-input {
-        @apply text-center;
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 </style>
@@ -748,128 +197,69 @@
 <template>
     <Transition name="modal">
         <div v-if="modalStore.showDepositModal" class="modal-backdrop">
-            <!-- Modal Principal -->
+            <Transition name="fade">
+                <div v-if="showCloseConfirmation" class="confirmation-modal">
+                    <div class="confirmation-content">
+                        <h3>Cancelar pagamento?</h3>
+                        <p>Se você sair agora, o código PIX será invalidado.</p>
+                        <div class="confirmation-buttons">
+                            <button @click="confirmClose" class="confirm-btn">
+                                Sim, cancelar
+                            </button>
+                            <button @click="showCloseConfirmation = false" class="cancel-btn">
+                                Continuar pagamento
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+
             <div class="modal-container" @click.stop>
                 <div class="modal-header">
                     <div class="header-content">
-                        <button v-if="showPixQRCode" @click="goBack" class="back-button">
+                        <button 
+                            v-if="showPixQRCode" 
+                            @click="goBack" 
+                            class="back-button"
+                            aria-label="Voltar"
+                        >
                             <i class="fa-light fa-arrow-left"></i>
                         </button>
-                        <div>
-                            <h2 class="modal-title">Depositar</h2>
-                            <p class="modal-subtitle">Adicione saldo à sua conta</p>
+                        <div class="header-text">
+                            <h2 class="modal-title">
+                                <i class="fa-duotone fa-wallet wallet-icon"></i>
+                                {{ showPixQRCode ? 'Pagamento PIX' : 'Depositar' }}
+                            </h2>
+                            <p class="modal-subtitle">
+                                {{ showPixQRCode ? 'Escaneie o QR Code para pagar' : 'Adicione saldo à sua conta' }}
+                            </p>
                         </div>
                     </div>
-                    <button @click="handleClose" class="close-button">
-                        <i class="fa-light fa-x"></i>
+                    <button 
+                        @click="handleClose" 
+                        class="close-button"
+                        aria-label="Fechar"
+                    >
+                        <i class="fa-light fa-xmark"></i>
                     </button>
                 </div>
 
                 <div class="modal-content">
-                    <!-- Step 1: Valor -->
-                    <div v-if="!showPixQRCode" class="deposit-step">
-                        <div class="section-group"> 
-                            <div class="amount-input-container">
-                                <label class="input-label">Valor do depósito</label>
-                                <div class="input-wrapper">
-                                    <div class="currency-symbol">R$</div>
-                                    <input 
-                                        type="text" 
-                                        :value="amount"
-                                        class="amount-input"
-                                        @input="formatAmount"
-                                        placeholder="0"
-                                    />
-                                </div>
-                            </div>
+                    <AmountStep
+                        v-if="!showPixQRCode"
+                        v-model:amount="amount"
+                        :is-loading="isLoading"
+                        :quick-values="quickValues"
+                        @submit="submitDeposit"
+                    />
 
-                            <div class="section-divider"></div>
-
-                            <div class="quick-values-section"> 
-                                <label class="section-label">Valores sugeridos</label>
-                                <div class="quick-values-grid">
-                                    <button 
-                                        v-for="value in quickValues" 
-                                        :key="value.amount"
-                                        @click="selectAmount(value.amount)"
-                                        :class="['quick-value-btn', { active: amount === value.amount }]"
-                                        style="position: relative"
-                                    >
-                                        {{ formatPrice(value.amount) }}
-                                        <span 
-                                            v-if="value.tag" 
-                                            :class="['value-tag', `tag-${value.tag.type}`]"
-                                        >
-                                            {{ value.tag.text }}
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Summary -->
-                        <div class="summary-section">
-                            <div class="summary">
-                                <div class="summary-row total">
-                                    <span>Valor total</span>
-                                    <span>{{ formatPrice(amount) }}</span>
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <button 
-                                @click="submitDeposit"
-                                :disabled="!isValid || isLoading"
-                                class="submit-button"
-                            >
-                                <span v-if="isLoading" class="spinner"></span>
-                                <span v-else>Gerar QR Code</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: QR Code -->
-                    <div v-if="showPixQRCode" class="pix-step">
-                        <p class="qr-instructions">Escaneie a imagem para realizar o pagamento</p>
-                        
-                        <div class="qr-wrapper">
-                            <QRCodeVue3
-                                :value="qrcodecopypast"
-                                :width="240"
-                                :height="240"
-                                :qrOptions="{ typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'H' }"
-                                :imageOptions="{ hideBackgroundDots: true, imageSize: 0.4, margin: 0 }"
-                            />
-                        </div>
-
-                        <ol class="qr-instructions">
-                            <li>1. Leia o código QR acima no aplicativo Pix</li>
-                            <li>2. Conclua o depósito com seu banco</li>
-                            <li>3. O saldo de R$ {{ amount.toFixed(2) }} e qualquer bônus de depósito aplicável serão creditados</li>
-                        </ol>
-
-                        <!-- Código PIX -->
-                        <div class="pix-code-container">
-                            <div class="copy-wrapper">
-                                <input 
-                                    type="text" 
-                                    :value="qrcodecopypast" 
-                                    readonly 
-                                    class="pix-code-input"
-                                />
-                                <button @click="copyQRCode" class="copy-button">
-                                    <i class="fa-regular fa-copy"></i>
-                                    <span>Copiar Código</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="timer-container">
-                            <p class="timer-text">O tempo para você pagar acaba em:</p>
-                            <div class="timer">{{ formattedTimer }}</div>
-                            <div class="timer-progress"></div>
-                        </div>
-                    </div>
+                    <PixStep
+                        v-else
+                        :qr-code="qrcodecopypast"
+                        :amount="amount"
+                        :minutes="minutes"
+                        :seconds="seconds"
+                    />
                 </div>
             </div>
         </div>
@@ -887,6 +277,8 @@
     import { useModalStore } from '@/Stores/ModalStore'
     import { defineComponent } from 'vue'
     import { storeToRefs } from 'pinia'
+    import AmountStep from './Steps/AmountStep.vue'
+    import PixStep from './Steps/PixStep.vue'
 
     export default defineComponent({
         name: 'DepositWidget',
@@ -896,7 +288,7 @@
                 default: () => window.innerWidth <= 768
             }
         },
-        components: { QRCodeVue3, StripeCheckout },
+        components: { QRCodeVue3, StripeCheckout, AmountStep, PixStep },
         data() {
             return {
                 isModalOpen: true,
@@ -1058,7 +450,21 @@
             
             confirmClose() {
                 this.showCloseConfirmation = false
+                this.resetState()
                 this.modalStore.closeDepositModal()
+            },
+
+            resetState() {
+                this.showPixQRCode = false
+                this.qrcodecopypast = ''
+                this.amount = 0
+                this.idTransaction = ''
+                if (this.timer) {
+                    clearInterval(this.timer)
+                }
+                if (this.intervalId) {
+                    clearInterval(this.intervalId)
+                }
             },
 
             goBack() {
@@ -1329,7 +735,6 @@
             if (this.intervalId) {
                 clearInterval(this.intervalId);
             }
-            // ... outros cleanups existentes ...
         }
     });
 </script>

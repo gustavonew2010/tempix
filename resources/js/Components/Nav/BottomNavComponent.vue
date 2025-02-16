@@ -85,7 +85,7 @@
 
 .profile-modal {
     position: fixed;
-    bottom: 80px;
+    bottom: 60px;
     left: 0;
     right: 0;
     background: #1E2024;
@@ -227,7 +227,7 @@
 }
 
 .deposit-icon-wrapper {
-    width: 42px;
+    width: 40px;
     height: 42px;
     background: linear-gradient(135deg, #00A2D4, #0088b3);
     border-radius: 50%;
@@ -327,6 +327,36 @@
         height: 38px;
     }
 }
+
+.avatar-container {
+    position: relative;
+}
+
+.avatar-placeholder-small {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white;
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+}
+
+.avatar-placeholder {
+    @apply w-12 h-12 rounded-full flex items-center justify-center text-base font-semibold text-white;
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+}
+
+.profile-info {
+    @apply flex items-center gap-4;
+}
+
+.user-details {
+    @apply flex flex-col;
+}
+
+.user-name {
+    @apply text-base font-semibold text-white;
+}
+
+.user-email {
+    @apply text-sm text-gray-400;
+}
 </style>
 <template>
     <div class="mobile-menu-wrapper aparecer-menu fixed bottom-0 left-0 right-0 bg-gradient z-50">
@@ -384,9 +414,16 @@
             <button v-if="userData" @click="openProfileMenu" 
                     class="nav-item" 
                     :class="{ 'active': temporaryActive === 'profile' }">
-                <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
-                     alt="avatar" 
-                     class="w-8 h-8 rounded-full border-2 border-primary">
+                <div class="avatar-container">
+                    <img v-if="currentAvatar"
+                         :src="currentAvatar"
+                         @error="handleAvatarError"
+                         alt="avatar" 
+                         class="w-8 h-8 rounded-full border-2 border-primary">
+                    <div v-else class="avatar-placeholder-small">
+                        {{ initials }}
+                    </div>
+                </div>
                 <span>Perfil</span>
             </button>
         </div>
@@ -394,9 +431,16 @@
         <div v-if="showProfileMenu" class="profile-modal">
             <div class="profile-header">
                 <div class="profile-info">
-                    <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
-                         alt="avatar" 
-                         class="w-12 h-12 rounded-full border-2 border-primary">
+                    <div class="avatar-container">
+                        <img v-if="currentAvatar"
+                             :src="currentAvatar"
+                             @error="handleAvatarError"
+                             alt="avatar" 
+                             class="w-12 h-12 rounded-full border-2 border-primary">
+                        <div v-else class="avatar-placeholder">
+                            {{ initials }}
+                        </div>
+                    </div>
                     <div class="user-details">
                         <p class="user-name">{{ userData?.name }}</p>
                         <p class="user-email">{{ userData?.email }}</p>
@@ -408,7 +452,7 @@
             </div>
 
             <div class="profile-actions">
-                <button @click="adminAccount" class="admin-button">
+                <button @click="navigateToAccountManagement" class="admin-button">
                     <i class="fa-duotone fa-user"></i>
                     Administrar conta
                 </button>
@@ -443,9 +487,10 @@
     import { sidebarStore } from "@/Stores/SideBarStore.js";
     import { useSettingStore } from '@/Stores/SettingStore.js';
     import { useAuthStore } from "@/Stores/Auth.js";
-    import { inject, onMounted, ref } from 'vue';
+    import { inject, onMounted, ref, computed, watch } from 'vue';
     import emitter from '@/eventBus';
     import { useModalStore } from '@/Stores/ModalStore'
+    import { useRouter } from 'vue-router'
 
     export default {
         props: {
@@ -455,6 +500,7 @@
             }
         },
         setup() {
+            const router = useRouter()
             const modalStore = useModalStore()
             const sidebarMenuStore = sidebarStore();
             const authStore = useAuthStore();
@@ -463,14 +509,77 @@
             const openGameModal = inject('openGameModal', () => {});
             
             const userData = ref(authStore.user);
-            
+            const currentAvatar = ref(null)
+            const avatarError = ref(false)
+
+            // Computed para as iniciais do usuário
+            const initials = computed(() => {
+                if (!userData.value?.name) return ''
+                return userData.value.name
+                    .split(' ')
+                    .map(word => word[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)
+            })
+
+            // Função para lidar com erro no carregamento da imagem
+            const handleAvatarError = () => {
+                avatarError.value = true
+                currentAvatar.value = null
+            }
+
+            // Função para inicializar o avatar
+            const initializeAvatar = () => {
+                if (userData.value?.avatar) {
+                    const avatarPath = userData.value.avatar.startsWith('/storage/') 
+                        ? userData.value.avatar 
+                        : `/storage/${userData.value.avatar}`
+                    currentAvatar.value = avatarPath
+                    avatarError.value = false
+                } else {
+                    currentAvatar.value = null
+                    avatarError.value = true
+                }
+            }
+
+            // Watch para mudanças no avatar
+            watch(() => userData.value?.avatar, (newAvatar) => {
+                if (newAvatar) {
+                    const avatarPath = newAvatar.startsWith('/storage/') 
+                        ? newAvatar 
+                        : `/storage/${newAvatar}`
+                    currentAvatar.value = avatarPath
+                    avatarError.value = false
+                } else {
+                    currentAvatar.value = null
+                    avatarError.value = true
+                }
+            }, { immediate: true })
+
+            // Watch para o userData inteiro
+            watch(() => userData.value, (newUserData) => {
+                if (newUserData) {
+                    initializeAvatar()
+                }
+            }, { immediate: true })
+
+            onMounted(() => {
+                initializeAvatar()
+            })
+
             return {
                 modalStore,
                 sidebarMenuStore,
                 authStore,
                 filterGamesByCategory,
                 openGameModal,
-                userData
+                userData,
+                currentAvatar,
+                avatarError,
+                initials,
+                handleAvatarError,
+                router
             };
         },
         data() {
@@ -500,7 +609,9 @@
             },
             toggleMenu() {
                 this.setTemporaryActive('menu');
-                this.sidebarMenuStore.setSidebarToogle();
+                if (window.innerWidth <= 1023) {
+                    this.sidebarMenuStore.setSidebarStatus(!this.sidebarStatus);
+                }
             },
             async handleCategoryClick(category) {
                 event?.preventDefault();
@@ -531,9 +642,12 @@
             closeProfileMenu() {
                 this.showProfileMenu = false;
             },
+            navigateToAccountManagement() {
+                this.closeProfileMenu()
+                this.$router.push({ name: 'accountManagement' })
+            },
             adminAccount() {
-                this.closeProfileMenu();
-                this.$emit('open-profile-modal');
+                this.navigateToAccountManagement()
             },
             openDepositModal() {
                 this.setTemporaryActive('deposit');

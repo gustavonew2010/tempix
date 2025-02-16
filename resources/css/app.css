@@ -1,0 +1,65 @@
+/* Estilos globais para o Vue Toastification */
+.Vue-Toastification__container {
+    z-index: 999999 !important;
+}
+
+.Vue-Toastification__toast {
+    background: linear-gradient(135deg, #1a1d24, #1E2024) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+}
+
+.Vue-Toastification__toast--error {
+    background: linear-gradient(135deg, #1E293B, #0F172A) !important;
+    border: 1px solid #00A2D4 !important;
+}
+
+.Vue-Toastification__toast--success {
+    background: linear-gradient(135deg, #1E293B, #0F172A) !important;
+    border: 1px solid #00A2D4 !important;
+}
+
+.Vue-Toastification__toast--info {
+    background: linear-gradient(135deg, #1E293B, #0F172A) !important;
+    border: 1px solid #00A2D4 !important;
+}
+
+/* Estilo do ícone */
+.Vue-Toastification__toast i,
+.Vue-Toastification__toast .Vue-Toastification__icon {
+    color: #00A2D4 !important;
+}
+
+/* Estilo do texto */
+.Vue-Toastification__toast-body {
+    color: #fff !important;
+    font-size: 0.875rem !important;
+}
+
+/* Efeito de brilho na borda */
+.Vue-Toastification__toast {
+    position: relative;
+    overflow: hidden;
+}
+
+.Vue-Toastification__toast::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 162, 212, 0.1),
+        transparent
+    );
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    100% {
+        left: 100%;
+    }
+}

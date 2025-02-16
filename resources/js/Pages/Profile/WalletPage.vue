@@ -1,7 +1,6 @@
 <style>
 .wallet-page {
     @apply min-h-screen py-8 px-4 md:px-6;
-    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
 }
 
 .wallet-container {
@@ -336,29 +335,79 @@
 }
 
 .is-loading::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(4px);
-    border-radius: inherit;
+    display: none;
+}
+
+.skeleton-card-content {
+    @apply flex gap-4 w-full;
+}
+
+.skeleton-icon {
+    @apply w-12 h-12 rounded-full flex-shrink-0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+}
+
+.skeleton-text-group {
+    @apply flex-1 space-y-4;
+}
+
+.skeleton-title {
+    @apply h-6 rounded-lg w-32;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .skeleton-text {
-    height: 2.5rem;
-    width: 200px;
-    background: linear-gradient(90deg, #1E293B 25%, #2D3748 50%, #1E293B 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 0.5rem;
+    @apply h-4 rounded-lg w-24;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-progress {
+    @apply h-2 rounded-full w-full mt-6;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-limit {
+    @apply h-5 rounded-lg w-full flex items-center justify-between;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Animação suave de pulse */
+.is-loading .skeleton-icon,
+.is-loading .skeleton-title,
+.is-loading .skeleton-text,
+.is-loading .skeleton-progress,
+.is-loading .skeleton-limit {
+    position: relative;
+    overflow: hidden;
+}
+
+.is-loading .skeleton-icon::after,
+.is-loading .skeleton-title::after,
+.is-loading .skeleton-text::after,
+.is-loading .skeleton-progress::after,
+.is-loading .skeleton-limit::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 100%
+    );
+    animation: shimmer 2s infinite ease-out;
 }
 
 @keyframes shimmer {
     0% {
-        background-position: 200% 0;
+        transform: translateX(-100%);
     }
     100% {
-        background-position: -200% 0;
+        transform: translateX(100%);
     }
 }
 
@@ -453,6 +502,50 @@
 .detail-item {
     @apply flex items-center gap-2 text-sm text-gray-400;
 }
+
+/* Skeleton para os Stats */
+.skeleton-stat-content {
+    @apply flex items-center gap-4 w-full;
+}
+
+.skeleton-stat-icon {
+    @apply w-12 h-12 rounded-full flex-shrink-0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+}
+
+.skeleton-stat-info {
+    @apply flex flex-col gap-2 flex-1;
+}
+
+.skeleton-stat-label {
+    @apply h-4 rounded-lg w-24;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-stat-value {
+    @apply h-6 rounded-lg w-32;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Aplicar a mesma animação de shimmer */
+.is-loading .skeleton-stat-icon::after,
+.is-loading .skeleton-stat-label::after,
+.is-loading .skeleton-stat-value::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 100%
+    );
+    animation: shimmer 2s infinite ease-out;
+}
 </style>
 <template>
     <BaseLayout>
@@ -468,36 +561,51 @@
                             </div>
                             <div class="skeleton-text" v-else></div>
                             
-                            <div class="balance-details">
-                                <div class="detail-item">
-                                    <i class="fa-solid fa-gift"></i>
-                                    <span>Bônus: B$ {{ state.currencyFormat((wallet?.balance_bonus || 0), wallet?.currency || 'BRL') }}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
-                                    <span>Última atualização: {{ lastUpdate }}</span>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="quick-stats">
-                            <div class="stat-item">
-                                <div class="stat-icon deposits">
-                                    <i class="fa-solid fa-arrow-down"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <span class="stat-label">Total Depositado</span>
-                                    <span class="stat-value">{{ state.currencyFormat(totalDeposits || 0, wallet?.currency || 'BRL') }}</span>
-                                </div>
+                            <!-- Total Depositado -->
+                            <div class="stat-item" :class="{ 'is-loading': isPageLoading }">
+                                <template v-if="!isPageLoading">
+                                    <div class="stat-icon deposits">
+                                        <i class="fa-solid fa-arrow-down"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-label">Total Depositado</span>
+                                        <span class="stat-value">{{ state.currencyFormat(totalDeposits || 0, wallet?.currency || 'BRL') }}</span>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <div class="skeleton-stat-content">
+                                        <div class="skeleton-stat-icon"></div>
+                                        <div class="skeleton-stat-info">
+                                            <div class="skeleton-stat-label"></div>
+                                            <div class="skeleton-stat-value"></div>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
-                            <div class="stat-item">
-                                <div class="stat-icon withdraws">
-                                    <i class="fa-solid fa-arrow-up"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <span class="stat-label">Total Retirado</span>
-                                    <span class="stat-value">{{ state.currencyFormat(totalWithdraws || 0, wallet?.currency || 'BRL') }}</span>
-                                </div>
+
+                            <!-- Total Retirado -->
+                            <div class="stat-item" :class="{ 'is-loading': isPageLoading }">
+                                <template v-if="!isPageLoading">
+                                    <div class="stat-icon withdraws">
+                                        <i class="fa-solid fa-arrow-up"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-label">Total Retirado</span>
+                                        <span class="stat-value">{{ state.currencyFormat(totalWithdraws || 0, wallet?.currency || 'BRL') }}</span>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <div class="skeleton-stat-content">
+                                        <div class="skeleton-stat-icon"></div>
+                                        <div class="skeleton-stat-info">
+                                            <div class="skeleton-stat-label"></div>
+                                            <div class="skeleton-stat-value"></div>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
@@ -516,39 +624,65 @@
 
                 <!-- Cards de Informação -->
                 <div class="info-cards-grid">
-                    <div class="info-card verification-status">
-                        <div class="info-card-icon">
-                            <i class="fa-solid fa-shield-check"></i>
-                        </div>
-                        <div class="info-card-content">
-                            <h3>Status da Conta</h3>
-                            <p>Conta Verificada</p>
-                            <div class="verification-progress">
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 100%"></div>
-                                </div>
-                                <span>100% Completo</span>
+                    <!-- Status da Conta Card -->
+                    <div class="info-card verification-status" :class="{ 'is-loading': isPageLoading }">
+                        <template v-if="!isPageLoading">
+                            <div class="info-card-icon">
+                                <i class="fa-solid fa-shield-check"></i>
                             </div>
-                        </div>
+                            <div class="info-card-content">
+                                <h3>Status da Conta</h3>
+                                <p>Conta Verificada</p>
+                                <div class="verification-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 100%"></div>
+                                    </div>
+                                    <span>100% Completo</span>
+                                </div>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="skeleton-card-content">
+                                <div class="skeleton-icon"></div>
+                                <div class="skeleton-text-group">
+                                    <div class="skeleton-title"></div>
+                                    <div class="skeleton-text"></div>
+                                    <div class="skeleton-progress"></div>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
-                    <div class="info-card limits">
-                        <div class="info-card-icon">
-                            <i class="fa-solid fa-chart-line"></i>
-                        </div>
-                        <div class="info-card-content">
-                            <h3>Limites da Conta</h3>
-                            <div class="limits-info">
-                                <div class="limit-item">
-                                    <span>Depósito Mínimo:</span>
-                                    <strong>R$ 20,00</strong>
-                                </div>
-                                <div class="limit-item">
-                                    <span>Saque Mínimo:</span>
-                                    <strong>R$ 50,00</strong>
+                    <!-- Limites Card -->
+                    <div class="info-card limits" :class="{ 'is-loading': isPageLoading }">
+                        <template v-if="!isPageLoading">
+                            <div class="info-card-icon">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <div class="info-card-content">
+                                <h3>Limites da Conta</h3>
+                                <div class="limits-info">
+                                    <div class="limit-item">
+                                        <span>Depósito Mínimo:</span>
+                                        <strong>R$ 20,00</strong>
+                                    </div>
+                                    <div class="limit-item">
+                                        <span>Saque Mínimo:</span>
+                                        <strong>R$ 50,00</strong>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </template>
+                        <template v-else>
+                            <div class="skeleton-card-content">
+                                <div class="skeleton-icon"></div>
+                                <div class="skeleton-text-group">
+                                    <div class="skeleton-title"></div>
+                                    <div class="skeleton-limit"></div>
+                                    <div class="skeleton-limit"></div>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
 

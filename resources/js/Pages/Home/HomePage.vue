@@ -12,7 +12,7 @@
     font-size: 13px;
     gap: 0.5em;
     padding: 6px 12px;
-    border-radius: 20px;
+    border-radius: 20px; 
     margin-top: -30px; 
     left: 48.5%;
     transform: translateX(-50%);
@@ -2565,6 +2565,7 @@
             :categories="categories"
             :sidebar="sidebarStatus"
             @select-category="handleCategorySelect"
+            @open-game="openGameModal"
         />
         <div class="home-container">
             <!-- Apenas a seção do banner/jogo alterna -->
@@ -2577,6 +2578,7 @@
                         :isLoadingGame="isLoadingGame" 
                         :errorMessage="errorMessage" 
                         @close="closeGameModal"
+                        @retry="retryLoadGame"
                     />
                 </template>
                 <template v-else>
@@ -2730,7 +2732,7 @@
                         :key="provider.id"
                         :title="`Jogos da ${provider.name}`"
                         :games="provider.games"
-                        @open-game="openGameModal"
+            @open-game="openGameModal"
                         @show-all="showAllGames"
                     />
                 </div>
@@ -3500,16 +3502,18 @@ export default {
             this.isLoadingGame = true;
             this.activeGame = game;
             this.errorMessage = null;
+            this.gameUrl = null; // Reset gameUrl
             
             try {
-                const endpoint = game.slug 
-                    ? `games/single/${game.slug}`
-                    : `games/single/${game.id}`;
+                const endpoint = `games/single/${game.slug}`;
+                console.log('Fazendo requisição para:', endpoint); // Debug
 
                 const response = await HttpApi.get(endpoint);
+                console.log('Resposta da API:', response); // Debug
                 
                 if (response?.data?.gameUrl) {
                     this.gameUrl = response.data.gameUrl;
+                    console.log('URL do jogo definida:', this.gameUrl); // Debug
                 } else {
                     throw new Error('URL do jogo não encontrada');
                 }
@@ -3523,10 +3527,16 @@ export default {
         },
 
         closeGameModal() {
-            this.showModal = false;
             this.activeGame = null;
             this.gameUrl = null;
             this.errorMessage = null;
+            this.isLoadingGame = false;
+        },
+
+        retryLoadGame() {
+            if (this.activeGame) {
+                this.openGameModal(this.activeGame);
+            }
         },
 
         toggleFullscreen() {
@@ -3857,11 +3867,6 @@ export default {
             if (this.pendingGame) {
                 this.openGameModal(this.pendingGame);
                 this.pendingGame = null;
-            }
-        },
-        retryLoadGame() {
-            if (this.activeGame) {
-                this.openGameModal(this.activeGame);
             }
         },
         showAllGames() {

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Games\GameController;
 use App\Http\Controllers\Api\Search\SearchGameController;
+use App\Http\Controllers\Api\Profile\VerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,29 @@ Route::group(['middleware' => ['auth.jwt']], function () {
             include_once(__DIR__ . '/groups/api/profile/favorites.php');
             include_once(__DIR__ . '/groups/api/profile/recents.php');
             include_once(__DIR__ . '/groups/api/profile/vip.php');
+            
+            // Rotas de Afiliados
+            Route::prefix('affiliates')->group(function () {
+                Route::get('/', 'App\Http\Controllers\Api\Profile\AffiliateController@index');
+                Route::get('/generate', 'App\Http\Controllers\Api\Profile\AffiliateController@generate');
+                Route::post('/request', 'App\Http\Controllers\Api\Profile\AffiliateController@request');
+            });
+
+            // Rota para atualização do avatar
+            Route::post('/upload-avatar', [ProfileController::class, 'updateAvatar']);
+
+            // Endpoint para envio de documentos
+            Route::post('/documents', [App\Http\Controllers\Api\Profile\DocumentController::class, 'store']);
+
+            // Endpoint para atualização dos dados pessoais
+            Route::put('/update-personal-data', [App\Http\Controllers\Api\Profile\ProfileController::class, 'updatePersonalData']);
+
+            // Rota para alteração de senha
+            Route::post('/change-password', [App\Http\Controllers\Api\Profile\ProfileController::class, 'changePassword']);
+
+            Route::get('/verification', [VerificationController::class, 'index']);
+            Route::post('/verification/points', [VerificationController::class, 'updatePoints']);
+            Route::post('/verification/complete-step', [VerificationController::class, 'completeStep']);
         });
 
     Route::prefix('wallet')
@@ -52,6 +76,15 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
     include_once(__DIR__ . '/groups/api/missions/mission.php');;
     include_once(__DIR__ . '/groups/api/missions/missionuser.php');;
+
+    Route::prefix('verification')->group(function () {
+        Route::post('/phone', [\App\Http\Controllers\Api\Verification\VerificationController::class, 'sendPhoneVerification']);
+        Route::post('/email', [\App\Http\Controllers\Api\Verification\VerificationController::class, 'sendEmailVerification']);
+
+        // Rotas adicionadas para confirmar os códigos (email e telefone)
+        Route::post('/email/confirm', [\App\Http\Controllers\Api\Verification\VerificationController::class, 'confirmEmailVerification']);
+        Route::post('/phone/confirm', [\App\Http\Controllers\Api\Verification\VerificationController::class, 'confirmPhoneVerification']);
+    });
 });
 
 
@@ -70,13 +103,6 @@ Route::prefix('search')
     ->group(function ()
     {
         include_once(__DIR__ . '/groups/api/search/search.php');
-    });
-
-Route::prefix('profile')
-    ->group(function ()
-    {
-        Route::post('/getLanguage', [ProfileController::class, 'getLanguage']);
-        Route::put('/updateLanguage', [ProfileController::class, 'updateLanguage']);
     });
 
 Route::prefix('providers')

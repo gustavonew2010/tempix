@@ -20,6 +20,7 @@ export const useAuthStore = defineStore('auth', {
         setToken(token) {
             this.token = token;
             localStorage.setItem('token', token);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         },
 
         getToken() {
@@ -61,6 +62,7 @@ export const useAuthStore = defineStore('auth', {
             this.isAuth = false;
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            delete axios.defaults.headers.common['Authorization'];
         },
 
         initializingEcho() {
@@ -82,5 +84,34 @@ export const useAuthStore = defineStore('auth', {
                 }
             });
         },
+
+        async fetchUser() {
+            try {
+                const response = await axios.get('/api/profile'); // Retorna { status, user, totalEarnings, ... }
+                console.log("Retorno do fetchUser:", response.data);
+
+                // Verifica se a response contém a chave "user"
+                if (response.data && response.data.user) {
+                    // Conversão dos campos para camelCase (se o front espera 'birthDate' em vez de 'birth_date', etc.)
+                    const userFromApi = response.data.user;
+                    const userCamelCase = {
+                        ...userFromApi,
+                        // Você pode mapear ou renomear os campos conforme o esperado:
+                        fullName: userFromApi.name,         // se o front espera fullName
+                        motherName: userFromApi.mother_name,
+                        birthDate: userFromApi.birth_date,
+                        // Caso queira mapear outros campos, adicione aqui
+                    };
+
+                    // Define apenas o objeto do usuário na store
+                    this.user = userCamelCase;
+                    localStorage.setItem('user', JSON.stringify(userCamelCase));
+                } else {
+                    console.error('Resposta inválida da API:', response.data);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar usuário:", error);
+            }
+        }
     }
 })

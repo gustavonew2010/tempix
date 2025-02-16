@@ -12,23 +12,11 @@
                             <div class="balance-info">
                                 <span class="balance-label">Saldo Disponível</span>
                                 <span class="balance-value">
-                                    {{ state.currencyFormat(parseFloat(wallet?.balance_withdrawal || 0), wallet?.currency) }}
+                                    {{ state.currencyFormat(Number(wallet?.balance_withdrawal || 0).toFixed(2), wallet?.currency) }}
                                 </span>
                             </div>
                         </div>
                         
-                        <div class="balance-item">
-                            <div class="balance-icon bonus">
-                                <i class="fa-solid fa-gift"></i>
-                            </div>
-                            <div class="balance-info">
-                                <span class="balance-label">Bônus</span>
-                                <span class="balance-value">
-                                    {{ state.currencyFormat(parseFloat(wallet?.balance_bonus || 0), wallet?.currency) }}
-                                </span>
-                            </div>
-                        </div>
-
                         <div class="balance-item">
                             <div class="balance-icon limits">
                                 <i class="fa-solid fa-arrow-down-up-across-line"></i>
@@ -36,8 +24,19 @@
                             <div class="balance-info">
                                 <span class="balance-label">Limites de Saque</span>
                                 <span class="balance-value">
-                                    {{ state.currencyFormat(setting?.min_withdrawal || 0, wallet?.currency) }} - 
-                                    {{ state.currencyFormat(setting?.max_withdrawal || 0, wallet?.currency) }}
+                                    {{ state.currencyFormat(Number(verificationData?.level?.withdrawal_limit || 0).toFixed(2), wallet?.currency) }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="balance-item">
+                            <div class="balance-icon daily">
+                                <i class="fa-solid fa-calendar-day"></i>
+                            </div>
+                            <div class="balance-info">
+                                <span class="balance-label">Saque Disponível Hoje</span>
+                                <span class="balance-value">
+                                    {{ state.currencyFormat(Number(getDailyAvailable()).toFixed(2), wallet?.currency) }}
                                 </span>
                             </div>
                         </div>
@@ -192,6 +191,7 @@ import WalletSideMenu from "@/Pages/Profile/Components/WalletSideMenu.vue";
 import HttpApi from "@/Services/HttpApi.js";
 import {useToast} from "vue-toastification";
 import {useSettingStore} from "@/Stores/SettingStore.js";
+import VerificationService from '@/Services/VerificationService'
 
 export default {
     props: [],
@@ -201,6 +201,8 @@ export default {
             isLoading: false,
             setting: null,
             wallet: null,
+            verificationData: null,
+            dailyWithdrawn: 0,
             withdraw: {
                 name: '',
                 pix_key: '',
@@ -210,16 +212,7 @@ export default {
                 currency: '',
                 symbol: '',
                 accept_terms: false
-            },
-            withdraw_deposit: {
-                name: '',
-                bank_info: '',
-                amount: '',
-                type: 'bank',
-                currency: '',
-                symbol: '',
-                accept_terms: false
-            },
+            }
         }
     },
     setup(props) {
@@ -233,14 +226,50 @@ export default {
         window.scrollTo(0, 0);
     },
     methods: {
+        getDailyAvailable() {
+            const limit = this.verificationData?.level?.withdrawal_limit || 0;
+            const available = Math.max(0, limit - this.dailyWithdrawn);
+            return Number(available.toFixed(2));
+        },
+        
+        async loadVerificationData() {
+            try {
+                const response = await VerificationService.getVerificationStatus();
+                this.verificationData = response.verification;
+            } catch (error) {
+                console.error('Erro ao carregar dados de verificação:', error);
+            }
+        },
+
+        async getDailyWithdrawn() {
+            try {
+                const response = await HttpApi.get('wallet/withdraw/daily-total');
+                this.dailyWithdrawn = response.data.total || 0;
+            } catch (error) {
+                console.error('Erro ao buscar total de saques diários:', error);
+            }
+        },
+
         setMinAmount: function() {
-            this.withdraw.amount = this.setting.min_withdrawal;
+            this.withdraw.amount = Number(20).toFixed(2);
         },
+        
         setMaxAmount: function() {
-            this.withdraw.amount = this.setting.max_withdrawal;
+            const availableDaily = this.getDailyAvailable();
+            const maxAmount = Math.min(
+                Number(this.wallet.balance_withdrawal),
+                Number(availableDaily)
+            );
+            this.withdraw.amount = Number(maxAmount).toFixed(2);
         },
+        
         setPercentAmount: function(percent) {
-            this.withdraw.amount = ( percent / 100 ) * this.wallet.balance_withdrawal;
+            const availableDaily = this.getDailyAvailable();
+            const maxAmount = Math.min(
+                Number(this.wallet.balance_withdrawal),
+                Number(availableDaily)
+            );
+            this.withdraw.amount = Number((percent / 100) * maxAmount).toFixed(2);
         },
         getWallet: function() {
             const _this = this;
@@ -253,9 +282,6 @@ export default {
 
                     _this.withdraw.currency = response.data.wallet.currency;
                     _this.withdraw.symbol = response.data.wallet.symbol;
-
-                    _this.withdraw_deposit.currency = response.data.wallet.currency;
-                    _this.withdraw_deposit.symbol = response.data.wallet.symbol;
 
                     _this.isLoadingWallet = false;
                 })
@@ -275,38 +301,28 @@ export default {
             if(settingData) {
                 _this.setting                   = settingData;
                 _this.withdraw.amount           = settingData.min_withdrawal;
-                _this.withdraw_deposit.amount   = settingData.min_withdrawal;
             }
 
             _this.isLoading                 = false;
         },
-        submitWithdrawBank: function(event) {
-            const _this = this;
-            const _toast = useToast();
-            _this.isLoading = true;
-
-            HttpApi.post('wallet/withdraw/request', _this.withdraw_deposit).then(response => {
-                _this.isLoading = false;
-                _this.withdraw_deposit = {
-                    name: '',
-                    bank_info: '',
-                    amount: '',
-                    type: '',
-                    accept_terms: false
-                }
-
-                _this.router.push({ name: 'profileTransactions' });
-                _toast.success(response.data.message);
-            }).catch(error => {
-                Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                    _toast.error(`${value}`);
-                });
-                _this.isLoading = false;
-            });
-        },
         submitWithdraw: function(event) {
             const _this = this;
             const _toast = useToast();
+            
+            // Validar limite diário
+            const availableDaily = this.getDailyAvailable();
+            if (this.withdraw.amount > availableDaily) {
+                _toast.error(`Valor excede o limite diário disponível de ${this.state.currencyFormat(availableDaily, this.wallet.currency)}`);
+                return;
+            }
+
+            // Validar limite do nível
+            const levelLimit = this.verificationData?.level?.withdrawal_limit || 0;
+            if (this.withdraw.amount > levelLimit) {
+                _toast.error(`Valor excede o limite do seu nível de ${this.state.currencyFormat(levelLimit, this.wallet.currency)}`);
+                return;
+            }
+
             _this.isLoading = true;
 
             HttpApi.post('wallet/withdraw/request', _this.withdraw).then(response => {
@@ -332,7 +348,8 @@ export default {
     },
     created() {
         this.getWallet();
-        this.getSetting();
+        this.loadVerificationData();
+        this.getDailyWithdrawn();
 
     },
     watch: {},
@@ -342,7 +359,6 @@ export default {
 <style scoped>
 .withdraw-page {
     @apply min-h-screen py-8 px-4;
-    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
 }
 
 .withdraw-container {

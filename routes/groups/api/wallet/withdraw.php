@@ -9,4 +9,5 @@ Route::prefix('withdraw')
     {
         Route::get('/', [WithdrawController::class, 'index']);
         Route::post('/request', [WalletController::class, 'requestWithdrawal']);
+        Route::get('/daily-total', [WalletController::class, 'getDailyWithdrawnTotal']);
     });

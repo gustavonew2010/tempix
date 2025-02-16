@@ -130,14 +130,8 @@
                             </a>
                         </div>
 
-                        <div class="cf-turnstile-wrapper flex justify-center my-4">
-                            <div class="cf-turnstile" 
-                                 :data-sitekey="turnstileSiteKey"
-                                 data-theme="dark"></div>
-                        </div>
-
                         <button type="submit" 
-                                :disabled="!turnstileToken || isLoadingRegister"
+                                :disabled="isLoadingRegister"
                                 class="mobile-submit-btn">
                             <span v-if="!isLoadingRegister">Criar conta</span>
                             <i v-else class="fa-duotone fa-spinner-third fa-spin"></i>
@@ -295,14 +289,8 @@
                                 </a>
                             </div>
 
-                            <div class="cf-turnstile-wrapper flex justify-center my-4">
-                                <div class="cf-turnstile" 
-                                     :data-sitekey="turnstileSiteKey"
-                                     data-theme="dark"></div>
-                            </div>
-
                             <button type="submit"
-                                    :disabled="!turnstileToken || isLoadingRegister"
+                                    :disabled="isLoadingRegister"
                                     class="w-full bg-[#00A2D4] hover:bg-[#0077FF] text-white py-3.5 rounded-lg font-medium transition-all flex items-center justify-center">
                                 <span v-if="!isLoadingRegister">Criar conta</span>
                                 <i v-else class="fa-duotone fa-spinner-third fa-spin"></i>
@@ -639,8 +627,7 @@ export default {
 
             try {
                 const response = await HttpApi.post('auth/register', {
-                    ...this.registerForm,
-                    'cf-turnstile-response': this.turnstileToken
+                    ...this.registerForm
                 })
                 
                 if (response.data.access_token) {
@@ -661,17 +648,23 @@ export default {
                     toast.success(this.$t('Your account has been created successfully'))
                 }
             } catch (error) {
-                if (error.response) {
-                    const errors = error.response.data
-                    if (typeof errors === 'object') {
-                        Object.values(errors).forEach(error => {
-                            toast.error(error)
-                        })
-                    } else {
-                        toast.error('Erro ao registrar')
-                    }
+                if (error.response && error.response.data) {
+                    // Verifica se há erros no formato {campo: [mensagens]}
+                    const errorData = error.response.data
+                    
+                    // Itera sobre cada campo de erro
+                    Object.keys(errorData).forEach(field => {
+                        const messages = errorData[field]
+                        if (Array.isArray(messages)) {
+                            messages.forEach(message => {
+                                toast.error(message)
+                            })
+                        } else if (typeof messages === 'string') {
+                            toast.error(messages)
+                        }
+                    })
                 } else {
-                    toast.error('Erro ao registrar')
+                    toast.error('Erro ao criar conta. Por favor, tente novamente.')
                 }
             } finally {
                 this.isLoadingRegister = false
@@ -680,9 +673,7 @@ export default {
 
         switchTab(tab) {
             this.activeTab = tab
-            // Limpa o token atual
             this.turnstileToken = null
-            // Limpa os widgets existentes e reinicializa
             this.$nextTick(() => {
                 this.clearTurnstileWidgets()
                 this.initTurnstile()
@@ -799,7 +790,7 @@ export default {
 .mobile-layout {
     @apply fixed inset-0 bg-[#1A1D21] flex flex-col w-full h-full;
     height: 100vh; /* Força altura total */
-    height: -webkit-fill-available; /* Suporte para iOS */
+    height: -webkit-fill-available;
 }
 
 /* Desktop Layout */
@@ -831,9 +822,8 @@ export default {
 }
 
 .mobile-content {
-    @apply flex-1 flex flex-col p-6;
-    @apply overflow-y-auto;
-    @apply pb-6;
+    @apply flex-1 overflow-y-auto;
+    padding-bottom: 100px; /* Adiciona espaço extra no final para garantir que todo conteúdo seja acessível */
 }
 
 .mobile-logo {
@@ -877,7 +867,8 @@ export default {
 }
 
 .mobile-turnstile-wrapper {
-    @apply flex justify-center my-4;
+    @apply my-4;
+    margin-bottom: 20px; /* Garante espaço após o captcha */
 }
 
 .mobile-submit-btn {
@@ -1097,8 +1088,12 @@ export default {
 
 /* Fix para iOS */
 @supports (-webkit-touch-callout: none) {
-  .mobile-layout {
-    min-height: -webkit-fill-available;
-  }
+    .mobile-layout {
+        min-height: -webkit-fill-available;
+    }
+    
+    .mobile-content {
+        height: calc(-webkit-fill-available - 70px);
+    }
 }
 </style> 

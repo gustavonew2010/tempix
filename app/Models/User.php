@@ -102,6 +102,7 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         'role_id',
         'avatar',
         'name',
+        'display_name',
         'last_name',
         'cpf',
         'phone',
@@ -119,6 +120,22 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         'is_admin',
         'language',
         'role_id',
+        'mother_name',
+        'birth_date',
+        'cep',
+        'street',
+        'neighborhood',
+        'city',
+        'state',
+        'number',
+        'complement',
+        'phone_verification_code',
+        'phone_verification_expires_at',
+        'email_verification_code',
+        'email_verification_expires_at',
+        'cpf_verified_at',
+        'document_verified_at',
+        'selfie_verified_at',
     ];
 
     /**
@@ -137,8 +154,14 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'email_verified_at'             => 'datetime',
+        'password'                      => 'hashed',
+        'birth_date'                    => 'date:Y-m-d',
+        'phone_verification_expires_at' => 'datetime',
+        'email_verification_expires_at' => 'datetime',
+        'cpf_verified_at' => 'datetime',
+        'document_verified_at' => 'datetime',
+        'selfie_verified_at' => 'datetime',
     ];
 
     protected $appends = ['dateHumanReadable', 'createdAt', 'totalLikes'];
@@ -248,4 +271,25 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         return [];
     }
 
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    public function verification()
+    {
+        return $this->hasOne(UserVerification::class);
+    }
+
+    public function verificationLevel()
+    {
+        return $this->hasOneThrough(
+            VerificationLevel::class,
+            UserVerification::class,
+            'user_id',
+            'id',
+            'id',
+            'verification_level_id'
+        );
+    }
 }

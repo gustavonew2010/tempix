@@ -115,12 +115,18 @@
 /* Updated sidebar styles */
 aside {
     background: #1E2328;
-    width: 280px;
+    width: 280px !important;
     position: fixed;
     height: 100vh;
     top: 0;
     left: 0;
     z-index: 40;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+aside.active {
+    transform: translateX(0);
 }
 
 .sidebar-content {
@@ -155,16 +161,6 @@ aside {
     gap: 0.75rem;
 }
 
-/* Versão colapsada */
-.sidebar-collapsed {
-    width: 65px !important;
-    min-width: 65px !important;
-}
-
-/* Remove margem extra do último item */
-.mb-\[200px\] {
-    margin-bottom: 0 !important;
-}
 /* Dividers */
 div[style*="background-color: #27292A"] {
     margin: 0.5rem 0;
@@ -269,84 +265,8 @@ ul li a:hover {
     margin-top: 24px;
 }
 
-/* Collapsed sidebar styles */
-.sidebar-collapsed {
-    width: 65px !important;
-    transition: none !important;
-}
 
-.sidebar-collapsed .gray-scale-menu {
-    padding: 8px;
-    display: flex;
-    justify-content: center;
-}
 
-/* Ajuste do tamanho dos ícones no modo minimizado */
-.sidebar-collapsed .gray-scale-menu img,
-.sidebar-collapsed .gray-scale-menu svg {
-    width: 20px;
-    height: 20px;
-    margin-right: 0;
-    transition: none;
-}
-
-/* Tooltip para o menu minimizado */
-.sidebar-collapsed .gray-scale-menu::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: none;
-    z-index: 1000;
-    margin-left: 10px;
-}
-
-/* Seta do tooltip */
-.sidebar-collapsed .gray-scale-menu::before {
-    content: '';
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 6px solid transparent;
-    border-right-color: rgba(0, 0, 0, 0.8);
-    opacity: 0;
-    visibility: hidden;
-    transition: none;
-    margin-left: -2px;
-}
-
-/* Mostrar tooltip no hover */
-.sidebar-collapsed .gray-scale-menu:hover::after,
-.sidebar-collapsed .gray-scale-menu:hover::before {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Efeito hover elegante para ícones */
-.sidebar-collapsed .gray-scale-menu:hover img,
-.sidebar-collapsed .gray-scale-menu:hover svg {
-    transform: none;
-    filter: brightness(1.2);
-}
-
-/* Ajuste das larguras do sidebar */
-.lg\:w-\[280px\] {
-    transition: none;
-}
-
-.lg\:w-\[65px\] {
-    transition: none;
-}
 
 /* Adjust container padding */
 .px-4 {
@@ -465,29 +385,9 @@ ul.space-y-2.font-medium {
     margin-top: 24px;
 }
 
-/* Collapsed sidebar styles */
-.sidebar-collapsed {
-    width: 64px;
-}
 
-.sidebar-collapsed .gray-scale-menu {
-    padding: 8px;
-    display: flex;
-    justify-content: center;
-}
 
-.sidebar-collapsed .menu-icon {
-    margin-right: 0;
-}
 
-/* Update the sidebar width classes */
-.lg\:w-\[280px\] {
-    width: 80px !important;
-}
-
-.lg\:w-\[65px\] {
-    width: 70px !important;
-}
 
 /* Adjust container padding */
 .px-4 {
@@ -595,10 +495,6 @@ aside {
     transition: none;
 }
 
-/* Larguras do sidebar */
-.lg\:w-\[280px\] {
-    width: 80px !important; /* Quando minimizado */
-}
 
 /* Quando o menu está expandido */
 .sidebar-expanded {
@@ -618,76 +514,9 @@ aside {
     height: 20px !important;
 }
 
-/* Container minimizado */
-.sidebar-collapsed {
-    width: 80px !important;
-    transition: none;
-}
 
-.sidebar-collapsed .gray-scale-menu {
-    width: 80px !important;
-    padding: 8px;
-    display: flex;
-    justify-content: center;
-}
 
-/* Ajustes de margem e padding */
-.sidebar-collapsed ul.font-medium {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
 
-.sidebar-collapsed li {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-/* Larguras do sidebar */
-@media (min-width: 1024px) { /* lg breakpoint */
-    .lg\:w-\[280px\] {
-        width: 80px !important;
-    }
-
-    .sidebar-expanded {
-        width: 280px !important;
-    }
-
-    .sidebar-collapsed {
-        width: 80px !important;
-    }
-}
-
-/* Mobile styles */
-@media (max-width: 1023px) {
-    aside {
-        display: none;
-    }
-
-    aside.active {
-        display: block;
-    }
-
-    .gray-scale-menu {
-        width: 100% !important;
-        padding: 12px !important;
-    }
-
-    /* Backdrop só aparece no mobile */
-    .sidebar-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 35;
-        display: none;
-    }
-
-    .sidebar-backdrop.active {
-        display: block;
-    }
-}
 
 /* Estilos comuns */
 .gray-scale-menu img,
@@ -742,15 +571,6 @@ aside {
     text-decoration: none;
 }
 
-/* Ajuste para o menu minimizado */
-.sidebar-collapsed .gray-scale-menu {
-    justify-content: center;
-    padding: 8px;
-}
-
-.sidebar-collapsed .gray-scale-menu img {
-    margin-right: 0;
-}
 
 /* Adicione estes novos estilos */
 .category-header {
@@ -849,12 +669,6 @@ aside {
     height: 0;
 }
 
-/* Ajuste o tamanho dos ícones no menu minimizado */
-.sidebar-collapsed .gray-scale-menu img,
-.sidebar-collapsed .gray-scale-menu svg {
-    width: 18px !important;
-    height: 18px !important;
-}
 
 /* Ajuste o tamanho da fonte nas subcategorias */
 .subcategories .gray-scale-menu {
@@ -931,43 +745,83 @@ aside {
     z-index: 40;
 }
 
-/* Desktop styles */
-@media (min-width: 1024px) {
-    aside {
-        display: block !important; /* Força o sidebar a ficar visível no desktop */
-    }
+
+
+/* Ajuste do container principal */
+.space-y-2.font-medium {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100%;
 }
 
-/* Mobile styles */
-@media (max-width: 1023px) {
+/* Ajuste do grupo de categorias */
+.category-group {
+    width: 100%;
+}
+
+/* Ajuste do cabeçalho da categoria */
+.category-header.gray-scale-menu {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    margin: 0;
+}
+
+/* Ajuste das subcategorias */
+.subcategories {
+    width: 100%;
+}
+
+.subcategories .gray-scale-menu {
+    width: 100%;
+    cursor: pointer;
+    justify-content: flex-start;
+    padding: 12px 16px 12px 26px !important;
+    margin: 0;
+    font-size: 0.875rem;
+    opacity: 0.85;
+}
+
+/* Hover na subcategoria */
+.subcategories .gray-scale-menu:hover {
+    opacity: 1;
+    cursor: pointer;
+    padding-left: 28px !important;
+    transition: all 0.2s ease;
+}
+
+/* Ajuste geral do gray-scale-menu */
+.gray-scale-menu {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    margin: 0;
+}
+
+/* Ajuste para mobile */
+@media (max-width: 1024px) {
     aside {
-        display: none;
+        width: 280px !important;
     }
-
-    aside.active {
-        display: block;
-    }
-
+    
     .gray-scale-menu {
         width: 100% !important;
-        padding: 12px !important;
     }
 
-    .sidebar-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 35;
-        display: none;
-    }
-
-    .sidebar-backdrop.active {
-        display: block;
+    /* Adiciona padding inferior para o conteúdo do sidebar em mobile */
+    .sidebar-content {
+        padding-bottom: 80px !important;
     }
 }
+
+/* Ajuste para garantir que o sidebar permaneça visível em desktop */
+@media (min-width: 1025px) {
+    aside {
+        transform: translateX(0) !important;
+        display: block !important;
+    }
+}
+
 </style>
 <template>
     <div>
@@ -982,9 +836,11 @@ aside {
         ></div>
 
         <aside
+            v-show="sidebarStatus"
             :class="[
                 'pt-20',
-                { 'active': sidebarStatus && isMobile }
+                { 'active': sidebarStatus && isMobile },
+                { 'hidden': !sidebarStatus }
             ]"
         >
             <div class="h-full pb-4 overflow-y-auto sidebar-content">
@@ -1000,7 +856,7 @@ aside {
                 </div>
 
                 <!-- Categorias principais -->
-                <div class="space-y-2 font-medium py-2 px-6">
+                <div class="space-y-2 font-medium">
                     <div v-for="category in mainCategories" 
                          :key="category.id" 
                          class="category-group">
@@ -1096,7 +952,7 @@ aside {
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { sidebarStore } from "@/Stores/SideBarStore.js";
 import { useRouter } from 'vue-router';
 
@@ -1108,32 +964,74 @@ export default {
             default: () => []
         }
     },
-    setup(props) {
+    setup(props, { emit }) {
         const sidebarMenuStore = sidebarStore();
-        const activeCategories = ref(new Set());
         const router = useRouter();
-        const isMobile = ref(window.innerWidth <= 1023);
+        const isMobile = ref(window.innerWidth <= 1024);
+        const activeCategoryStates = ref({});
+        let resizeTimeout;
 
-        // Atualiza isMobile quando a janela é redimensionada
-        window.addEventListener('resize', () => {
-            isMobile.value = window.innerWidth <= 1023;
+        // Computed para controlar a visibilidade do sidebar
+        const sidebarStatus = computed(() => {
+            return sidebarMenuStore.getSidebarStatus;
         });
-        
-        // Fecha o sidebar no mobile quando a rota muda
+
+        // Função para atualizar o estado do sidebar com debounce
+        const updateSidebarStatus = () => {
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
+            }
+            
+            resizeTimeout = setTimeout(() => {
+                const newIsMobile = window.innerWidth <= 1024;
+                isMobile.value = newIsMobile;
+                sidebarMenuStore.setSidebarStatus(!newIsMobile);
+                console.log('Status final do sidebar após resize:', !newIsMobile);
+            }, 250); // Delay de 250ms
+        };
+
+        // Inicializa o estado do sidebar
+        onMounted(() => {
+            const newIsMobile = window.innerWidth <= 1024;
+            isMobile.value = newIsMobile;
+            sidebarMenuStore.setSidebarStatus(!newIsMobile);
+            
+            // Inicializa explicitamente todas as categorias principais como true
+            props.categories.forEach(category => {
+                if (!category.parent_id) {
+                    activeCategoryStates.value[category.id] = true;
+                }
+            });
+            
+            window.addEventListener('resize', updateSidebarStatus);
+        });
+
+        // Remove o listener quando o componente é destruído
+        onUnmounted(() => {
+            window.removeEventListener('resize', updateSidebarStatus);
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
+            }
+        });
+
+        // Fecha o sidebar apenas no mobile quando a rota muda
         router.afterEach(() => {
             if (isMobile.value) {
                 sidebarMenuStore.setSidebarStatus(false);
             }
         });
-        
-        const sidebarStatus = computed(() => sidebarMenuStore.getSidebarStatus);
+
+        function toggleSidebar() {
+            // Só permite toggle em mobile
+            if (isMobile.value) {
+                sidebarMenuStore.setSidebarStatus(!sidebarMenuStore.getSidebarStatus);
+            }
+        }
 
         function handleCategoryClick(category) {
-            if (activeCategories.value.has(category.id)) {
-                activeCategories.value.delete(category.id);
-            } else {
-                activeCategories.value.add(category.id);
-            }
+            // Garante que o estado existe antes de fazer o toggle
+            const currentState = activeCategoryStates.value[category.id] ?? true;
+            activeCategoryStates.value[category.id] = !currentState;
         }
 
         function hasSubCategories(categoryId) {
@@ -1145,26 +1043,38 @@ export default {
         }
 
         function handleSubCategoryClick(subCategory) {
-            router.push(subCategory.url);
+            // Se tem slug, é um jogo que deve ser aberto diretamente
+            if (subCategory.slug) {
+                emit('open-game', {
+                    id: subCategory.id,
+                    game_name: subCategory.name,
+                    slug: subCategory.slug
+                });
+            } else {
+                // Se não tem slug, é uma categoria para filtrar
+                emit('select-category', subCategory);
+            }
+
+            // Se estiver em mobile, fecha o sidebar
+            if (isMobile.value) {
+                sidebarMenuStore.setSidebarStatus(false);
+            }
         }
 
         function isActiveCategory(categoryId) {
-            return activeCategories.value.has(categoryId);
+            // Retorna true se o estado não estiver explicitamente definido como false
+            return activeCategoryStates.value[categoryId] ?? true;
         }
 
         function isActiveRoute(url) {
             return router.currentRoute.value.path === url;
         }
 
-        function toggleSidebar() {
-            sidebarMenuStore.setSidebarStatus(!sidebarStatus.value);
-        }
-
         return {
             sidebarMenuStore,
-            activeCategories,
             isMobile,
             sidebarStatus,
+            activeCategoryStates,
             handleCategoryClick,
             hasSubCategories,
             getSubCategories,
@@ -1178,14 +1088,6 @@ export default {
         mainCategories() {
             return this.categories?.filter(cat => !cat.parent_id) || [];
         }
-    },
-    mounted() {
-        // Inicializa todas as categorias principais como expandidas
-        this.mainCategories.forEach(category => {
-            if (this.hasSubCategories(category.id)) {
-                this.activeCategories.add(category.id);
-            }
-        });
     }
 };
 </script>

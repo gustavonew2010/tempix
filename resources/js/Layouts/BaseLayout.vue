@@ -1,11 +1,15 @@
 <template>
-    <div class="layout-wrapper" :class="{ 'sidebar-collapsed': sidebarStatus }">
+    <div class="layout-wrapper">
         <NavTopComponent 
             :auth-status="isAuthenticated"
             class="layout-header"
         />
         
-        <SideBarComponent :categories="categories" />
+        <SideBarComponent 
+            :categories="categories" 
+            @select-category="$emit('select-category', $event)"
+            @open-game="$emit('open-game', $event)"
+        />
 
         <div class="layout-container">
             <main class="layout-main">
@@ -62,13 +66,31 @@ export default defineComponent({
         const authStore = useAuthStore()
         const { isAuth } = storeToRefs(authStore)
         const sidebarStoreInstance = sidebarStore()
-        const sidebarStatus = computed(() => sidebarStoreInstance.getSidebarStatus)
         const categories = []
+        
+        // Adiciona logs para debug
+        console.log('Setup iniciado')
+        console.log('Window width:', window.innerWidth)
+        
+        // Inicializa o sidebar como aberto em telas maiores
+        const isMobile = window.innerWidth <= 1024
+        console.log('É mobile?', isMobile)
+        
+        sidebarStoreInstance.setSidebarStatus(!isMobile)
+        console.log('Status inicial do sidebar:', sidebarStoreInstance.getSidebarStatus)
+        
+        // Adiciona listener para redimensionamento
+        window.addEventListener('resize', () => {
+            const newIsMobile = window.innerWidth <= 1024
+            console.log('Resize detectado - Nova largura:', window.innerWidth)
+            console.log('Novo status mobile:', newIsMobile)
+            sidebarStoreInstance.setSidebarStatus(!newIsMobile)
+            console.log('Novo status do sidebar:', sidebarStoreInstance.getSidebarStatus)
+        })
         
         return {
             modalStore,
             isAuthenticated: isAuth,
-            sidebarStatus,
             categories,
         }
     },
@@ -78,6 +100,8 @@ export default defineComponent({
         }
     },
     async mounted() {
+        console.log('Component montado')
+        console.log('Status do sidebar após montagem:', sidebarStore().getSidebarStatus)
         try {
             await this.loadInitialData()
             initFlowbite()
@@ -95,12 +119,7 @@ export default defineComponent({
             } catch (error) {
                 console.error('Erro ao carregar categorias:', error)
             }
-        },
-        getInitialSidebarState() {
-            return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-                ? false
-                : JSON.parse(localStorage.getItem('sidebarStatus') || 'false')
-        },
+        }
     },
     watch: {
         isAuthenticated(newValue) {
@@ -111,7 +130,8 @@ export default defineComponent({
     },
     beforeUnmount() {
         document.body.style.overflow = 'auto'
-    }
+    },
+    emits: ['select-category', 'open-game'],
 })
 </script>
 
@@ -144,25 +164,15 @@ export default defineComponent({
     transition: all 0.3s ease;
     z-index: 40;
     overflow: hidden;
-}
-
-.layout-sidebar.sidebar-collapsed {
-    width: 65px;
-    min-width: 65px;
-    max-width: 65px;
+    transform: translateX(0); /* Garante que o sidebar esteja visível por padrão */
 }
 
 .layout-container {
     display: flex;
     flex: 1;
-    margin-left: 300px;
+    margin-left: 280px; /* Valor fixo */
+    width: calc(100% - 280px); /* Valor fixo */
     transition: margin-left 0.3s ease;
-    width: calc(100% - 300px);
-}
-
-.sidebar-collapsed .layout-container {
-    margin-left: 80px;
-    width: calc(100% - 80px);
 }
 
 .layout-main {
@@ -193,10 +203,6 @@ export default defineComponent({
 
 /* Responsivo */
 @media (max-width: 1024px) {
-    .layout-sidebar {
-        display: none;
-    }
-
     .layout-container {
         margin-left: 0;
         width: 100%;
@@ -204,6 +210,14 @@ export default defineComponent({
 
     .layout-content {
         padding: 0 1rem;
+    }
+
+    .layout-sidebar {
+        transform: translateX(-100%); /* Esconde o sidebar em mobile */
+    }
+    
+    .layout-sidebar.active {
+        transform: translateX(0); /* Mostra o sidebar quando ativo em mobile */
     }
 }
 

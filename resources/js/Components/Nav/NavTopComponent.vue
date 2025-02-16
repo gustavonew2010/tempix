@@ -47,9 +47,18 @@
                                                 class="profile-button h-full flex items-center"
                                                 aria-expanded="false">
                                             <span class="sr-only">Open user menu</span>
-                                            <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`" 
-                                                 alt="avatar" 
-                                                 class="w-8 h-8 rounded-full border-2 border-primary">
+                                            <div class="avatar-container">
+                                                <img
+                                                    v-if="currentAvatar"
+                                                    :src="currentAvatar"
+                                                    @error="handleAvatarError"
+                                                    class="w-8 h-8 rounded-full border-2 border-primary"
+                                                    alt="Avatar"
+                                                />
+                                                <div v-else class="avatar-placeholder-small">
+                                                    {{ initials }}
+                                                </div>
+                                            </div>
                                         </button>
                                         
                                         <!-- Dropdown Menu -->
@@ -57,8 +66,18 @@
                                              id="dropdown-user2" 
                                              :class="{ 'hidden': !showUserDropdown }">
                                             <div class="flex flex-col items-center p-4 bg-[#1E2024]">
-                                                <img :src="userData?.avatar ? `/storage/${userData.avatar}` : `/assets/images/profile.jpg`"
-                                                     alt="avatar" class="w-16 h-16 rounded-full border-2 border-primary mb-2">
+                                                <div class="avatar-container-large">
+                                                    <img
+                                                        v-if="currentAvatar"
+                                                        :src="currentAvatar"
+                                                        @error="handleAvatarError"
+                                                        class="w-16 h-16 rounded-full border-2 border-primary mb-2"
+                                                        alt="Avatar"
+                                                    />
+                                                    <div v-else class="avatar-placeholder-large">
+                                                        {{ initials }}
+                                                    </div>
+                                                </div>
                                                 <p class="text-base font-bold text-white">{{ userData?.name }}</p>
                                                 <p class="text-sm text-gray-400">{{ userData?.email }}</p>
                                                 <button @click="navigateToAccountManagement" class="mt-3 w-full border border-gray-500 rounded p-2 text-sm text-white">
@@ -146,7 +165,7 @@ import { sidebarStore } from '@/Stores/SideBarStore.js'
 import { useSettingStore } from '@/Stores/SettingStore.js'
 import { Modal } from 'flowbite'
 import { RouterLink, useRoute } from "vue-router";
-import { onMounted, ref, watch, watchEffect } from "vue";
+import { onMounted, ref, watch, watchEffect, computed } from "vue";
 import DropdownDarkLight from "@/Components/UI/DropdownDarkLight.vue";
 import LanguageSelector from "@/Components/UI/LanguageSelector.vue";
 import WalletBalance from "@/Components/UI/WalletBalance.vue";
@@ -198,6 +217,10 @@ export default {
         inGameMode: {
             type: Boolean,
             default: false
+        },
+        userData: {
+            type: Object,
+            required: true
         }
     },
 
@@ -211,6 +234,211 @@ export default {
         const cacheStore = useCacheStore()
         const modalStore = useModalStore()
 
+        const avatarError = ref(false)
+        const currentAvatar = ref(null)
+        const hoverAvatar = ref(false)
+        const avatarInput = ref(null)
+
+        const initials = computed(() => {
+            const fullName = userData.value?.displayName || userData.value?.name || ''
+            
+            if (!fullName) return ''
+            
+            const nameParts = fullName.trim().split(' ').filter(part => part.length > 0)
+            
+            if (nameParts.length === 0) return ''
+            
+            if (nameParts.length === 1) {
+                return nameParts[0][0].toUpperCase()
+            }
+            
+            const firstInitial = nameParts[0][0]
+            const lastInitial = nameParts[nameParts.length - 1][0]
+            
+            return (firstInitial + lastInitial).toUpperCase()
+        })
+
+        const handleAvatarError = () => {
+            console.log('Erro ao carregar avatar:', {
+                currentAvatar: currentAvatar.value,
+                userData: userData.value?.avatar
+            })
+            avatarError.value = true
+            currentAvatar.value = null
+        }
+
+        const triggerFileSelect = () => {
+            avatarInput.value.click()
+        }
+
+        const validateFile = (file) => {
+            if (!file) {
+                toast.error('Nenhum arquivo selecionado.')
+                return false
+            }
+
+            const extension = file.name.split('.').pop().toLowerCase()
+            const allowedExtensions = ['jpg', 'jpeg', 'png']
+            
+            if (!allowedExtensions.includes(extension)) {
+                toast.error(`Arquivo ${extension.toUpperCase()} não é permitido. Use apenas JPG ou PNG.`)
+                return false
+            }
+
+            const maxSize = 5 * 1024 * 1024 // 5MB
+            if (file.size > maxSize) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2)
+                toast.error(`Arquivo muito grande (${sizeMB}MB). O limite é 5MB.`)
+                return false
+            }
+
+            if (file.size === 0) {
+                toast.error('O arquivo está vazio.')
+                return false
+            }
+
+            return true
+        }
+
+        const handleAvatarChange = async (event) => {
+            try {
+                const file = event.target.files[0]
+                
+                if (!file) {
+                    toast.error('Nenhuma imagem selecionada.')
+                    return
+                }
+
+                if (!validateFile(file)) {
+                    event.target.value = null
+                    return
+                }
+
+                toast.info('Enviando imagem...')
+
+                // Criar preview local
+                const reader = new FileReader()
+                reader.onload = (e) => {
+                    currentAvatar.value = e.target.result
+                    avatarError.value = false // Resetar o erro ao ter um novo preview
+                }
+                reader.onerror = () => {
+                    toast.error('Erro ao ler o arquivo. Tente novamente.')
+                    if (event.target) {
+                        event.target.value = null
+                    }
+                }
+                reader.readAsDataURL(file)
+
+                const formData = new FormData()
+                formData.append('avatar', file)
+
+                const response = await HttpApi.post('/profile/upload-avatar', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+
+                if (response.data.status) {
+                    toast.success('Imagem atualizada com sucesso!')
+                    if (authStore.updateUser) {
+                        authStore.updateUser(response.data.user)
+                    }
+                } else {
+                    throw new Error(response.data.message || 'Erro ao atualizar imagem.')
+                }
+            } catch (error) {
+                let errorMessage = 'Erro ao fazer upload da imagem.'
+                
+                if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message
+                } else if (error.message) {
+                    errorMessage = error.message
+                }
+
+                toast.error(errorMessage)
+                // Restaurar o avatar anterior
+                if (userData.value?.avatar) {
+                    const avatarPath = userData.value.avatar.startsWith('/storage/') 
+                        ? userData.value.avatar 
+                        : `/storage/${userData.value.avatar}`
+                    currentAvatar.value = avatarPath
+                    avatarError.value = false
+                } else {
+                    currentAvatar.value = null
+                    avatarError.value = true
+                }
+            } finally {
+                if (event.target) {
+                    event.target.value = null
+                }
+            }
+        }
+
+        const initializeAvatar = () => {
+            console.log('Inicializando avatar:', {
+                hasUserData: !!userData.value,
+                avatar: userData.value?.avatar,
+                currentAvatar: currentAvatar.value
+            })
+
+            if (userData.value?.avatar) {
+                const avatarPath = userData.value.avatar.startsWith('/storage/') 
+                    ? userData.value.avatar 
+                    : `/storage/${userData.value.avatar}`
+                currentAvatar.value = avatarPath
+                avatarError.value = false
+                console.log('Avatar inicializado:', currentAvatar.value)
+            } else {
+                currentAvatar.value = null
+                avatarError.value = true
+                console.log('Sem avatar, usando iniciais')
+            }
+        }
+
+        // Watch para mudanças no avatar
+        watch(() => userData.value?.avatar, (newAvatar) => {
+            console.log('Avatar mudou:', {
+                new: newAvatar,
+                currentAvatar: currentAvatar.value
+            })
+
+            if (newAvatar) {
+                const avatarPath = newAvatar.startsWith('/storage/') 
+                    ? newAvatar 
+                    : `/storage/${newAvatar}`
+                currentAvatar.value = avatarPath
+                avatarError.value = false
+                console.log('Avatar atualizado para:', currentAvatar.value)
+            } else {
+                currentAvatar.value = null
+                avatarError.value = true
+                console.log('Avatar removido, usando iniciais')
+            }
+        }, { immediate: true })
+
+        // Watch para o userData inteiro
+        watch(() => userData.value, (newUserData, oldUserData) => {
+            console.log('UserData mudou:', {
+                oldAvatar: oldUserData?.avatar,
+                newAvatar: newUserData?.avatar,
+                currentAvatar: currentAvatar.value
+            })
+            
+            if (newUserData) {
+                initializeAvatar()
+            }
+        }, { immediate: true })
+
+        onMounted(() => {
+            console.log('Componente montado:', {
+                hasUserData: !!userData.value,
+                avatar: userData.value?.avatar,
+                currentAvatar: currentAvatar.value
+            })
+            initializeAvatar()
+        })
+
         return { 
             authStore, 
             userData,
@@ -219,7 +447,15 @@ export default {
             sidebarMenuStore,
             setting: settingStore.setting,
             cacheStore,
-            modalStore
+            modalStore,
+            avatarError,
+            initials,
+            handleAvatarError,
+            currentAvatar,
+            hoverAvatar,
+            avatarInput,
+            triggerFileSelect,
+            handleAvatarChange
         }
     },
 
@@ -750,5 +986,23 @@ export default {
     .ui-button-blue2 {
         @apply px-2 text-xs;
     }
+}
+
+.avatar-container {
+    position: relative;
+}
+
+.avatar-container-large {
+    position: relative;
+}
+
+.avatar-placeholder-small {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white;
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+}
+
+.avatar-placeholder-large {
+    @apply w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold text-white;
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
 }
 </style>
