@@ -13,10 +13,10 @@ services:
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_URL: https://tempix.bet
-      ASSET_URL: https://tempix.bet
-      VITE_APP_URL: https://tempix.bet
-      MIX_ASSET_URL: https://tempix.bet
+      APP_URL: http://localhost
+      ASSET_URL: http://localhost
+      VITE_APP_URL: http://localhost
+      MIX_ASSET_URL: http://localhost
       VITE_BASE_URL: /
       DB_CONNECTION: mysql
       DB_HOST: betx.chc00us2cv1d.sa-east-1.rds.amazonaws.com

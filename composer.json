@@ -13,6 +13,7 @@
         "ext-intl": "*",
         "ext-libxml": "*",
         "ext-simplexml": "*",
+        "ext-zip": "*",
         "althinect/filament-spatie-roles-permissions": "^2.2",
         "aymanalhattami/filament-page-with-sidebar": "*",
         "creagia/filament-code-field": "^2.0",
@@ -25,14 +26,14 @@
         "laravel/socialite": "^5.10",
         "laravel/tinker": "^2.8",
         "laravellegends/pt-br-validator": "^10.0",
+        "nesbot/carbon": "^2.72.1",
         "nwidart/laravel-modules": "^10.0",
         "pusher/pusher-php-server": "^7.2",
         "ramsey/uuid": "^4.7",
         "spatie/laravel-permission": "^6.1",
         "stripe/stripe-php": "^13.6",
-        "tymon/jwt-auth": "^2.0",
-        "ext-zip": "*",
-        "nesbot/carbon": "^2.72.1"
+        "twilio/sdk": "*",
+        "tymon/jwt-auth": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
